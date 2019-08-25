@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.0.4";
+const char *codybot_version_string = "0.0.5";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -26,18 +26,26 @@ static const char *short_options = "hVbf";
 
 int fd, ret, endmainloop;
 char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
+
+// sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
+
+// medusa.blinkenshell.org
+//char *server_ip_blinkenshell = "69.164.197.11";
+
+// irc.freenode.net
 char *server_ip_freenode = "204.225.96.251";
+
 SSL *pSSL;
 
 void HelpShow(void) {
-	printf("Usage: codybot { -h/--help | -V/--version }\n");
+	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
 }
 
 // raw should hold something like ":esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #esselfe :!fortune"
 char *raw_to_word(char *raw) {
 	char *c = raw;
-	unsigned int cnt = 0, cnt_total = strlen(raw);
+	unsigned int cnt = 0;
 	while (1) {
 		++c;
 		++cnt;
@@ -46,18 +54,84 @@ char *raw_to_word(char *raw) {
 		else if (*c == '\0')
 			break;
 	}
-	char *word = (char *)malloc(cnt_total-cnt+1);
+	char *word = (char *)malloc(1024);
+	memset(word, 0, 1024);
 	cnt = 0;
-	while (1) {
-		//sprintf(word, "%s", c);
-		word[cnt] = *(c+cnt);
-		if (*(c+cnt+1) == ' ' || *(c+cnt+1) == '\0') {
-			word[cnt+1] = '\0';
-			break;
+	if (*c != '\0') {
+		++c;
+		while (1) {
+			word[cnt] = *(c+cnt);
+			if (*(c+cnt+1) == ' ' || *(c+cnt+1) == '\0')
+				break;
+			++cnt;
 		}
 	}
 
 	return word;
+}
+
+void fortune(void) {
+	FILE *fp = fopen("linux.fortune", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "codybot error: Cannot open linux.fortune: %s\n", strerror(errno));
+		if (server_ip == server_ip_blinkenshell)
+			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open database\n");
+		else
+			sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune error: cannot open database\n");
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		return;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	unsigned long filesize = (unsigned long)ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	unsigned int position = rand()%(filesize-200-rand()%1800)+1000;
+	fseek(fp, position, SEEK_CUR);
+
+	int c = 0, cprev, cnt = 0;
+	char fortune_line[4096];
+	memset(fortune_line, 0, 4096);
+	while (1) {
+		cprev = c;
+		c = fgetc(fp);
+		if (c == -1) {
+			c = ' ';
+			break;
+		}
+		fputc(c, stdout);
+		if (c == '%' && cprev == '\n') {
+			fgetc(fp);
+			c = ' ';
+			break;
+		}
+	}
+
+	while (1) {
+		cprev = c;
+		c = fgetc(fp);
+		if (c == -1)
+			break;
+		else if (c == '\t' && cprev == '\n')
+			break;
+		else if (c == '%' && cprev == '\n')
+			break;
+		else if (c == '\n' && cprev == '\n')
+			fortune_line[cnt++] = ' ';
+		else if (c == '\n' && cprev != '\n')
+			fortune_line[cnt++] = ' ';
+		else
+			fortune_line[cnt++] = c;
+	}
+
+	if (strlen(fortune_line) > 0) {
+		if (server_ip == server_ip_freenode)
+			sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune: %s\n", fortune_line);
+		else
+			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune: %s\n", fortune_line);
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	}
+
+	fclose(fp);
 }
 
 void *ThreadFunc(void *argp) {
@@ -74,8 +148,8 @@ void *ThreadFunc(void *argp) {
 		gettimeofday(&tv0, NULL);
 		t0 = (time_t)tv0.tv_sec;
 		tm0 = gmtime(&t0);
-		buffer_rx[strlen(buffer_rx)-1] = '\0';
-		printf("%02d:%02d:%02d.%03ld:<<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+		buffer_rx[strlen(buffer_rx)-2] = '\0';
+		printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 			tv0.tv_usec, buffer_rx);
 		// respond to ping request from the server
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
@@ -87,20 +161,21 @@ void *ThreadFunc(void *argp) {
 				gettimeofday(&tv0, NULL);
 				t0 = (time_t)tv0.tv_sec;
 				tm0 = gmtime(&t0);
-				printf("%02d:%02d:%02d.%03ld:[[%s]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				printf("%02d:%02d:%02d.%03ld [[%s]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 					tv0.tv_usec, buffer_cmd);
 			}
 			else {
-				SSL_write(pSSL, "PONG\n", 11);
+				SSL_write(pSSL, "PONG\r\n", 11);
 				gettimeofday(&tv0, NULL);
 				t0 = (time_t)tv0.tv_sec;
 				tm0 = gmtime(&t0);
-				printf("%02d:%02d:%02d.%03ld:[[PONG sent]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				printf("%02d:%02d:%02d.%03ld [[PONG sent]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 					tv0.tv_usec);
 			}
 		}
-		//printf("raw_to_word(): <%s>\n", raw_to_word(buffer_rx));
-		//printf("raw_to_word()\n");
+		if (strcmp(raw_to_word(buffer_rx), "!fortune")==0) {
+			fortune();
+		}
 		usleep(10000);
 	}
 	return NULL;
@@ -127,22 +202,20 @@ void ConnectClient(void) {
 		printf("socket fd: %d\n", fd);
 	
 	struct sockaddr_in addr;
-	addr.sin_addr.s_addr = inet_addr("192.168.2.168");
-	//addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(16423);
+	if (server_ip == server_ip_blinkenshell)
+		addr.sin_port = htons(16423);
+	else
+		addr.sin_port = htons(16424);
 	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		fprintf(stderr, "codybot error: Cannot bind(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else
-		printf("bind() 192.168.2.168:16423 successful\n");
+		printf("bind() 0.0.0.0:16423 successful\n");
 	
 	struct sockaddr_in host;
-	//blinkenshell
-	//host.sin_addr.s_addr = inet_addr("194.14.45.5");
-	//freenode
-	//host.sin_addr.s_addr = inet_addr("204.225.96.251");
 	host.sin_addr.s_addr = inet_addr(server_ip);
 	host.sin_family = AF_INET;
 	host.sin_port = htons(6697);
@@ -151,7 +224,7 @@ void ConnectClient(void) {
 		exit(1);
 	}
 	else
-		printf("connect() 194.14.45.5 successful\n");
+		printf("connect() %s successful\n", server_ip);
 
 	SSL_load_error_strings();
 	SSL_library_init();
@@ -196,6 +269,7 @@ void ConnectClient(void) {
 	buffer = (char *)malloc(1024);
 	memset(buffer, 0, 1024);
 	
+	// start the thread here, as soon as we can
 	pthread_t thr;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -204,19 +278,18 @@ void ConnectClient(void) {
 	pthread_detach(thr);
 	pthread_attr_destroy(&attr);
 
-	SSL_write(pSSL, "PASS none\n", 10);
-	SSL_write(pSSL, "NICK codybot\n", 13);
-	if (server_ip == server_ip_freenode)
-		SSL_write(pSSL, "USER bsfc BSFC-PC04 irc.freenode.net Steph\n", 43);
-	else
-		SSL_write(pSSL, "USER bsfc BSFC-PC04 irc.blinkenshell.org Steph\n", 46);
-
-	ReadCommandLoop();
-
-	SSL_shutdown(pSSL);
-	SSL_free(pSSL);
-	ret = close(fd);
-	printf("close() returns %d\n", ret);
+	sprintf(buffer_cmd, "PASS none\n");
+	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	sprintf(buffer_cmd, "NICK codybot\n");
+	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	if (server_ip == server_ip_freenode) {
+		sprintf(buffer_cmd, "USER bsfc BSFC-PC04 irc.freenode.net Steph\n");
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	}
+	else {
+		sprintf(buffer_cmd, "USER codybot BSFC-PC04 irc.blinkenshell.org :Steph\n");
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	}
 }
 
 void SignalFunc(int signum) {
@@ -253,6 +326,11 @@ int main(int argc, char **argv) {
 		server_ip = server_ip_freenode;
 
 	ConnectClient();
+	ReadCommandLoop();
+
+	SSL_shutdown(pSSL);
+	SSL_free(pSSL);
+	ret = close(fd);
 
 	return 0;
 }

@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.0";
+const char *codybot_version_string = "0.1.1";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -25,10 +25,10 @@ static const struct option long_options[] = {
 static const char *short_options = "hVbf";
 
 int fd, ret, endmainloop;
-char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
 struct timeval tv0;
 struct tm *tm0;
 time_t t0;
+char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
 
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
@@ -80,7 +80,8 @@ void fortune(void) {
 		if (server_ip == server_ip_blinkenshell)
 			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open database\n");
 		else
-			sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune error: cannot open database\n");
+			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open database\n");
+			//sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune error: cannot open database\n");
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		return;
 	}
@@ -89,12 +90,11 @@ void fortune(void) {
 	unsigned long filesize = (unsigned long)ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	srand((unsigned int)time(NULL));
-	unsigned int position = rand()%(filesize-500);
-	fseek(fp, position, SEEK_CUR);
+	fseek(fp, rand()%(filesize-500), SEEK_CUR);
 
 	int c = 0, cprev, cnt = 0;
-	char fortune_line[4096];
-	memset(fortune_line, 0, 4096);
+	char fortune_line[1024];
+	memset(fortune_line, 0, 1024);
 	while (1) {
 		cprev = c;
 		c = fgetc(fp);
@@ -102,8 +102,8 @@ void fortune(void) {
 			c = ' ';
 			break;
 		}
-		fputc(c, stdout);
-		if (c == '%' && cprev == '\n') {
+		if (cprev == '\n' && c == '%') {
+			//skip the newline
 			fgetc(fp);
 			c = ' ';
 			break;
@@ -134,6 +134,12 @@ void fortune(void) {
 		else
 			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune: %s\n", fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		gettimeofday(&tv0, NULL);
+		t0 = (time_t)tv0.tv_sec;
+		tm0 = gmtime(&t0);
+		buffer_cmd[strlen(buffer_cmd)-2] = '\0';
+		printf("%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				tv0.tv_usec, buffer_cmd);
 	}
 
 	fclose(fp);
@@ -185,6 +191,12 @@ void *ThreadFunc(void *argp) {
 				//sprintf(buffer_cmd, "privmsg ##linux-offtopic :codybot %s\n", codybot_version_string);
 				sprintf(buffer_cmd, "privmsg #codybot :codybot %s\n", codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			gettimeofday(&tv0, NULL);
+			t0 = (time_t)tv0.tv_sec;
+			tm0 = gmtime(&t0);
+			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
+			printf("%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				tv0.tv_usec, buffer_cmd);
 		}
 
 		usleep(10000);

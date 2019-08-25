@@ -12,31 +12,79 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.0.2";
+const char *codybot_version_string = "0.0.3";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
 	{"version", no_argument, NULL, 'V'},
+	{"blinkenshell", no_argument, NULL, 'b'},
+	{"freenode", no_argument, NULL, 'f'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hV";
+static const char *short_options = "hVbf";
 
-int fd, ret;
-char *buffer, *buffer_rx, *buffer_cmd;
+int fd, ret, endmainloop;
+char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
+char *server_ip_blinkenshell = "194.14.45.5";
+char *server_ip_freenode = "204.225.96.251";
 SSL *pSSL;
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version }\n");
 }
 
-void *ThreadFunc(void *argp) {
+// raw should hold something like ":esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #esselfe :!fortune"
+char *raw_to_word(char *raw) {
+	char *c = raw;
+	unsigned int cnt = 0, cnt_total = strlen(raw);
 	while (1) {
-		SSL_read(pSSL, buffer_rx, 1023);
-		printf("buffer_rx: <%s>\n", buffer_rx);
+		++c;
+		++cnt;
+		if (*c == ':')
+			break;
+		else if (*c == '\0')
+			break;
+	}
+	char *word = (char *)malloc(cnt_total-cnt+1);
+	cnt = 0;
+	while (1) {
+		//sprintf(word, "%s", c);
+		word[cnt] = *(c+cnt);
+		if (*(c+cnt+1) == ' ' || *(c+cnt+1) == '\0') {
+			word[cnt+1] = '\0';
+			break;
+		}
+	}
+
+	return word;
+}
+
+void *ThreadFunc(void *argp) {
+	while (!endmainloop) {
 		memset(buffer_rx, 0, 1024);
-		usleep(250000);
+		SSL_read(pSSL, buffer_rx, 1023);
+		printf("buffer_rx:<<%s>>\n", buffer_rx);
+		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
+			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
+			SSL_write(pSSL, "PONG\n", 11);
+			printf("[PONG sent]\n");
+		}
+		//printf("raw_to_word(): <%s>\n", raw_to_word(buffer_rx));
+		//printf("raw_to_word()\n");
+		usleep(10000);
 	}
 	return NULL;
+}
+
+void ReadCommandLoop(void) {
+	while (!endmainloop) {
+		memset(buffer_cmd, 0, 1024);
+		fgets(buffer_cmd, 1024, stdin);
+		if (strcmp(buffer_cmd, "exit")==0)
+			endmainloop = 1;
+		else
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	}
 }
 
 void ConnectClient(void) {
@@ -46,24 +94,26 @@ void ConnectClient(void) {
 		exit(1);
 	}
 	else
-		printf("fd: %d\n", fd);
+		printf("socket fd: %d\n", fd);
 	
 	struct sockaddr_in addr;
 	addr.sin_addr.s_addr = inet_addr("192.168.2.168");
+	//addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(16422);
+	addr.sin_port = htons(16423);
 	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		fprintf(stderr, "codybot error: Cannot bind(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else
-		printf("bind() 192.168.2.168:16416 successful\n");
+		printf("bind() 192.168.2.168:16423 successful\n");
 	
 	struct sockaddr_in host;
 	//blinkenshell
 	//host.sin_addr.s_addr = inet_addr("194.14.45.5");
 	//freenode
-	host.sin_addr.s_addr = inet_addr("204.225.96.251");
+	//host.sin_addr.s_addr = inet_addr("204.225.96.251");
+	host.sin_addr.s_addr = inet_addr(server_ip);
 	host.sin_family = AF_INET;
 	host.sin_port = htons(6697);
 	if (connect(fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
@@ -126,19 +176,12 @@ void ConnectClient(void) {
 
 	SSL_write(pSSL, "PASS none\n", 10);
 	SSL_write(pSSL, "NICK codybot\n", 13);
-	SSL_write(pSSL, "USER bsfc BSFC-PC04 irc.freenode.net Steph\n", 43);
+	if (server_ip == server_ip_freenode)
+		SSL_write(pSSL, "USER bsfc BSFC-PC04 irc.freenode.net Steph\n", 43);
+	else
+		SSL_write(pSSL, "USER bsfc BSFC-PC04 irc.blinkenshell.org Steph\n", 46);
 
-	while (1) {
-		memset(buffer_cmd, 0, 1024);
-		fgets(buffer_cmd, 1024, stdin);
-		if (strcmp(buffer_cmd, "exit")==0) {
-			SSL_shutdown(pSSL);
-			SSL_free(pSSL);
-			close(fd);
-			exit(0);
-		}
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	}
+	ReadCommandLoop();
 
 	SSL_shutdown(pSSL);
 	SSL_free(pSSL);
@@ -164,11 +207,20 @@ int main(int argc, char **argv) {
 		case 'V':
 			printf("codybot %s\n", codybot_version_string);
 			exit(0);
+		case 'b':
+			server_ip = server_ip_blinkenshell;
+			break;
+		case 'f':
+			server_ip = server_ip_freenode;
+			break;
 		default:
 			fprintf(stderr, "codybot error: Unknown argument: %c/%d\n", (char)c, c);
 			break;
 		}
 	}
+
+	if (!server_ip)
+		server_ip = server_ip_freenode;
 
 	ConnectClient();
 

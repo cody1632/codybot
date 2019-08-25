@@ -7,12 +7,13 @@
 #include <pthread.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.0.3";
+const char *codybot_version_string = "0.0.4";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -60,14 +61,26 @@ char *raw_to_word(char *raw) {
 }
 
 void *ThreadFunc(void *argp) {
+	struct timeval tv0;
+	struct tm *tm0;
+	time_t t0;
 	while (!endmainloop) {
 		memset(buffer_rx, 0, 1024);
 		SSL_read(pSSL, buffer_rx, 1023);
-		printf("buffer_rx:<<%s>>\n", buffer_rx);
+		gettimeofday(&tv0, NULL);
+		t0 = (time_t)tv0.tv_sec;
+		tm0 = gmtime(&t0);
+		printf("%02d:%02d:%02d.%03ld:<<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+			tv0.tv_usec, buffer_rx);
+		// respond to ping request from the server
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
 			SSL_write(pSSL, "PONG\n", 11);
-			printf("[PONG sent]\n");
+			gettimeofday(&tv0, NULL);
+			t0 = (time_t)tv0.tv_sec;
+			tm0 = gmtime(&t0);
+			printf("%02d:%02d:%02d.%03ld:[[PONG sent]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				tv0.tv_usec);
 		}
 		//printf("raw_to_word(): <%s>\n", raw_to_word(buffer_rx));
 		//printf("raw_to_word()\n");

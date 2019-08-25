@@ -74,7 +74,7 @@ void ConnectClient(void) {
 	
 	char *buffer = (char *)malloc(1024);
 	memset(buffer, 0, 1024);
-	sprintf(buffer, "PASS 16326486##");
+	sprintf(buffer, "PASS 1632##");
 	int ret = send(fd, buffer, strlen(buffer), 0);
 	printf("send() returns %d\n", ret);
 

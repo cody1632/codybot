@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.0.5";
+const char *codybot_version_string = "0.1.0";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -26,6 +26,9 @@ static const char *short_options = "hVbf";
 
 int fd, ret, endmainloop;
 char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
+struct timeval tv0;
+struct tm *tm0;
+time_t t0;
 
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
@@ -33,8 +36,8 @@ char *server_ip_blinkenshell = "194.14.45.5";
 // medusa.blinkenshell.org
 //char *server_ip_blinkenshell = "69.164.197.11";
 
-// irc.freenode.net
-char *server_ip_freenode = "204.225.96.251";
+// livingstone.freenode.net
+char *server_ip_freenode = "107.182.226.199";
 
 SSL *pSSL;
 
@@ -85,7 +88,8 @@ void fortune(void) {
 	fseek(fp, 0, SEEK_END);
 	unsigned long filesize = (unsigned long)ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-	unsigned int position = rand()%(filesize-200-rand()%1800)+1000;
+	srand((unsigned int)time(NULL));
+	unsigned int position = rand()%(filesize-500);
 	fseek(fp, position, SEEK_CUR);
 
 	int c = 0, cprev, cnt = 0;
@@ -125,7 +129,8 @@ void fortune(void) {
 
 	if (strlen(fortune_line) > 0) {
 		if (server_ip == server_ip_freenode)
-			sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune: %s\n", fortune_line);
+//			sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune: %s\n", fortune_line);
+			sprintf(buffer_cmd, "privmsg #codybot :fortune: %s\n", fortune_line);
 		else
 			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune: %s\n", fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -135,9 +140,6 @@ void fortune(void) {
 }
 
 void *ThreadFunc(void *argp) {
-	struct timeval tv0;
-	struct tm *tm0;
-	time_t t0;
 	while (!endmainloop) {
 		memset(buffer_rx, 0, 1024);
 		SSL_read(pSSL, buffer_rx, 1023);
@@ -161,21 +163,30 @@ void *ThreadFunc(void *argp) {
 				gettimeofday(&tv0, NULL);
 				t0 = (time_t)tv0.tv_sec;
 				tm0 = gmtime(&t0);
-				printf("%02d:%02d:%02d.%03ld [[%s]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				buffer_cmd[strlen(buffer_cmd)-2] = '\0';
+				printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 					tv0.tv_usec, buffer_cmd);
 			}
 			else {
-				SSL_write(pSSL, "PONG\r\n", 11);
+				SSL_write(pSSL, "PONG\n", 5);
 				gettimeofday(&tv0, NULL);
 				t0 = (time_t)tv0.tv_sec;
 				tm0 = gmtime(&t0);
-				printf("%02d:%02d:%02d.%03ld [[PONG sent]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				printf("%02d:%02d:%02d.%03ld ##PONG sent##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 					tv0.tv_usec);
 			}
 		}
-		if (strcmp(raw_to_word(buffer_rx), "!fortune")==0) {
+		if (strcmp(raw_to_word(buffer_rx), "!fortune")==0)
 			fortune();
+		else if (strcmp(raw_to_word(buffer_rx), "!codybot_version")==0) {
+			if (server_ip == server_ip_blinkenshell)
+				sprintf(buffer_cmd, "privmsg #blinkenshell :codybot %s\n", codybot_version_string);
+			else
+				//sprintf(buffer_cmd, "privmsg ##linux-offtopic :codybot %s\n", codybot_version_string);
+				sprintf(buffer_cmd, "privmsg #codybot :codybot %s\n", codybot_version_string);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		}
+
 		usleep(10000);
 	}
 	return NULL;
@@ -185,10 +196,19 @@ void ReadCommandLoop(void) {
 	while (!endmainloop) {
 		memset(buffer_cmd, 0, 1024);
 		fgets(buffer_cmd, 1024, stdin);
-		if (strcmp(buffer_cmd, "exit")==0)
+		if (buffer_cmd[0] == '\n')
+			continue;
+		else if (strcmp(buffer_cmd, "exit")==0)
 			endmainloop = 1;
-		else
+		else {
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			gettimeofday(&tv0, NULL);
+			t0 = (time_t)tv0.tv_sec;
+			tm0 = gmtime(&t0);
+			buffer_cmd[strlen(buffer_cmd)-2] = '\0';
+			printf("%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				tv0.tv_usec, buffer_cmd);
+		}
 	}
 }
 
@@ -213,7 +233,7 @@ void ConnectClient(void) {
 		exit(1);
 	}
 	else
-		printf("bind() 0.0.0.0:16423 successful\n");
+		printf("bind() 0.0.0.0 successful\n");
 	
 	struct sockaddr_in host;
 	host.sin_addr.s_addr = inet_addr(server_ip);

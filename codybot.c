@@ -67,20 +67,37 @@ void *ThreadFunc(void *argp) {
 	while (!endmainloop) {
 		memset(buffer_rx, 0, 1024);
 		SSL_read(pSSL, buffer_rx, 1023);
+		if (strlen(buffer_rx) == 0) {
+			endmainloop = 1;
+			break;
+		}
 		gettimeofday(&tv0, NULL);
 		t0 = (time_t)tv0.tv_sec;
 		tm0 = gmtime(&t0);
+		buffer_rx[strlen(buffer_rx)-1] = '\0';
 		printf("%02d:%02d:%02d.%03ld:<<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 			tv0.tv_usec, buffer_rx);
 		// respond to ping request from the server
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
-			SSL_write(pSSL, "PONG\n", 11);
-			gettimeofday(&tv0, NULL);
-			t0 = (time_t)tv0.tv_sec;
-			tm0 = gmtime(&t0);
-			printf("%02d:%02d:%02d.%03ld:[[PONG sent]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-				tv0.tv_usec);
+			if (server_ip == server_ip_blinkenshell) {
+				sprintf(buffer_cmd, "%s\n", buffer_rx);
+				buffer_cmd[1] = 'O';
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				gettimeofday(&tv0, NULL);
+				t0 = (time_t)tv0.tv_sec;
+				tm0 = gmtime(&t0);
+				printf("%02d:%02d:%02d.%03ld:[[%s]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+					tv0.tv_usec, buffer_cmd);
+			}
+			else {
+				SSL_write(pSSL, "PONG\n", 11);
+				gettimeofday(&tv0, NULL);
+				t0 = (time_t)tv0.tv_sec;
+				tm0 = gmtime(&t0);
+				printf("%02d:%02d:%02d.%03ld:[[PONG sent]]\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+					tv0.tv_usec);
+			}
 		}
 		//printf("raw_to_word(): <%s>\n", raw_to_word(buffer_rx));
 		//printf("raw_to_word()\n");

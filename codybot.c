@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.4";
+const char *codybot_version_string = "0.1.5";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -297,12 +297,14 @@ void *ThreadFunc(void *argp) {
 				sprintf(buffer_cmd, "%s\n", buffer_rx);
 				buffer_cmd[1] = 'O';
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				gettimeofday(&tv0, NULL);
-				t0 = (time_t)tv0.tv_sec;
-				tm0 = gmtime(&t0);
-				buffer_cmd[strlen(buffer_cmd)-1] = '\0';
-				printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-					tv0.tv_usec, buffer_cmd);
+				if (debug) {
+					gettimeofday(&tv0, NULL);
+					t0 = (time_t)tv0.tv_sec;
+					tm0 = gmtime(&t0);
+					buffer_cmd[strlen(buffer_cmd)-1] = '\0';
+					printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+						tv0.tv_usec, buffer_cmd);
+				}
 			}
 			else {
 				SSL_write(pSSL, "PONG\n", 5);
@@ -420,12 +422,14 @@ void ConnectClient(void) {
 	}
 
 	SSL_CTX_set_ecdh_auto(ctx, 1);
-	if (SSL_CTX_use_certificate_file(ctx, "nick.cert", SSL_FILETYPE_PEM) <= 0) {
+	//if (SSL_CTX_use_certificate_file(ctx, "nick.cert", SSL_FILETYPE_PEM) <= 0) {
+	if (SSL_CTX_use_certificate_file(ctx, "cert.pem", SSL_FILETYPE_PEM) <= 0) {
         fprintf(stderr, "##codybot error: Cannot load nick.cert\n");
 		exit(1);
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, "nick.key", SSL_FILETYPE_PEM) <= 0 ) {
+    //if (SSL_CTX_use_PrivateKey_file(ctx, "nick.key", SSL_FILETYPE_PEM) <= 0 ) {
+    if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0 ) {
         fprintf(stderr, "##codybot error: Cannot load nick.key\n");
 		exit(1);
     }

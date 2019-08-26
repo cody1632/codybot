@@ -383,10 +383,14 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 				tv0.tv_usec, buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "!debug on")==0)
+		else if (strcmp(raw.text, "^debug on")==0) {
 			debug = 1;
-		else if (strcmp(raw.text, "!debug off")==0)
+			printf("##debug on\n");
+		}
+		else if (strcmp(raw.text, "^debug off")==0) {
 			debug = 0;
+			printf("##debug off\n");
+		}
 
 		usleep(10000);
 }

@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.5";
+const char *codybot_version_string = "0.1.6";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -420,19 +420,6 @@ void ConnectClient(void) {
 		fprintf(stderr, "##codybot error: Cannot create SSL context\n");
 		exit(1);
 	}
-
-	SSL_CTX_set_ecdh_auto(ctx, 1);
-	//if (SSL_CTX_use_certificate_file(ctx, "nick.cert", SSL_FILETYPE_PEM) <= 0) {
-	if (SSL_CTX_use_certificate_file(ctx, "cert.pem", SSL_FILETYPE_PEM) <= 0) {
-        fprintf(stderr, "##codybot error: Cannot load nick.cert\n");
-		exit(1);
-    }
-
-    //if (SSL_CTX_use_PrivateKey_file(ctx, "nick.key", SSL_FILETYPE_PEM) <= 0 ) {
-    if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0 ) {
-        fprintf(stderr, "##codybot error: Cannot load nick.key\n");
-		exit(1);
-    }
 
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
 	pSSL = SSL_new(ctx);

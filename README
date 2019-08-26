@@ -11,3 +11,8 @@ on registering a nick with NickServ as codybot is presently reserved.
 
 To trigger a fortune cookie, just type '!fortune' in a channel where the bot
 is present, like #codybot, ##c-offtopic or ##linux-offtopic
+
+The fortune cookie database file is linux.fortune. It's made of concatenation
+of linux, computers, miscellaneous and wisdom files from
+/usr/share/games/fortunes from the system-provided fortune program.
+(see https://github.com/shlomif/fortune-mod/archive/fortune-mod-2.6.2.tar.gz)

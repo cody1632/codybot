@@ -343,16 +343,18 @@ void Stats(struct raw_line *rawp) {
 	memset(buffer_cmd, 0, 4096);
 }
 
-char *tourette_items[12] = {
+char *tourette_items[20] = {
 "can't believe a word of what you say", "has nothing to do with anything",
 "doesn't uderstand gravity", "won't remark anything special",
 "wonders how the fuck this happened", "won't give a shit",
 "don't give a damn", "have no retarded clue", "fuck fuck fuck!",
-"says it's stupid", "poops on you all", "vomits on you all"
+"calisse!", "ciboire!", "tabarnak!", "osti!", "sacrament!",
+"says it's stupid", "poops on you all", "vomits on you all",
+" screams FUCK out loud", "piss on you", "has pain in the ass"
 };
 void Tourette(struct raw_line *rawp) {
 	sprintf(buffer_cmd, "privmsg %s :%cACTION %s%c\n", rawp->channel, 1,
-		tourette_items[rand()%12], 1);
+		tourette_items[rand()%20], 1);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	memset(buffer_cmd, 0, 4096);
 }

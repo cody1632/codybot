@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.2";
+const char *codybot_version_string = "0.1.3";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -46,6 +46,13 @@ void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
 }
 
+// a raw line from the server should hold something like one of these:
+// :codybot!~user@unaffiliated/esselfe PRIVMSG ##linux-offtopic :!fortune
+// :NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.
+// :freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode.
+// :PING :livingstone.freenode.net
+// :codybot MODE codybot :+Zi
+// :livingstone.freenode.net 372 codybot :- Thank you for using freenode!
 struct raw_line {
 	char *nick;
 	char *username;
@@ -55,41 +62,19 @@ struct raw_line {
 	char *text;
 };
 
-// raw should hold something like ":esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #esselfe :!fortune"
-char *RawToWord(char *raw) {
-	char *c = raw;
-	unsigned int cnt = 0;
-	while (1) {
-		++c;
-		++cnt;
-		if (*c == ':')
-			break;
-		else if (*c == '\0')
-			break;
-	}
-	char *word = (char *)malloc(1024);
-	memset(word, 0, 1024);
-	cnt = 0;
-	if (*c != '\0') {
-		++c;
-		while (1) {
-			word[cnt] = *(c+cnt);
-			if (*(c+cnt+1) == ' ' || *(c+cnt+1) == '\0')
-				break;
-			++cnt;
-		}
-	}
-
-	return word;
-}
-
 // :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :!codybot_version
 void RawLineParse(struct raw_line *raw, char *line) {
-	char *c = line, word[1025];
+	char *c = line, word[4096];
 	unsigned int cnt = 0, rec_nick = 1, rec_username = 0, rec_host = 0, rec_command = 0,
 		rec_channel = 0, rec_text = 0;
 	
-	// messages to skip
+	// messages to skip:
+// :livingstone.freenode.net 372 codybot :- Thank you for using freenode!
+// :codybot MODE codybot :+Zi
+// :NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.
+// :freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode.
+// :PING :livingstone.freenode.net
+// ERROR :Closing Link: mtrlpq69-157-190-235.bell.ca (Quit: codybot)
 	if (*c==':' && *(c+1)=='l' && *(c+2)=='i' && *(c+3)=='v' && *(c+4)=='i' && *(c+5)=='n' &&
 		*(c+6)=='g' && *(c+7)=='s' && *(c+8)=='t' && *(c+9)=='o' && *(c+10)=='n' &&
 		*(c+11)=='e' && *(c+12)=='.')
@@ -107,11 +92,11 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		return;
 	else if (*c=='E' && *(c+1)=='R' && *(c+2)=='R' && *(c+3)=='O' && *(c+4)=='R')
 		return;
-	else {
-		if (debug)
-			printf("RawLineParse() started\n");
-	}
+
+	if (debug)
+		printf("\n##RawLineParse() started\n");
 	
+	// remove multi-lines buffer
 	while (1) {
 		if (*c == '\0')
 			break;
@@ -127,16 +112,16 @@ void RawLineParse(struct raw_line *raw, char *line) {
 	unsigned int cnt_total = 0;
 	while (1) {
 		if (*c == ':' && cnt_total == 0) {
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			++c;
 			if (debug)
-				printf("&&raw: <%s>&&\n", line);
+				printf("&&raw: <<%s>>&&\n", line);
 			continue;
 		}
 		else if (rec_nick && *c == '!') {
 			raw->nick = (char *)malloc(strlen(word)+1);
 			sprintf(raw->nick, "%s", word);
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			rec_nick = 0;
 			rec_username = 1;
 			cnt = 0;
@@ -150,7 +135,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		else if (rec_username && *c == '@') {
 			raw->username = (char *)malloc(strlen(word)+1);
 			sprintf(raw->username, "%s", word);
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			rec_username = 0;
 			rec_host = 1;
 			cnt = 0;
@@ -160,7 +145,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		else if (rec_host && *c == ' ') {
 			raw->host = (char *)malloc(strlen(word)+1);
 			sprintf(raw->host, "%s", word);
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			rec_host = 0;
 			rec_command = 1;
 			cnt = 0;
@@ -170,7 +155,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		else if (rec_command && *c == ' ') {
 			raw->command = (char *)malloc(strlen(word)+1);
 			sprintf(raw->command, "%s", word);
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			rec_command = 0;
 			rec_channel = 1;
 			cnt = 0;
@@ -181,7 +166,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		else if (rec_channel && *c == ' ') {
 			raw->channel = (char *)malloc(strlen(word)+1);
 			sprintf(raw->channel, "%s", word);
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			rec_channel = 0;
 			if (strcmp(raw->command, "PRIVMSG")==0)
 				rec_text = 1;
@@ -192,7 +177,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		else if (rec_text && *c == '\0') {
 			raw->text = (char *)malloc(strlen(word)+1);
 			sprintf(raw->text, "%s", word);
-			memset(word, 0, 1024);
+			memset(word, 0, 4096);
 			rec_text = 0;
 			cnt = 0;
 			if (debug)
@@ -211,17 +196,17 @@ void RawLineParse(struct raw_line *raw, char *line) {
 	}
 
 	if (debug)
-		printf("RawLineParse() ended\n");
+		printf("##RawLineParse() ended\n\n");
 }
 
 void fortune(void) {
 	FILE *fp = fopen("linux.fortune", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "codybot error: Cannot open linux.fortune: %s\n", strerror(errno));
+		fprintf(stderr, "##codybot error: Cannot open linux.fortune database: %s\n", strerror(errno));
 		if (server_ip == server_ip_blinkenshell)
-			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open database\n");
+			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open linux.fortune database\n");
 		else
-			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open database\n");
+			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open linux.fortune database\n");
 			//sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune error: cannot open database\n");
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		return;
@@ -235,8 +220,8 @@ void fortune(void) {
 	fseek(fp, rand()%(filesize-500), SEEK_CUR);
 
 	int c = 0, cprev, cnt = 0;
-	char fortune_line[1024];
-	memset(fortune_line, 0, 1024);
+	char fortune_line[4096];
+	memset(fortune_line, 0, 4096);
 	while (1) {
 		cprev = c;
 		c = fgetc(fp);
@@ -280,7 +265,7 @@ void fortune(void) {
 		t0 = (time_t)tv0.tv_sec;
 		tm0 = gmtime(&t0);
 		buffer_cmd[strlen(buffer_cmd)-2] = '\0';
-		printf("%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+		printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 				tv0.tv_usec, buffer_cmd);
 	}
 
@@ -290,8 +275,8 @@ void fortune(void) {
 // function to process messages received from server
 void *ThreadFunc(void *argp) {
 	while (!endmainloop) {
-		memset(buffer_rx, 0, 1024);
-		SSL_read(pSSL, buffer_rx, 1023);
+		memset(buffer_rx, 0, 4096);
+		SSL_read(pSSL, buffer_rx, 4095);
 		if (strlen(buffer_rx) == 0) {
 			endmainloop = 1;
 			break;
@@ -312,17 +297,19 @@ void *ThreadFunc(void *argp) {
 				gettimeofday(&tv0, NULL);
 				t0 = (time_t)tv0.tv_sec;
 				tm0 = gmtime(&t0);
-				buffer_cmd[strlen(buffer_cmd)-2] = '\0';
+				buffer_cmd[strlen(buffer_cmd)-1] = '\0';
 				printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 					tv0.tv_usec, buffer_cmd);
 			}
 			else {
 				SSL_write(pSSL, "PONG\n", 5);
-				gettimeofday(&tv0, NULL);
-				t0 = (time_t)tv0.tv_sec;
-				tm0 = gmtime(&t0);
-				printf("%02d:%02d:%02d.%03ld ##PONG sent##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-					tv0.tv_usec);
+				if (debug) {
+					gettimeofday(&tv0, NULL);
+					t0 = (time_t)tv0.tv_sec;
+					tm0 = gmtime(&t0);
+					printf("%02d:%02d:%02d.%03ld ##PONG sent\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+						tv0.tv_usec);
+				}
 			}
 		}
 
@@ -342,7 +329,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			t0 = (time_t)tv0.tv_sec;
 			tm0 = gmtime(&t0);
 			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
-			printf("%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+			printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 				tv0.tv_usec, buffer_cmd);
 		}
 		else if (strcmp(raw.text, "!debug on")==0)
@@ -358,7 +345,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 
 void ReadCommandLoop(void) {
 	while (!endmainloop) {
-		memset(buffer_cmd, 0, 1024);
+		memset(buffer_cmd, 0, 4096);
 		fgets(buffer_cmd, 1024, stdin);
 		if (buffer_cmd[0] == '\n')
 			continue;
@@ -369,8 +356,8 @@ void ReadCommandLoop(void) {
 			gettimeofday(&tv0, NULL);
 			t0 = (time_t)tv0.tv_sec;
 			tm0 = gmtime(&t0);
-			buffer_cmd[strlen(buffer_cmd)-2] = '\0';
-			printf("%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
+			printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 				tv0.tv_usec, buffer_cmd);
 		}
 	}
@@ -379,12 +366,12 @@ void ReadCommandLoop(void) {
 void ConnectClient(void) {
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd < 0) {
-		fprintf(stderr, "codybot error: Cannot socket(): %s\n", strerror(errno));
+		fprintf(stderr, "##codybot error: Cannot socket(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("socket fd: %d\n", fd);
+			printf("##socket fd: %d\n", fd);
 	}
 	
 	struct sockaddr_in addr;
@@ -395,12 +382,12 @@ void ConnectClient(void) {
 	else
 		addr.sin_port = htons(16424);
 	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		fprintf(stderr, "codybot error: Cannot bind(): %s\n", strerror(errno));
+		fprintf(stderr, "##codybot error: Cannot bind(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("bind() 0.0.0.0 successful\n");
+			printf("##bind() 0.0.0.0 successful\n");
 	}
 	
 	struct sockaddr_in host;
@@ -408,12 +395,12 @@ void ConnectClient(void) {
 	host.sin_family = AF_INET;
 	host.sin_port = htons(6697);
 	if (connect(fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
-		fprintf(stderr, "codybot error: Cannot connect(): %s\n", strerror(errno));
+		fprintf(stderr, "##codybot error: Cannot connect(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("connect() %s successful\n", server_ip);
+			printf("##connect() %s successful\n", server_ip);
 	}
 
 	SSL_load_error_strings();
@@ -423,18 +410,18 @@ void ConnectClient(void) {
 	const SSL_METHOD *method = TLS_method();
 	SSL_CTX *ctx = SSL_CTX_new(method);
 	if (!ctx) {
-		fprintf(stderr, "codybot error: Cannot create SSL context\n");
+		fprintf(stderr, "##codybot error: Cannot create SSL context\n");
 		exit(1);
 	}
 
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 	if (SSL_CTX_use_certificate_file(ctx, "nick.cert", SSL_FILETYPE_PEM) <= 0) {
-        fprintf(stderr, "codybot error: Cannot load nick.cert\n");
+        fprintf(stderr, "##codybot error: Cannot load nick.cert\n");
 		exit(1);
     }
 
     if (SSL_CTX_use_PrivateKey_file(ctx, "nick.key", SSL_FILETYPE_PEM) <= 0 ) {
-        fprintf(stderr, "codybot error: Cannot load nick.key\n");
+        fprintf(stderr, "##codybot error: Cannot load nick.key\n");
 		exit(1);
     }
 
@@ -446,18 +433,18 @@ void ConnectClient(void) {
 	SSL_connect(pSSL);
 	ret = SSL_accept(pSSL);
 	if (ret <= 0) {
-		fprintf(stderr, "codybot error: SSL_accept() failed, ret: %d\n", ret);
-		fprintf(stderr, "error: %d\n", SSL_get_error(pSSL, 0));
+		fprintf(stderr, "##codybot error: SSL_accept() failed, ret: %d\n", ret);
+		fprintf(stderr, "##SSL error number: %d\n", SSL_get_error(pSSL, 0));
 		close(fd);
 		exit(1);
 	}
 
-	buffer_rx = (char *)malloc(1024);
-	memset(buffer_rx, 0, 1024);
-	buffer_cmd = (char *)malloc(1024);
-	memset(buffer_cmd, 0, 1024);
-	buffer = (char *)malloc(1024);
-	memset(buffer, 0, 1024);
+	buffer_rx = (char *)malloc(4096);
+	memset(buffer_rx, 0, 4096);
+	buffer_cmd = (char *)malloc(4096);
+	memset(buffer_cmd, 0, 4096);
+	buffer = (char *)malloc(4096);
+	memset(buffer, 0, 4096);
 	
 	// start the thread here, as soon as we can
 	pthread_t thr;

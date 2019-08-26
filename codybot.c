@@ -9,11 +9,12 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.7";
+const char *codybot_version_string = "0.1.8";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -21,14 +22,17 @@ static const struct option long_options[] = {
 	{"debug", no_argument, NULL, 'd'},
 	{"blinkenshell", no_argument, NULL, 'b'},
 	{"freenode", no_argument, NULL, 'f'},
+	{"server", required_argument, NULL, 's'},
+	{"port", required_argument, NULL, 'p'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVdbf";
+static const char *short_options = "hVdbfs:p:";
 
 int debug, fd, ret, endmainloop;
 struct timeval tv0;
 struct tm *tm0;
 time_t t0;
+unsigned int server_port;
 char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
 char *nick = "codybot";
 
@@ -289,8 +293,13 @@ void SlapCheck(struct raw_line *raw) {
 	  *(c+12)=='s' && *(c+13)==' ' && *(c+14)=='c' && *(c+15)=='o' &&
 	  *(c+16)=='d' && *(c+17)=='y' && *(c+18)=='b' && *(c+19)=='o' &&
 	  *(c+20)=='t' && *(c+21)==' ') {
-		sprintf(buffer_cmd, "privmsg #codybot :%cACTION slaps %s with %s\n", 
-			1, raw->nick, slap_items[rand()%20]);
+	    char *target;
+		if (strcmp(raw->channel, nick)==0)
+			target = raw->nick;
+		else
+			target = raw->channel;
+		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s\n", 
+			target, 1, raw->nick, slap_items[rand()%20]);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 }
@@ -421,7 +430,7 @@ void ConnectClient(void) {
 	struct sockaddr_in host;
 	host.sin_addr.s_addr = inet_addr(server_ip);
 	host.sin_family = AF_INET;
-	host.sin_port = htons(6697);
+	host.sin_port = htons(server_port);
 	if (connect(fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
 		fprintf(stderr, "##codybot error: Cannot connect(): %s\n", strerror(errno));
 		exit(1);
@@ -486,6 +495,30 @@ void ConnectClient(void) {
 	}
 }
 
+void GetServerIP(char *hostname) {
+	struct hostent *he;
+	struct in_addr **addr_list;
+	int cnt = 0;
+
+	he = gethostbyname(hostname);
+	if (he == NULL) {
+		fprintf(stderr, "##codybot error: Cannot gethostbyname()\n");
+		exit(1);
+	}
+
+	addr_list = (struct in_addr **)he->h_addr_list;
+
+	char *tmpstr = inet_ntoa(*addr_list[0]);
+	server_ip = (char *)malloc(strlen(tmpstr)+1);
+	sprintf(server_ip, "%s", tmpstr);
+
+	if (debug) {
+		for (cnt = 0; addr_list[cnt] != NULL; cnt++) {
+			printf("%s\n", inet_ntoa(*addr_list[cnt]));
+		}
+	}
+}
+
 void SignalFunc(int signum) {
 	close(fd);
 }
@@ -513,12 +546,21 @@ int main(int argc, char **argv) {
 		case 'f':
 			server_ip = server_ip_freenode;
 			break;
+		case 'p':
+			server_port = atoi(optarg);
+			break;
+		case 's':
+			// set server addr
+			GetServerIP(optarg);
+			break;
 		default:
 			fprintf(stderr, "codybot error: Unknown argument: %c/%d\n", (char)c, c);
 			break;
 		}
 	}
 
+	if (!server_port)
+		server_port = 6697;
 	if (!server_ip)
 		server_ip = server_ip_freenode;
 

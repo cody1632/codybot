@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.11";
+const char *codybot_version_string = "0.1.12";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -30,6 +30,7 @@ static const struct option long_options[] = {
 static const char *short_options = "hVdbfn:p:s:";
 
 int debug, fd, ret, endmainloop;
+unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
 time_t t0;
@@ -217,7 +218,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		printf("##RawLineParse() ended\n\n");
 }
 
-void Fortune(struct raw_line *raw) {
+void Fortune(struct raw_line *rawp) {
 	FILE *fp = fopen("linux.fortune", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "##codybot error: Cannot open linux.fortune database: %s\n", strerror(errno));
@@ -274,10 +275,10 @@ void Fortune(struct raw_line *raw) {
 
 	if (strlen(fortune_line) > 0) {
 		char *target;
-		if (strcmp(raw->channel, nick)==0)
-			target = raw->nick;
+		if (strcmp(rawp->channel, nick)==0)
+			target = rawp->nick;
 		else
-			target = raw->channel;
+			target = rawp->channel;
 
 		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -291,6 +292,18 @@ void Fortune(struct raw_line *raw) {
 	}
 
 	fclose(fp);
+
+	fp = fopen("stats", "w");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot error: Cannot open stats file\n");
+		return;
+	}
+
+	char str[1024];
+	sprintf(str, "%llu\n", ++fortune_total);
+	fputs(str, fp);
+
+	fclose(fp);
 }
 
 char *slap_items[20] = {
@@ -299,8 +312,8 @@ char *slap_items[20] = {
 "a rubber band", "a large trout", "a rabbit", "a lizard", "a dinosaur",
 "a chair", "a mouse pad", "a C programming book", "a belt"
 };
-void SlapCheck(struct raw_line *raw) {
-	char *c = raw->text;
+void SlapCheck(struct raw_line *rawp) {
+	char *c = rawp->text;
 	if (*(c+1)=='A' && *(c+2)=='C' && *(c+3)=='T' && *(c+4)=='I' &&
 	  *(c+5)=='O' && *(c+6)=='N' && *(c+7)==' ' &&
 	  *(c+8)=='s' && *(c+9)=='l' && *(c+10)=='a' && *(c+11)=='p' && 
@@ -308,15 +321,26 @@ void SlapCheck(struct raw_line *raw) {
 	  *(c+16)=='d' && *(c+17)=='y' && *(c+18)=='b' && *(c+19)=='o' &&
 	  *(c+20)=='t' && *(c+21)==' ') {
 	    char *target;
-		if (strcmp(raw->channel, nick)==0)
-			target = raw->nick;
+		if (strcmp(rawp->channel, nick)==0)
+			target = rawp->nick;
 		else
-			target = raw->channel;
+			target = rawp->channel;
 		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
-			target, 1, raw->nick, slap_items[rand()%20], 1);
+			target, 1, rawp->nick, slap_items[rand()%20], 1);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		memset(buffer_cmd, 0, 4096);
 	}
+}
+
+void Stats(struct raw_line *rawp) {
+	char *target;
+	if (strcmp(rawp->channel, nick)==0)
+		target = rawp->nick;
+	else
+		target = rawp->channel;
+	sprintf(buffer_cmd, "privmsg %s :Given fortune cookies: %llu\n", target, fortune_total);
+	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	memset(buffer_cmd, 0, 4096);
 }
 
 char *tourette_items[12] = {
@@ -326,8 +350,8 @@ char *tourette_items[12] = {
 "don't give a damn", "have no retarded clue", "fuck fuck fuck!",
 "says it's stupid", "poops on you all", "vomits on you all"
 };
-void Tourette(struct raw_line *raw) {
-	sprintf(buffer_cmd, "privmsg %s :%cACTION %s%c\n", raw->channel, 1,
+void Tourette(struct raw_line *rawp) {
+	sprintf(buffer_cmd, "privmsg %s :%cACTION %s%c\n", rawp->channel, 1,
 		tourette_items[rand()%12], 1);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	memset(buffer_cmd, 0, 4096);
@@ -398,7 +422,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 				target = raw.nick;
 			else
 				target = raw.channel;
-			sprintf(buffer_cmd, "privmsg %s :commands: about help fortune tourette\n",
+			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune stats tourette\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			memset(buffer_cmd, 0, 4096);
@@ -428,6 +452,8 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			debug = 0;
 			printf("##debug off\n");
 		}
+		else if (strcmp(raw.text, "^stats")==0)
+			Stats(&raw);
 		else if (strcmp(raw.text, "^tourette")==0)
 			Tourette(&raw);
 
@@ -630,6 +656,19 @@ int main(int argc, char **argv) {
 		server_port = 6697;
 	if (!server_ip)
 		server_ip = server_ip_freenode;
+
+	FILE *fp = fopen("stats", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot error: Cannot open stats file\n");
+	}
+	else {
+		char str[1024];
+		fgets(str, 1023, fp);
+		fclose(fp);
+		fortune_total = atoi(str);
+	}
+	if (debug)
+		printf("##fortune_total: %llu\n", fortune_total);
 
 	ConnectClient();
 	ReadCommandLoop();

@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.9";
+const char *codybot_version_string = "0.1.10";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -213,7 +213,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		printf("##RawLineParse() ended\n\n");
 }
 
-void fortune(struct raw_line *raw) {
+void Fortune(struct raw_line *raw) {
 	FILE *fp = fopen("linux.fortune", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "##codybot error: Cannot open linux.fortune database: %s\n", strerror(errno));
@@ -315,6 +315,20 @@ void SlapCheck(struct raw_line *raw) {
 	}
 }
 
+char *tourette_items[12] = {
+"can't believe a word of what you say", "has nothing to do with anything",
+"doesn't uderstand gravity", "won't remark anything special",
+"wonders how the fuck this happened", "won't give a shit",
+"don't give a damn", "have no retarded clue", "fuck fuck fuck!",
+"says it's stupid", "poops on you all", "vomits on you all"
+};
+void Tourette(struct raw_line *raw) {
+	sprintf(buffer_cmd, "privmsg %s :%cACTION %s%c\n", raw->channel, 1,
+		tourette_items[rand()%12], 1);
+	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	memset(buffer_cmd, 0, 4096);
+}
+
 // function to process messages received from server
 void *ThreadFunc(void *argp) {
 	while (!endmainloop) {
@@ -366,7 +380,7 @@ void *ThreadFunc(void *argp) {
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		SlapCheck(&raw);
 		if (strcmp(raw.text, "^fortune")==0)
-			fortune(&raw);
+			Fortune(&raw);
 		else if (strcmp(raw.text, "^codybot_version")==0) {
 			if (strcmp(raw.channel, nick)==0)
 				target = raw.nick;
@@ -391,6 +405,8 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			debug = 0;
 			printf("##debug off\n");
 		}
+		else if (strcmp(raw.text, "^tourette")==0)
+			Tourette(&raw);
 
 		usleep(10000);
 }

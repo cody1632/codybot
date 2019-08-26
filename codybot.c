@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.3";
+const char *codybot_version_string = "0.1.4";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -30,6 +30,7 @@ struct timeval tv0;
 struct tm *tm0;
 time_t t0;
 char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
+char *nick = "codybot";
 
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
@@ -199,7 +200,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		printf("##RawLineParse() ended\n\n");
 }
 
-void fortune(void) {
+void fortune(struct raw_line *raw) {
 	FILE *fp = fopen("linux.fortune", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "##codybot error: Cannot open linux.fortune database: %s\n", strerror(errno));
@@ -255,11 +256,13 @@ void fortune(void) {
 	}
 
 	if (strlen(fortune_line) > 0) {
-		if (server_ip == server_ip_freenode)
-//			sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune: %s\n", fortune_line);
-			sprintf(buffer_cmd, "privmsg #codybot :fortune: %s\n", fortune_line);
+		char *target;
+		if (strcmp(raw->channel, nick)==0)
+			target = raw->nick;
 		else
-			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune: %s\n", fortune_line);
+			target = raw->channel;
+
+		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		gettimeofday(&tv0, NULL);
 		t0 = (time_t)tv0.tv_sec;
@@ -313,17 +316,19 @@ void *ThreadFunc(void *argp) {
 			}
 		}
 
+		char *target;
 		struct raw_line raw;
 		RawLineParse(&raw, buffer_rx);
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		if (strcmp(raw.text, "!fortune")==0)
-			fortune();
+			fortune(&raw);
 		else if (strcmp(raw.text, "!codybot_version")==0) {
-			if (server_ip == server_ip_blinkenshell)
-				sprintf(buffer_cmd, "privmsg #blinkenshell :codybot %s\n", codybot_version_string);
+			if (strcmp(raw.channel, nick)==0)
+				target = raw.nick;
 			else
-				//sprintf(buffer_cmd, "privmsg ##linux-offtopic :codybot %s\n", codybot_version_string);
-				sprintf(buffer_cmd, "privmsg #codybot :codybot %s\n", codybot_version_string);
+				target = raw.channel;
+
+			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			gettimeofday(&tv0, NULL);
 			t0 = (time_t)tv0.tv_sec;

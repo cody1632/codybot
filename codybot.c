@@ -85,6 +85,7 @@ void RawLineParse(struct raw_line *raw, char *line) {
 	// messages to skip:
 // :livingstone.freenode.net 372 codybot :- Thank you for using freenode!
 // :codybot MODE codybot :+Zi
+// :ChanServ!ChanServ@services. MODE #codybot +o esselfe
 // :NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.
 // :freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode.
 // :PING :livingstone.freenode.net
@@ -94,6 +95,9 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		*(c+11)=='e' && *(c+12)=='.')
 		return;
 	else if (*(c+8)==' ' && *(c+9)=='M' && *(c+10)=='O' && *(c+11)=='D' && *(c+12)=='E')
+		return;
+	else if (*(c+1)=='C' && *(c+2)=='h' && *(c+3)=='a' && *(c+4)=='n' && *(c+5)=='S' &&
+		*(c+6)=='e' && *(c+7)=='r' && *(c+8)=='v' && *(c+9)=='!')
 		return;
 	else if (*(c+1)=='N' && *(c+2)=='i' && *(c+3)=='c' && *(c+4)=='k' && *(c+5)=='S' &&
 		*(c+6)=='e' && *(c+7)=='r' && *(c+8)=='v' && *(c+9)=='!')

@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.8";
+const char *codybot_version_string = "0.1.9";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -22,11 +22,12 @@ static const struct option long_options[] = {
 	{"debug", no_argument, NULL, 'd'},
 	{"blinkenshell", no_argument, NULL, 'b'},
 	{"freenode", no_argument, NULL, 'f'},
-	{"server", required_argument, NULL, 's'},
+	{"nick", required_argument, NULL, 'n'},
 	{"port", required_argument, NULL, 'p'},
+	{"server", required_argument, NULL, 's'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVdbfs:p:";
+static const char *short_options = "hVdbfn:p:s:";
 
 int debug, fd, ret, endmainloop;
 struct timeval tv0;
@@ -34,7 +35,7 @@ struct tm *tm0;
 time_t t0;
 unsigned int server_port;
 char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
-char *nick = "codybot";
+char *nick;
 
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
@@ -66,9 +67,17 @@ struct raw_line {
 	char *channel;
 	char *text;
 };
+struct raw_line raw;
 
 // :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :!codybot_version
 void RawLineParse(struct raw_line *raw, char *line) {
+/*	if (raw->nick) free(raw->nick);
+	if (raw->username) free(raw->username);
+	if (raw->host) free(raw->host);
+	if (raw->command) free(raw->command);
+	if (raw->channel) free(raw->channel);
+	if (raw->text) free(raw->text); */
+
 	char *c = line, word[4096];
 	unsigned int cnt = 0, rec_nick = 1, rec_username = 0, rec_host = 0, rec_command = 0,
 		rec_channel = 0, rec_text = 0;
@@ -274,6 +283,7 @@ void fortune(struct raw_line *raw) {
 		buffer_cmd[strlen(buffer_cmd)-2] = '\0';
 		printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 				tv0.tv_usec, buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
 	}
 
 	fclose(fp);
@@ -298,9 +308,10 @@ void SlapCheck(struct raw_line *raw) {
 			target = raw->nick;
 		else
 			target = raw->channel;
-		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s\n", 
-			target, 1, raw->nick, slap_items[rand()%20]);
+		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
+			target, 1, raw->nick, slap_items[rand()%20], 1);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		memset(buffer_cmd, 0, 4096);
 	}
 }
 
@@ -317,8 +328,10 @@ void *ThreadFunc(void *argp) {
 		t0 = (time_t)tv0.tv_sec;
 		tm0 = gmtime(&t0);
 		buffer_rx[strlen(buffer_rx)-2] = '\0';
-		printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-			tv0.tv_usec, buffer_rx);
+		if (buffer_rx[0] != 'P' && buffer_rx[1] != 'I' && buffer_rx[2] != 'N' &&
+		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ')
+			printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+				tv0.tv_usec, buffer_rx);
 		// respond to ping request from the server
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
@@ -334,6 +347,7 @@ void *ThreadFunc(void *argp) {
 					printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 						tv0.tv_usec, buffer_cmd);
 				}
+				memset(buffer_cmd, 0, 4096);
 			}
 			else {
 				SSL_write(pSSL, "PONG\n", 5);
@@ -348,13 +362,12 @@ void *ThreadFunc(void *argp) {
 		}
 
 		char *target;
-		struct raw_line raw;
 		RawLineParse(&raw, buffer_rx);
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		SlapCheck(&raw);
-		if (strcmp(raw.text, "!fortune")==0)
+		if (strcmp(raw.text, "^fortune")==0)
 			fortune(&raw);
-		else if (strcmp(raw.text, "!codybot_version")==0) {
+		else if (strcmp(raw.text, "^codybot_version")==0) {
 			if (strcmp(raw.channel, nick)==0)
 				target = raw.nick;
 			else
@@ -368,6 +381,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
 			printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 				tv0.tv_usec, buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "!debug on")==0)
 			debug = 1;
@@ -396,6 +410,7 @@ void ReadCommandLoop(void) {
 			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
 			printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 				tv0.tv_usec, buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
 		}
 	}
 }
@@ -493,6 +508,7 @@ void ConnectClient(void) {
 		sprintf(buffer_cmd, "USER codybot BSFC-PC04 irc.blinkenshell.org :Steph\n");
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
+	memset(buffer_cmd, 0, 4096);
 }
 
 void GetServerIP(char *hostname) {
@@ -546,6 +562,10 @@ int main(int argc, char **argv) {
 		case 'f':
 			server_ip = server_ip_freenode;
 			break;
+		case 'n':
+			nick = (char *)malloc(strlen(optarg)+1);
+			sprintf(nick, "%s", optarg);
+			break;
 		case 'p':
 			server_port = atoi(optarg);
 			break;
@@ -559,6 +579,10 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (!nick) {
+		nick = (char *)malloc(strlen("codybot")+1);
+		sprintf(nick, "codybot");
+	}
 	if (!server_port)
 		server_port = 6697;
 	if (!server_ip)

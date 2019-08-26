@@ -502,7 +502,7 @@ void ConnectClient(void) {
 		addr.sin_port = htons(16423);
 	else
 		addr.sin_port = htons(16424);
-	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		fprintf(stderr, "##codybot error: Cannot bind(): %s\n", strerror(errno));
 		exit(1);
 	}
@@ -515,7 +515,7 @@ void ConnectClient(void) {
 	host.sin_addr.s_addr = inet_addr(server_ip);
 	host.sin_family = AF_INET;
 	host.sin_port = htons(server_port);
-	if (connect(fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
+	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
 		fprintf(stderr, "##codybot error: Cannot connect(): %s\n", strerror(errno));
 		exit(1);
 	}
@@ -545,7 +545,7 @@ void ConnectClient(void) {
 	if (ret <= 0) {
 		fprintf(stderr, "##codybot error: SSL_accept() failed, ret: %d\n", ret);
 		fprintf(stderr, "##SSL error number: %d\n", SSL_get_error(pSSL, 0));
-		close(fd);
+		close(socket_fd);
 		exit(1);
 	}
 
@@ -675,7 +675,7 @@ int main(int argc, char **argv) {
 
 	SSL_shutdown(pSSL);
 	SSL_free(pSSL);
-	ret = close(fd);
+	ret = close(socket_fd);
 
 	return 0;
 }

@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.10";
+const char *codybot_version_string = "0.1.11";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -379,14 +379,33 @@ void *ThreadFunc(void *argp) {
 		RawLineParse(&raw, buffer_rx);
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		SlapCheck(&raw);
-		if (strcmp(raw.text, "^fortune")==0)
+		if (strcmp(raw.text, "^about")==0) {
+			if (strcmp(raw.channel, nick)==0)
+				target = raw.nick;
+			else
+				target = raw.channel;
+			sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
+			"sources @ https://github.com/cody1632/codybot\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			memset(buffer_cmd, 0, 4096);
+		}
+		else if (strcmp(raw.text, "^help")==0) {
+			if (strcmp(raw.channel, nick)==0)
+				target = raw.nick;
+			else
+				target = raw.channel;
+			sprintf(buffer_cmd, "privmsg %s :commands: about help fortune debug {on|off} tourette\n",
+				target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			memset(buffer_cmd, 0, 4096);
+		}
+		else if (strcmp(raw.text, "^fortune")==0)
 			Fortune(&raw);
 		else if (strcmp(raw.text, "^codybot_version")==0) {
 			if (strcmp(raw.channel, nick)==0)
 				target = raw.nick;
 			else
 				target = raw.channel;
-
 			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			gettimeofday(&tv0, NULL);

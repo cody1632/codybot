@@ -13,7 +13,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.6";
+const char *codybot_version_string = "0.1.7";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -275,6 +275,26 @@ void fortune(struct raw_line *raw) {
 	fclose(fp);
 }
 
+char *slap_items[20] = {
+"an USB cord", "a power cord", "a laptop", "a slice of ham", "a keyboard", "a laptop cord",
+"a banana peel", "a dictionary", "an atlas book", "a biography book", "an encyclopedia",
+"a rubber band", "a large trout", "a rabbit", "a lizard", "a dinosaur",
+"a chair", "a mouse pad", "a C programming book", "a belt"
+};
+void SlapCheck(struct raw_line *raw) {
+	char *c = raw->text;
+	if (*(c+1)=='A' && *(c+2)=='C' && *(c+3)=='T' && *(c+4)=='I' &&
+	  *(c+5)=='O' && *(c+6)=='N' && *(c+7)==' ' &&
+	  *(c+8)=='s' && *(c+9)=='l' && *(c+10)=='a' && *(c+11)=='p' && 
+	  *(c+12)=='s' && *(c+13)==' ' && *(c+14)=='c' && *(c+15)=='o' &&
+	  *(c+16)=='d' && *(c+17)=='y' && *(c+18)=='b' && *(c+19)=='o' &&
+	  *(c+20)=='t' && *(c+21)==' ') {
+		sprintf(buffer_cmd, "privmsg #codybot :%cACTION slaps %s with %s\n", 
+			1, raw->nick, slap_items[rand()%20]);
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	}
+}
+
 // function to process messages received from server
 void *ThreadFunc(void *argp) {
 	while (!endmainloop) {
@@ -322,6 +342,7 @@ void *ThreadFunc(void *argp) {
 		struct raw_line raw;
 		RawLineParse(&raw, buffer_rx);
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
+		SlapCheck(&raw);
 		if (strcmp(raw.text, "!fortune")==0)
 			fortune(&raw);
 		else if (strcmp(raw.text, "!codybot_version")==0) {

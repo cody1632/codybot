@@ -394,7 +394,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 				target = raw.nick;
 			else
 				target = raw.channel;
-			sprintf(buffer_cmd, "privmsg %s :commands: about help fortune debug {on|off} tourette\n",
+			sprintf(buffer_cmd, "privmsg %s :commands: about help fortune tourette\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			memset(buffer_cmd, 0, 4096);

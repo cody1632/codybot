@@ -29,7 +29,7 @@ static const struct option long_options[] = {
 };
 static const char *short_options = "hVdbfn:p:s:";
 
-int debug, fd, ret, endmainloop;
+int debug, socket_fd, ret, endmainloop;
 unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
@@ -485,14 +485,14 @@ void ReadCommandLoop(void) {
 }
 
 void ConnectClient(void) {
-	fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (fd < 0) {
+	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (socket_fd < 0) {
 		fprintf(stderr, "##codybot error: Cannot socket(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("##socket fd: %d\n", fd);
+			printf("##socket_fd: %d\n", socket_fd);
 	}
 	
 	struct sockaddr_in addr;
@@ -537,8 +537,8 @@ void ConnectClient(void) {
 
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
 	pSSL = SSL_new(ctx);
-	SSL_set_fd(pSSL, fd);
-	BIO *bio = BIO_new_socket(fd, BIO_CLOSE);
+	SSL_set_fd(pSSL, socket_fd);
+	BIO *bio = BIO_new_socket(socket_fd, BIO_CLOSE);
 	SSL_set_bio(pSSL, bio, bio);
 	SSL_connect(pSSL);
 	ret = SSL_accept(pSSL);
@@ -605,7 +605,7 @@ void GetServerIP(char *hostname) {
 }
 
 void SignalFunc(int signum) {
-	close(fd);
+	close(socket_fd);
 }
 
 int main(int argc, char **argv) {

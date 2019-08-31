@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.15";
+const char *codybot_version_string = "0.1.16";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -38,7 +38,7 @@ time_t t0;
 unsigned int server_port;
 char *log_filename = "codybot.log";
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log, *server_ip;
-char *password;
+char *password = "########";
 char *nick;
 char *FullUserName = "codybot";
 char *hostname = "BSFC-VMLUNAR";
@@ -417,8 +417,53 @@ void Stats(struct raw_line *rawp) {
 	memset(buffer_cmd, 0, 4096);
 }
 
+void Weather(struct raw_line *rawp) {
+	unsigned int cnt = 0;
+	char city[1024], *cp = rawp->text + strlen("^weather ");
+	memset(city, 0, 1024);
+	while (1) {
+		if (*cp == '\n' || *cp == '\0')
+			break;
+		else if (cnt == 0 && *cp == ' ') {
+			++cp;
+			continue;
+		}
+		else if (*cp == ' ')
+			break;
+		
+		city[cnt] = *cp;
+		++cnt;
+		++cp;
+	}
+	memset(raw.text, 0, strlen(raw.text));
+
+	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O %s.html\n", city, city);
+	system(buffer);
+	sprintf(buffer, 
+		"sed -n \"4p\" %s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > %s.temp", city, city);
+	system(buffer);
+
+	sprintf(buffer, "%s.temp", city);
+	FILE *fp = fopen(buffer, "r");
+	if (fp == NULL) {
+		sprintf(buffer_cmd, "##codybot error: Cannot open %s: %s\n", buffer, strerror(errno));
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
+	}
+	char temp[1024];
+	fgets(temp, 1023, fp);
+	fclose(fp);
+
+	sprintf(buffer_cmd, "privmsg %s :%sC\n", target, temp);
+	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	Log(buffer_cmd);
+	memset(buffer_cmd, 0, 4096);
+	memset(buffer, 0, 4096);
+}
+
 // function to process messages received from server
-void *ThreadFunc(void *argp) {
+void *RXThreadFunc(void *argp) {
 	while (!endmainloop) {
 		memset(buffer_rx, 0, 4096);
 		SSL_read(pSSL, buffer_rx, 4095);
@@ -462,7 +507,7 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^help")==0) {
-			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune sh stats\n",
+			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune sh stats weather\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -486,6 +531,15 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
+		else if (strcmp(raw.text, "^weather")==0) {
+			sprintf(buffer_cmd, "privmsg %s :weather: missing argument, example: '^weather montreal'\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
+		else if (raw.text[0]=='^' && raw.text[1]=='w' && raw.text[2]=='e' && raw.text[3]=='a' &&
+			raw.text[4]=='t' && raw.text[5]=='h' && raw.text[6]=='e' && raw.text[7]=='r' && raw.text[8]==' ')
+			Weather(&raw);
 		else if (strcmp(raw.text, "^sh")==0) {
 			sprintf(buffer_cmd, "privmsg %s :sh: missing argument, example: '^sh ls -ld /tmp'\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -605,12 +659,12 @@ void ReadCommandLoop(void) {
 void ConnectClient(void) {
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_fd < 0) {
-		fprintf(stderr, "##codybot error: Cannot socket(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot error: Cannot socket(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("##socket_fd: %d\n", socket_fd);
+			printf("||socket_fd: %d\n", socket_fd);
 	}
 	
 	struct sockaddr_in addr;
@@ -621,12 +675,13 @@ void ConnectClient(void) {
 	else
 		addr.sin_port = htons(16424);
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		fprintf(stderr, "##codybot error: Cannot bind(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot error: Cannot bind(): %s\n", strerror(errno));
+		close(socket_fd);
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("##bind() 0.0.0.0 successful\n");
+			printf("||bind() 0.0.0.0 successful\n");
 	}
 	
 	struct sockaddr_in host;
@@ -634,12 +689,13 @@ void ConnectClient(void) {
 	host.sin_family = AF_INET;
 	host.sin_port = htons(server_port);
 	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
-		fprintf(stderr, "##codybot error: Cannot connect(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot error: Cannot connect(): %s\n", strerror(errno));
+		close(socket_fd);
 		exit(1);
 	}
 	else {
 		if (debug)
-			printf("##connect() %s successful\n", server_ip);
+			printf("||connect() %s successful\n", server_ip);
 	}
 
 	SSL_load_error_strings();
@@ -649,20 +705,44 @@ void ConnectClient(void) {
 	const SSL_METHOD *method = TLS_method();
 	SSL_CTX *ctx = SSL_CTX_new(method);
 	if (!ctx) {
-		fprintf(stderr, "##codybot error: Cannot create SSL context\n");
+		fprintf(stderr, "||codybot error: Cannot create SSL context\n");
+		close(socket_fd);
 		exit(1);
 	}
+	long opt_ctx;
+	if (debug) {
+		opt_ctx = SSL_CTX_get_options(ctx);
+		printf("||opt_ctx: %ld\n", opt_ctx);
+		SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
+		opt_ctx = SSL_CTX_get_options(ctx);
+		printf("||opt_ctx: %ld\n", opt_ctx);
+		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
+	}
+	else
+		SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
 
-	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
 	pSSL = SSL_new(ctx);
-	SSL_set_fd(pSSL, socket_fd);
+	long opt_ssl;
+	if (debug) {
+		opt_ssl = SSL_get_options(pSSL);
+		printf("||opt_ssl: %ld\n", opt_ssl);
+		SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
+		opt_ssl = SSL_get_options(pSSL);
+		printf("||opt_ssl: %ld\n", opt_ssl);
+		SSL_set_fd(pSSL, socket_fd);
+		opt_ssl = SSL_get_options(pSSL);
+		printf("||opt_ssl: %ld\n", opt_ssl);
+	}
+	else
+		SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
+
 	BIO *bio = BIO_new_socket(socket_fd, BIO_CLOSE);
 	SSL_set_bio(pSSL, bio, bio);
 	SSL_connect(pSSL);
 	ret = SSL_accept(pSSL);
 	if (ret <= 0) {
-		fprintf(stderr, "##codybot error: SSL_accept() failed, ret: %d\n", ret);
-		fprintf(stderr, "##SSL error number: %d\n", SSL_get_error(pSSL, 0));
+		fprintf(stderr, "||codybot error: SSL_accept() failed, ret: %d\n", ret);
+		fprintf(stderr, "||SSL error number: %d\n", SSL_get_error(pSSL, 0));
 		close(socket_fd);
 		exit(1);
 	}
@@ -672,7 +752,7 @@ void ConnectClient(void) {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&thr, &attr, ThreadFunc, NULL);
+	pthread_create(&thr, &attr, RXThreadFunc, NULL);
 	pthread_detach(thr);
 	pthread_attr_destroy(&attr);
 
@@ -681,9 +761,11 @@ void ConnectClient(void) {
 	else 
 		sprintf(buffer_cmd, "PASS none\n");
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	Log(buffer_cmd);
 
 	sprintf(buffer_cmd, "NICK %s\n", nick);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	Log(buffer_cmd);
 
 	if (server_ip == server_ip_freenode) {
 		sprintf(buffer_cmd, "USER %s %s irc.freenode.net %s\n", nick, hostname, FullUserName);
@@ -693,7 +775,7 @@ void ConnectClient(void) {
 		sprintf(buffer_cmd, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, FullUserName);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
-
+	Log(buffer_cmd);
 	memset(buffer_cmd, 0, 4096);
 }
 

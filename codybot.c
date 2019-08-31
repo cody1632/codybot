@@ -650,7 +650,7 @@ void ConnectClient(void) {
 
 	//sprintf(buffer_cmd, "PASS none\n");
 	if (strcmp(nick, "codybot")==0)
-		sprintf(buffer_cmd, "PASS 9329587##\n");
+		sprintf(buffer_cmd, "PASS #########\n");
 	else if (password)
 		sprintf(buffer_cmd, "PASS %s\n", password);
 	else 

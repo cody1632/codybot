@@ -23,11 +23,12 @@ static const struct option long_options[] = {
 	{"blinkenshell", no_argument, NULL, 'b'},
 	{"freenode", no_argument, NULL, 'f'},
 	{"nick", required_argument, NULL, 'n'},
+	{"password", required_argument, NULL, 'P'},
 	{"port", required_argument, NULL, 'p'},
 	{"server", required_argument, NULL, 's'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVdbfn:p:s:";
+static const char *short_options = "hVdbfn:P:p:s:";
 
 int debug, socket_fd, ret, endmainloop;
 unsigned long long fortune_total;
@@ -35,10 +36,12 @@ struct timeval tv0;
 struct tm *tm0;
 time_t t0;
 unsigned int server_port;
-char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
+char *log_filename = "codybot.log";
+char *buffer, *buffer_rx, *buffer_cmd, *buffer_log, *server_ip;
+char *password;
 char *nick;
-char *FullUserName = "FullUserName";
-char *hostname = "BSFC-PC04";
+char *FullUserName = "Steph";
+char *hostname = "BSFC-VMLUNAR";
 char *target;
 
 // sao.blinkenshell.org
@@ -54,6 +57,60 @@ SSL *pSSL;
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
+}
+
+void Log(char *text) {
+	FILE *fp = fopen(log_filename, "a+");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot error: Cannot open %s: %s\n", log_filename, strerror(errno));
+		return;
+	}
+
+	gettimeofday(&tv0, NULL);
+	t0 = (time_t)tv0.tv_sec;
+	tm0 = gmtime(&t0);
+	sprintf(buffer_log, "%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+		tv0.tv_usec, text);
+	fputs(buffer_log, fp);
+	fputs(buffer_log, stdout);
+
+	fclose(fp);
+}
+
+void Logr(char *text) {
+	FILE *fp = fopen(log_filename, "a+");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot error: Cannot open %s: %s\n", log_filename, strerror(errno));
+		return;
+	}
+
+	gettimeofday(&tv0, NULL);
+	t0 = (time_t)tv0.tv_sec;
+	tm0 = gmtime(&t0);
+	sprintf(buffer_log, "%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+		tv0.tv_usec, text);
+	fputs(buffer_log, fp);
+	fputs(buffer_log, stdout);
+
+	fclose(fp);
+}
+
+void Logx(char *text) {
+	FILE *fp = fopen(log_filename, "a+");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot error: Cannot open %s: %s\n", log_filename, strerror(errno));
+		return;
+	}
+
+	gettimeofday(&tv0, NULL);
+	t0 = (time_t)tv0.tv_sec;
+	tm0 = gmtime(&t0);
+	sprintf(buffer_log, "%02d:%02d:%02d.%03ld $$%s$$\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
+		tv0.tv_usec, text);
+	fputs(buffer_log, fp);
+	fputs(buffer_log, stdout);
+
+	fclose(fp);
 }
 
 // a raw line from the server should hold something like one of these:
@@ -288,12 +345,8 @@ void Fortune(struct raw_line *rawp) {
 		GetTarget(rawp);
 		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		gettimeofday(&tv0, NULL);
-		t0 = (time_t)tv0.tv_sec;
-		tm0 = gmtime(&t0);
-		buffer_cmd[strlen(buffer_cmd)-2] = '\0';
-		printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-				tv0.tv_usec, buffer_cmd);
+		//buffer_cmd[strlen(buffer_cmd)-2] = '\0';
+		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
 	}
 
@@ -330,6 +383,7 @@ void SlapCheck(struct raw_line *rawp) {
 		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
 			target, 1, rawp->nick, slap_items[rand()%20], 1);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
 	}
 }
@@ -344,11 +398,11 @@ void Stats(struct raw_line *rawp) {
 		fgets(str, 1023, fp);
 		fclose(fp);
 		fortune_total = atoi(str);
-		fclose(fp);
 	}
 	GetTarget(rawp);
 	sprintf(buffer_cmd, "privmsg %s :Given fortune cookies: %llu\n", target, fortune_total);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	Log(buffer_cmd);
 	memset(buffer_cmd, 0, 4096);
 }
 
@@ -361,14 +415,11 @@ void *ThreadFunc(void *argp) {
 			endmainloop = 1;
 			break;
 		}
-		gettimeofday(&tv0, NULL);
-		t0 = (time_t)tv0.tv_sec;
-		tm0 = gmtime(&t0);
 		buffer_rx[strlen(buffer_rx)-2] = '\0';
 		if (buffer_rx[0] != 'P' && buffer_rx[1] != 'I' && buffer_rx[2] != 'N' &&
-		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ')
-			printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-				tv0.tv_usec, buffer_rx);
+		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ') {
+			Logr(buffer_rx);
+		}
 		// respond to ping request from the server
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
@@ -377,36 +428,29 @@ void *ThreadFunc(void *argp) {
 				buffer_cmd[1] = 'O';
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 				if (debug) {
-					gettimeofday(&tv0, NULL);
-					t0 = (time_t)tv0.tv_sec;
-					tm0 = gmtime(&t0);
-					buffer_cmd[strlen(buffer_cmd)-1] = '\0';
-					printf("%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-						tv0.tv_usec, buffer_cmd);
+					Log(buffer_cmd);
 				}
 				memset(buffer_cmd, 0, 4096);
 			}
 			else {
 				SSL_write(pSSL, "PONG\n", 5);
 				if (debug) {
-					gettimeofday(&tv0, NULL);
-					t0 = (time_t)tv0.tv_sec;
-					tm0 = gmtime(&t0);
-					printf("%02d:%02d:%02d.%03ld ##PONG sent\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-						tv0.tv_usec);
+					Log("PONG");
 				}
 			}
 			continue;
 		}
 
 		RawLineParse(&raw, buffer_rx);
-if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
+if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
+strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
 		if (strcmp(raw.text, "^about")==0) {
 			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
 			"sources @ https://github.com/cody1632/codybot\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^help")==0) {
@@ -414,6 +458,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune sh stats\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^fortune")==0)
@@ -422,21 +467,16 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			gettimeofday(&tv0, NULL);
-			t0 = (time_t)tv0.tv_sec;
-			tm0 = gmtime(&t0);
-			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
-			printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-				tv0.tv_usec, buffer_cmd);
+			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^debug on")==0) {
 			debug = 1;
-			printf("##debug on\n");
+			Log("##debug on##");
 		}
 		else if (strcmp(raw.text, "^debug off")==0) {
 			debug = 0;
-			printf("##debug off\n");
+			Log("##debug off##");
 		}
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
@@ -454,7 +494,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 				++cnt;
 			}
 			strcat(cmd, " 2>&1 > cmd.output");
-			printf("\n##!!!running bash: <%s>\n", cmd);
+			Logx(cmd);
 			system(cmd);
 
 			FILE *fp = fopen("cmd.output", "r");
@@ -479,16 +519,26 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 			if (lines_total == 1) {
 				char result[4096];
 				fgets(result, 4095, fp);
-				sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
+				sprintf(buffer_cmd, "privmsg %s :%s", target, result);
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				printf("%s\n", buffer_cmd);
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
 			}
 			else {
-				// rem can't be run in rbash:
-				//system("cat cmd.output |nc termbin.com 9999 > cmd.url");
-				sprintf(buffer_cmd, "privmsg %s :Result is too long, cannot use paste in rbash\n", target);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				printf("%s\n", buffer_cmd);
+				system("cat cmd.output |nc termbin.com 9999 > cmd.url");
+				FILE *fp2 = fopen("cmd.url", "r");
+				if (fp2 == NULL) {
+					fprintf(stderr, "##codybot error: Cannot open cmd.url: %s\n", strerror(errno));
+				}
+				else {
+					char url[1024];
+					fgets(url, 1023, fp2);
+					fclose(fp2);
+					sprintf(buffer_cmd, "privmsg %s :%s", target, url);
+					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+					Log(buffer_cmd);
+					memset(buffer_cmd, 0, 4096);
+				}
 			}
 
 			fclose(fp);
@@ -510,12 +560,7 @@ void ReadCommandLoop(void) {
 			endmainloop = 1;
 		else {
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			gettimeofday(&tv0, NULL);
-			t0 = (time_t)tv0.tv_sec;
-			tm0 = gmtime(&t0);
-			buffer_cmd[strlen(buffer_cmd)-1] = '\0';
-			printf("%02d:%02d:%02d.%03ld ##<<%s>>##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-				tv0.tv_usec, buffer_cmd);
+			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 	}
@@ -586,13 +631,6 @@ void ConnectClient(void) {
 		exit(1);
 	}
 
-	buffer_rx = (char *)malloc(4096);
-	memset(buffer_rx, 0, 4096);
-	buffer_cmd = (char *)malloc(4096);
-	memset(buffer_cmd, 0, 4096);
-	buffer = (char *)malloc(4096);
-	memset(buffer, 0, 4096);
-	
 	// start the thread here, as soon as we can
 	pthread_t thr;
 	pthread_attr_t attr;
@@ -603,10 +641,17 @@ void ConnectClient(void) {
 	pthread_attr_destroy(&attr);
 
 	//sprintf(buffer_cmd, "PASS none\n");
-	sprintf(buffer_cmd, "PASS 9329587##\n");
+	if (strcmp(nick, "codybot")==0)
+		sprintf(buffer_cmd, "PASS 9329587##\n");
+	else if (password)
+		sprintf(buffer_cmd, "PASS %s\n", password);
+	else 
+		sprintf(buffer_cmd, "PASS none\n");
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+
 	sprintf(buffer_cmd, "NICK %s\n", nick);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+
 	if (server_ip == server_ip_freenode) {
 		sprintf(buffer_cmd, "USER %s %s irc.freenode.net %s\n", nick, hostname, FullUserName);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -615,6 +660,7 @@ void ConnectClient(void) {
 		sprintf(buffer_cmd, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, FullUserName);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
+
 	memset(buffer_cmd, 0, 4096);
 }
 
@@ -673,6 +719,10 @@ int main(int argc, char **argv) {
 			nick = (char *)malloc(strlen(optarg)+1);
 			sprintf(nick, "%s", optarg);
 			break;
+		case 'P':
+			password = (char *)malloc(strlen(optarg)+1);
+			sprintf(password, "%s", optarg);
+			break;
 		case 'p':
 			server_port = atoi(optarg);
 			break;
@@ -686,6 +736,10 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (!password) {
+			password = (char *)malloc(5);
+			sprintf(password, "none");
+	}
 	if (!nick) {
 		nick = (char *)malloc(strlen("codybot")+1);
 		sprintf(nick, "codybot");
@@ -695,6 +749,15 @@ int main(int argc, char **argv) {
 	if (!server_ip)
 		server_ip = server_ip_freenode;
 
+	buffer_rx = (char *)malloc(4096);
+	memset(buffer_rx, 0, 4096);
+	buffer_cmd = (char *)malloc(4096);
+	memset(buffer_cmd, 0, 4096);
+	buffer_log = (char *)malloc(4096);
+	memset(buffer_log, 0, 4096);
+	buffer = (char *)malloc(4096);
+	memset(buffer, 0, 4096);
+	
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "##codybot error: Cannot open stats file\n");

@@ -648,10 +648,7 @@ void ConnectClient(void) {
 	pthread_detach(thr);
 	pthread_attr_destroy(&attr);
 
-	//sprintf(buffer_cmd, "PASS none\n");
-	if (strcmp(nick, "codybot")==0)
-		sprintf(buffer_cmd, "PASS #########\n");
-	else if (password)
+	if (password)
 		sprintf(buffer_cmd, "PASS %s\n", password);
 	else 
 		sprintf(buffer_cmd, "PASS none\n");

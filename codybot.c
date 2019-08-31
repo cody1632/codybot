@@ -38,7 +38,7 @@ time_t t0;
 unsigned int server_port;
 char *log_filename = "codybot.log";
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log, *server_ip;
-char *password = "########";
+char *password = "#########";
 char *nick;
 char *FullUserName = "codybot";
 char *hostname = "BSFC-VMLUNAR";
@@ -459,6 +459,9 @@ void Weather(struct raw_line *rawp) {
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	Log(buffer_cmd);
 	memset(buffer_cmd, 0, 4096);
+
+	sprintf(buffer, "rm %s.*\n", city);
+	system(buffer);
 	memset(buffer, 0, 4096);
 }
 

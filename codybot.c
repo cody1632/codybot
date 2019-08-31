@@ -40,7 +40,7 @@ char *log_filename = "codybot.log";
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log, *server_ip;
 char *password;
 char *nick;
-char *FullUserName = "Steph";
+char *FullUserName = "codybot";
 char *hostname = "BSFC-VMLUNAR";
 char *target;
 
@@ -377,12 +377,16 @@ char *slap_items[20] = {
 };
 void SlapCheck(struct raw_line *rawp) {
 	char *c = rawp->text;
-	if (*(c+1)=='A' && *(c+2)=='C' && *(c+3)=='T' && *(c+4)=='I' &&
+	if ((*c==1 && *(c+1)=='A' && *(c+2)=='C' && *(c+3)=='T' && *(c+4)=='I' &&
 	  *(c+5)=='O' && *(c+6)=='N' && *(c+7)==' ' &&
-	  *(c+8)=='s' && *(c+9)=='l' && *(c+10)=='a' && *(c+11)=='p' && 
-	  *(c+12)=='s' && *(c+13)==' ' && *(c+14)=='c' && *(c+15)=='o' &&
-	  *(c+16)=='d' && *(c+17)=='y' && *(c+18)=='b' && *(c+19)=='o' &&
-	  *(c+20)=='t' && *(c+21)==' ') {
+	  *(c+8)=='s' && *(c+9)=='l' && *(c+10)=='a' && *(c+11)=='p' && *(c+12)=='s' &&
+	  *(c+13)==' ') && 
+	  ((*(c+14)=='c' && *(c+15)=='o' && *(c+16)=='d' && *(c+17)=='y' &&
+	  *(c+18)=='b' && *(c+19)=='o' && *(c+20)=='t' && *(c+21)==' ') ||
+	  (*(c+14)=='S' && *(c+15)=='p' && *(c+16)=='r' && *(c+17)=='i' &&
+	  *(c+18)=='n' && *(c+19)=='g' && *(c+20)=='S' && *(c+21)=='p' && *(c+22)=='r' &&
+	  *(c+23)=='o' && *(c+24)=='c' && *(c+25)=='k' && *(c+26)=='e' && *(c+27)=='t' &&
+	  *(c+28)==' '))) {
 		GetTarget(rawp);
 		gettimeofday(&tv0, NULL);
 		srand((unsigned int)tv0.tv_usec);
@@ -449,8 +453,8 @@ void *ThreadFunc(void *argp) {
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
+		GetTarget(&raw);
 		if (strcmp(raw.text, "^about")==0) {
-			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
 				"sources @ https://github.com/cody1632/codybot\n", target);	
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -458,7 +462,6 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^help")==0) {
-			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune sh stats\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -468,7 +471,6 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (strcmp(raw.text, "^fortune")==0)
 			Fortune(&raw);
 		else if (strcmp(raw.text, "^codybot_version")==0) {
-			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -484,6 +486,11 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
+		else if (strcmp(raw.text, "^sh")==0) {
+			sprintf(buffer_cmd, "privmsg %s :sh: missing argument, example: '^sh ls -ld /tmp'\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			memset(buffer_cmd, 0, 4096);
+		}
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
 			char *cp = raw.text + 4;
 // check for the kill command
@@ -492,12 +499,10 @@ while (1) {
 	if (*cp == '\n' || *cp == '\0')
 		break;
 	else if (*cp == ' ') {
-		printf("## got a space\n");
 		++cp;
 		continue;
 	}
 	else if (*cp=='k' && *(cp+1)=='i' && *(cp+2)=='l' && *(cp+3)=='l' && *(cp+4)==' ') {
-		printf("## will not run kill!\n");
 		dontrun = 1;
 		break;
 	}
@@ -505,7 +510,7 @@ while (1) {
 	++cp;
 }
 			if (dontrun) {
-				printf("## will not run kill!\n");
+				Log("#### Will not run kill!\n");
 				sprintf(raw.text, "^stats");
 				continue;
 			}

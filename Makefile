@@ -1,5 +1,5 @@
 
-CFLAGS = -std=c11 -Wall -Werror -O2 -D_GNU_SOURCE
+CFLAGS = -std=c11 -Wall -Werror -D_GNU_SOURCE
 LDFLAGS = -lpthread -lssl -lcrypto
 PROGNAME = codybot
 

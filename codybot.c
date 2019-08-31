@@ -298,7 +298,6 @@ void Fortune(struct raw_line *rawp) {
 			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open linux.fortune database\n");
 		else
 			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open linux.fortune database\n");
-			//sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune error: cannot open database\n");
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
@@ -351,7 +350,6 @@ void Fortune(struct raw_line *rawp) {
 		GetTarget(rawp);
 		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		//buffer_cmd[strlen(buffer_cmd)-2] = '\0';
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
 	}
@@ -400,6 +398,7 @@ void Stats(struct raw_line *rawp) {
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "##codybot error: Cannot open stats file\n");
+		return;
 	}
 	else {
 		char str[1024];
@@ -425,9 +424,8 @@ void *ThreadFunc(void *argp) {
 		}
 		buffer_rx[strlen(buffer_rx)-2] = '\0';
 		if (buffer_rx[0] != 'P' && buffer_rx[1] != 'I' && buffer_rx[2] != 'N' &&
-		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ') {
+		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ')
 			Logr(buffer_rx);
-		}
 		// respond to ping request from the server
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
@@ -435,16 +433,14 @@ void *ThreadFunc(void *argp) {
 				sprintf(buffer_cmd, "%s\n", buffer_rx);
 				buffer_cmd[1] = 'O';
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				if (debug) {
+				if (debug)
 					Log(buffer_cmd);
-				}
 				memset(buffer_cmd, 0, 4096);
 			}
 			else {
 				SSL_write(pSSL, "PONG\n", 5);
-				if (debug) {
+				if (debug)
 					Log("PONG");
-				}
 			}
 			continue;
 		}
@@ -456,7 +452,7 @@ strcmp(raw.command, "NICK")!=0) {
 		if (strcmp(raw.text, "^about")==0) {
 			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
-			"sources @ https://github.com/cody1632/codybot\n", target);
+				"sources @ https://github.com/cody1632/codybot\n", target);	
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
@@ -561,10 +557,10 @@ strcmp(raw.command, "NICK")!=0) {
 void ReadCommandLoop(void) {
 	while (!endmainloop) {
 		memset(buffer_cmd, 0, 4096);
-		fgets(buffer_cmd, 1024, stdin);
+		fgets(buffer_cmd, 4095, stdin);
 		if (buffer_cmd[0] == '\n')
 			continue;
-		else if (strcmp(buffer_cmd, "exit")==0)
+		else if (strcmp(buffer_cmd, "exit")==0 || strcmp(buffer_cmd, "quit")==0)
 			endmainloop = 1;
 		else {
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));

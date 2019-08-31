@@ -37,6 +37,8 @@ time_t t0;
 unsigned int server_port;
 char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
 char *nick;
+char *FullUserName = "FullUserName";
+char *hostname = "BSFC-PC04";
 
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
@@ -555,11 +557,11 @@ void ConnectClient(void) {
 	sprintf(buffer_cmd, "NICK %s\n", nick);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	if (server_ip == server_ip_freenode) {
-		sprintf(buffer_cmd, "USER bsfc BSFC-PC04 irc.freenode.net Steph\n");
+		sprintf(buffer_cmd, "USER %s %s irc.freenode.net %s\n", nick, hostname, FullUserName);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 	else {
-		sprintf(buffer_cmd, "USER codybot BSFC-PC04 irc.blinkenshell.org :Steph\n");
+		sprintf(buffer_cmd, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, FullUserName);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 	memset(buffer_cmd, 0, 4096);

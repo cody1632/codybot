@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.13";
+const char *codybot_version_string = "0.1.14";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -39,6 +39,7 @@ char *buffer, *buffer_rx, *buffer_cmd, *server_ip;
 char *nick;
 char *FullUserName = "FullUserName";
 char *hostname = "BSFC-PC04";
+char *target;
 
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
@@ -220,6 +221,14 @@ void RawLineParse(struct raw_line *raw, char *line) {
 		printf("##RawLineParse() ended\n\n");
 }
 
+char *GetTarget(struct raw_line *rawp) {
+	if (strcmp(raw.channel, nick)==0)
+		target = raw.nick;
+	else
+		target = raw.channel;
+	return target;
+}
+
 void Fortune(struct raw_line *rawp) {
 	FILE *fp = fopen("linux.fortune", "r");
 	if (fp == NULL) {
@@ -276,12 +285,7 @@ void Fortune(struct raw_line *rawp) {
 	}
 
 	if (strlen(fortune_line) > 0) {
-		char *target;
-		if (strcmp(rawp->channel, nick)==0)
-			target = rawp->nick;
-		else
-			target = rawp->channel;
-
+		GetTarget(rawp);
 		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		gettimeofday(&tv0, NULL);
@@ -322,11 +326,7 @@ void SlapCheck(struct raw_line *rawp) {
 	  *(c+12)=='s' && *(c+13)==' ' && *(c+14)=='c' && *(c+15)=='o' &&
 	  *(c+16)=='d' && *(c+17)=='y' && *(c+18)=='b' && *(c+19)=='o' &&
 	  *(c+20)=='t' && *(c+21)==' ') {
-	    char *target;
-		if (strcmp(rawp->channel, nick)==0)
-			target = rawp->nick;
-		else
-			target = rawp->channel;
+		GetTarget(rawp);
 		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
 			target, 1, rawp->nick, slap_items[rand()%20], 1);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -335,11 +335,18 @@ void SlapCheck(struct raw_line *rawp) {
 }
 
 void Stats(struct raw_line *rawp) {
-	char *target;
-	if (strcmp(rawp->channel, nick)==0)
-		target = rawp->nick;
-	else
-		target = rawp->channel;
+	FILE *fp = fopen("stats", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot error: Cannot open stats file\n");
+	}
+	else {
+		char str[1024];
+		fgets(str, 1023, fp);
+		fclose(fp);
+		fortune_total = atoi(str);
+		fclose(fp);
+	}
+	GetTarget(rawp);
 	sprintf(buffer_cmd, "privmsg %s :Given fortune cookies: %llu\n", target, fortune_total);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	memset(buffer_cmd, 0, 4096);
@@ -392,26 +399,19 @@ void *ThreadFunc(void *argp) {
 			continue;
 		}
 
-		char *target;
 		RawLineParse(&raw, buffer_rx);
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		SlapCheck(&raw);
 		if (strcmp(raw.text, "^about")==0) {
-			if (strcmp(raw.channel, nick)==0)
-				target = raw.nick;
-			else
-				target = raw.channel;
+			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
 			"sources @ https://github.com/cody1632/codybot\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^help")==0) {
-			if (strcmp(raw.channel, nick)==0)
-				target = raw.nick;
-			else
-				target = raw.channel;
-			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune stats\n",
+			GetTarget(&raw);
+			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune sh stats\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			memset(buffer_cmd, 0, 4096);
@@ -419,10 +419,7 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		else if (strcmp(raw.text, "^fortune")==0)
 			Fortune(&raw);
 		else if (strcmp(raw.text, "^codybot_version")==0) {
-			if (strcmp(raw.channel, nick)==0)
-				target = raw.nick;
-			else
-				target = raw.channel;
+			GetTarget(&raw);
 			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			gettimeofday(&tv0, NULL);
@@ -443,6 +440,59 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0) {
 		}
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
+		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
+			char *cp = raw.text + 4;
+			char cmd[1024];
+			unsigned int cnt = 0;
+			while (1) {
+				if (*cp == '\n' || *cp == '\0') {
+					cmd[cnt] = '\0';
+					break;
+				}
+				cmd[cnt] = *cp;
+				++cp;
+				++cnt;
+			}
+			strcat(cmd, " 2>&1 > cmd.output");
+			printf("\n##!!!running bash: <%s>\n", cmd);
+			system(cmd);
+
+			FILE *fp = fopen("cmd.output", "r");
+			if (fp == NULL) {
+				fprintf(stderr, "\n##codybot error: Cannot open cmd.output: %s\n", strerror(errno));
+				continue;
+			}
+
+			// count the line number
+			char c;
+			unsigned int lines_total = 0;
+			while (1) {
+				c = fgetc(fp);
+				if (c == -1)
+					break;
+				else if (c == '\n')
+					++lines_total;
+			}
+			fseek(fp, 0, SEEK_SET);
+
+			GetTarget(&raw);
+			if (lines_total == 1) {
+				char result[4096];
+				fgets(result, 4095, fp);
+				sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				printf("%s\n", buffer_cmd);
+			}
+			else {
+				// rem can't be run in rbash:
+				//system("cat cmd.output |nc termbin.com 9999 > cmd.url");
+				sprintf(buffer_cmd, "privmsg %s :Result is too long, cannot use paste in rbash\n", target);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				printf("%s\n", buffer_cmd);
+			}
+
+			fclose(fp);
+		}
 
 		usleep(10000);
 }
@@ -552,7 +602,8 @@ void ConnectClient(void) {
 	pthread_detach(thr);
 	pthread_attr_destroy(&attr);
 
-	sprintf(buffer_cmd, "PASS none\n");
+	//sprintf(buffer_cmd, "PASS none\n");
+	sprintf(buffer_cmd, "PASS 9329587##\n");
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	sprintf(buffer_cmd, "NICK %s\n", nick);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));

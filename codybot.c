@@ -543,9 +543,12 @@ strcmp(raw.command, "NICK")!=0) {
 					Log(buffer_cmd);
 					memset(buffer_cmd, 0, 4096);
 				}
+				fclose(fp2);
 			}
 
 			fclose(fp);
+
+			memset(raw.text, 0, strlen(raw.text));
 		}
 
 		usleep(10000);

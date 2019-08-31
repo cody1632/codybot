@@ -489,6 +489,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (strcmp(raw.text, "^sh")==0) {
 			sprintf(buffer_cmd, "privmsg %s :sh: missing argument, example: '^sh ls -ld /tmp'\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {

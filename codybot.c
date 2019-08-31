@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.12";
+const char *codybot_version_string = "0.1.13";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -387,6 +387,7 @@ void *ThreadFunc(void *argp) {
 						tv0.tv_usec);
 				}
 			}
+			continue;
 		}
 
 		char *target;

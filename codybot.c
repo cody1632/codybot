@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.14";
+const char *codybot_version_string = "0.1.15";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -57,6 +57,8 @@ SSL *pSSL;
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
+	printf("Usage: codybot { -d/--debug | -n/--nick NICK | -P/--password PASS | -p/--port NUM }\n");
+	printf("Usage: codybot { -s/--server URL }\n");
 }
 
 void Log(char *text) {
@@ -114,7 +116,8 @@ void Logx(char *text) {
 }
 
 // a raw line from the server should hold something like one of these:
-// :codybot!~user@unaffiliated/esselfe PRIVMSG ##linux-offtopic :!fortune
+// :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^stats
+// :codybot!~user@unaffiliated/esselfe PRIVMSG ##linux-offtopic :^fortune
 // :NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.
 // :freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode.
 // :PING :livingstone.freenode.net
@@ -132,6 +135,7 @@ struct raw_line raw;
 
 // :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :!codybot_version
 void RawLineParse(struct raw_line *raw, char *line) {
+// Getting a double free error with this, weird...
 /*	if (raw->nick) free(raw->nick);
 	if (raw->username) free(raw->username);
 	if (raw->host) free(raw->host);
@@ -296,6 +300,8 @@ void Fortune(struct raw_line *rawp) {
 			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open linux.fortune database\n");
 			//sprintf(buffer_cmd, "privmsg ##linux-offtopic :fortune error: cannot open database\n");
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
 		return;
 	}
 
@@ -380,6 +386,8 @@ void SlapCheck(struct raw_line *rawp) {
 	  *(c+16)=='d' && *(c+17)=='y' && *(c+18)=='b' && *(c+19)=='o' &&
 	  *(c+20)=='t' && *(c+21)==' ') {
 		GetTarget(rawp);
+		gettimeofday(&tv0, NULL);
+		srand((unsigned int)tv0.tv_usec);
 		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
 			target, 1, rawp->nick, slap_items[rand()%20], 1);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -642,7 +650,7 @@ void ConnectClient(void) {
 
 	//sprintf(buffer_cmd, "PASS none\n");
 	if (strcmp(nick, "codybot")==0)
-		sprintf(buffer_cmd, "PASS #########\n");
+		sprintf(buffer_cmd, "PASS 9329587##\n");
 	else if (password)
 		sprintf(buffer_cmd, "PASS %s\n", password);
 	else 

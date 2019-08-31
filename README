@@ -1,15 +1,22 @@
-20190824-20190826
+20190824
 codybot is an IRC bot written in C providing users with fortune cookies
 The bot can connect to irc.freenode.net using port 6697 for a SSL
 connection.
 
-To compile the program, just run 'make' with the source directory
-and run with './codybot'
+To compile the program, just run 'make' within the source directory
+and run with './codybot -n YourNick'. I don't recommend the -P/--password
+options since the password can be seen when running '^sh ps -eo pid,cmd'
 
 Consider changing the 'nick' value at the top of codybot.c if you plan
-on registering a nick with NickServ as codybot is presently reserved.
+on registering a nick with NickServ as codybot is presently reserved, or
+use the -n/--nick options.
 
-To trigger a fortune cookie, just type '!fortune' in a channel where the bot
+You should register and identify with the IRC server's NickServer.
+You can type '/msg NickServ help' in your connected IRC client.
+
+To see available commands, send '^help' in the channel where the bot is.
+
+To trigger a fortune cookie, just type '^fortune' in a channel where the bot
 is present, like #codybot, ##c-offtopic or ##linux-offtopic
 
 The fortune cookie database file is linux.fortune. It's made of concatenation

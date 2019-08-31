@@ -552,7 +552,7 @@ void ConnectClient(void) {
 
 	sprintf(buffer_cmd, "PASS none\n");
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	sprintf(buffer_cmd, "NICK codybot\n");
+	sprintf(buffer_cmd, "NICK %s\n", nick);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	if (server_ip == server_ip_freenode) {
 		sprintf(buffer_cmd, "USER bsfc BSFC-PC04 irc.freenode.net Steph\n");

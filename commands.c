@@ -42,7 +42,7 @@ void AsciiArt(struct raw_line *rawp) {
 		}
 	}
 
-	GetTarget(rawp);
+	RawGetTarget(rawp);
 	char line[1024];
 	memset(line, 0, 1024);
 	cnt = 0, c = ' ';
@@ -149,7 +149,7 @@ void Fortune(struct raw_line *rawp) {
 	}
 
 	if (strlen(fortune_line) > 0) {
-		GetTarget(rawp);
+		RawGetTarget(rawp);
 		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		Log(buffer_cmd);
@@ -224,7 +224,7 @@ void Joke(struct raw_line *rawp) {
             joke_line[cnt++] = c;
     }
 
-	GetTarget(rawp);
+	RawGetTarget(rawp);
 	if (strlen(joke_line) > 0) {
         sprintf(buffer_cmd, "privmsg %s :joke: %s\n", target, joke_line);
         SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -259,7 +259,7 @@ void SlapCheck(struct raw_line *rawp) {
 	  *(c+18)=='n' && *(c+19)=='g' && *(c+20)=='S' && *(c+21)=='p' && *(c+22)=='r' &&
 	  *(c+23)=='o' && *(c+24)=='c' && *(c+25)=='k' && *(c+26)=='e' && *(c+27)=='t' &&
 	  *(c+28)==' '))) {
-		GetTarget(rawp);
+		RawGetTarget(rawp);
 		gettimeofday(&tv0, NULL);
 		srand((unsigned int)tv0.tv_usec);
 		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
@@ -282,7 +282,7 @@ void Stats(struct raw_line *rawp) {
 		fclose(fp);
 		fortune_total = atoi(str);
 	}
-	GetTarget(rawp);
+	RawGetTarget(rawp);
 	sprintf(buffer_cmd, "privmsg %s :Given fortune cookies: %llu\n", target, fortune_total);
 	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	Log(buffer_cmd);

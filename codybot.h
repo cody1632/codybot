@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <openssl/ssl.h>
 
+// Globals from codybot.c
 extern const char *codybot_version_string;
 extern int debug, socket_fd, ret, endmainloop, sh_disabled;
 extern unsigned long long fortune_total;
@@ -16,12 +17,15 @@ extern char *nick;
 extern char *full_user_name;
 extern char *hostname;
 extern char *target;
+
+// Globals from server.c
 extern unsigned int server_port, local_port;
 extern char *server_ip;
 extern char *server_ip_blinkenshell;
 extern char *server_ip_freenode;
 extern SSL *pSSL;
 
+// Globals from raw.c
 // a raw line from the server should hold something like one of these:
 // :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^stats
 // :codybot!~user@unaffiliated/esselfe PRIVMSG ##linux-offtopic :^fortune
@@ -44,7 +48,6 @@ extern struct raw_line raw;
 void Log(char *text);
 void Logr(char *text);
 void Logx(char *text);
-char *GetTarget(struct raw_line *rawp);
 void *ThreadRXFunc(void *argp);
 // from commands.c
 void AsciiArt(struct raw_line *rawp);
@@ -54,9 +57,16 @@ void Joke(struct raw_line *rawp);
 void SlapCheck(struct raw_line *rawp);
 void Stats(struct raw_line *rawp);
 void Weather(struct raw_line *rawp);
+// from raw.c
+char *RawGetTarget(struct raw_line *rawp);
+void RawLineClear(struct raw_line *rawp);
+void RawLineParse(struct raw_line *rawp, char *line);
 // from server.c
 void ServerGetIP(char *hostname);
 void ServerConnect(void);
 void ServerClose(void);
+// from thread.c
+void ThreadRXStart(void);
+void *ThreadRXFunc(void *argp);
 
 #endif /* CODYBOT_H */

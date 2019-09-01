@@ -74,7 +74,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (strcmp(raw.text, "^chars")==0)
 			Chars(&raw);
 		else if (strcmp(raw.text, "^help")==0) {
-			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^codybot_version ^help"
+			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^version ^help"
 				" ^fortune ^joke ^sh ^stats ^weather\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -82,7 +82,7 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (strcmp(raw.text, "^fortune")==0)
 			Fortune(&raw);
-		else if (strcmp(raw.text, "^codybot_version")==0) {
+		else if (strcmp(raw.text, "^version")==0) {
 			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);

@@ -889,7 +889,7 @@ void ConnectClient(void) {
 	Log(buffer_cmd);
 
 	if (server_ip == server_ip_freenode) {
-		sprintf(buffer_cmd, "USER %s %s irc.freenode.net %s\n", nick, hostname, FullUserName);
+		sprintf(buffer_cmd, "USER codybot %s irc.freenode.net %s\n", hostname, FullUserName);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 	else {

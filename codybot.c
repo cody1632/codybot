@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.18";
+const char *codybot_version_string = "0.1.20";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -22,32 +22,35 @@ static const struct option long_options[] = {
 	{"debug", no_argument, NULL, 'd'},
 	{"blinkenshell", no_argument, NULL, 'b'},
 	{"freenode", no_argument, NULL, 'f'},
+	{"hostname", required_argument, NULL, 'H'},
+	{"log", required_argument, NULL, 'l'},
+	{"fullname", required_argument, NULL, 'N'},
 	{"nick", required_argument, NULL, 'n'},
+	{"localport", required_argument, NULL, 'P'},
 	{"port", required_argument, NULL, 'p'},
 	{"server", required_argument, NULL, 's'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVdbfn:P:p:s:";
+static const char *short_options = "hVdbfH:l:N:n:P:p:s:";
 
-int debug, socket_fd, ret, endmainloop;
+int debug, socket_fd, ret, endmainloop, sh_disabled;
 unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
 time_t t0;
-unsigned int server_port;
-char *log_filename = "codybot.log";
-char *buffer, *buffer_rx, *buffer_cmd, *buffer_log, *server_ip;
+unsigned int server_port, local_port;
+char *log_filename;
+char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 char *nick;
-char *FullUserName = "codybot";
-char *hostname = "BSFC-VMLUNAR";
+char *full_user_name;
+char *hostname;
 char *target;
 
+char *server_ip;
 // sao.blinkenshell.org
 char *server_ip_blinkenshell = "194.14.45.5";
-
 // medusa.blinkenshell.org
 //char *server_ip_blinkenshell = "69.164.197.11";
-
 // livingstone.freenode.net
 char *server_ip_freenode = "107.182.226.199";
 
@@ -55,7 +58,8 @@ SSL *pSSL;
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
-	printf("Usage: codybot { -d/--debug | -n/--nick NICK | -p/--port NUM | -s/--server URL }\n");
+	printf("               { -d/--debug | -n/--nick NICK | -p/--port NUM | -s/--server URL }\n");
+	printf("               { -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME }\n");
 }
 
 void Log(char *text) {
@@ -349,19 +353,18 @@ void Fortune(struct raw_line *rawp) {
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
+	
+		fclose(fp);
+		fp = fopen("stats", "w");
+		if (fp == NULL) {
+			fprintf(stderr, "##codybot error: Cannot open stats file\n");
+			return;
+		}
+
+		char str[1024];
+		sprintf(str, "%llu\n", ++fortune_total);
+		fputs(str, fp);
 	}
-
-	fclose(fp);
-
-	fp = fopen("stats", "w");
-	if (fp == NULL) {
-		fprintf(stderr, "##codybot error: Cannot open stats file\n");
-		return;
-	}
-
-	char str[1024];
-	sprintf(str, "%llu\n", ++fortune_total);
-	fputs(str, fp);
 
 	fclose(fp);
 }
@@ -637,7 +640,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
 		else if (strcmp(raw.text, "^weather")==0) {
-			sprintf(buffer_cmd, "privmsg %s :weather: missing argument, example: '^weather montreal'\n", target);
+			sprintf(buffer_cmd, "privmsg %s :weather: missing city argument, example: '^weather montreal'\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
@@ -652,6 +655,23 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
+/*			if (sh_disabled) {
+				sprintf(buffer_cmd, "privmsg %s :sh is temporarily disabled, try again later\n", target);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+				continue;
+			} */
+			FILE *fp2 = fopen("sh_disable", "r");
+			if (fp2 != NULL) {
+				fclose(fp2);
+				sprintf(buffer_cmd, "privmsg %s :sh is temporarily disabled, try again later\n", target);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+				continue;
+			}
+
 			char *cp = raw.text + 4;
 // check for the kill command
 unsigned int dontrun = 0;
@@ -676,7 +696,8 @@ while (1) {
 			}
 			cp = raw.text + 4;
 			char cmd[1024];
-			unsigned int cnt = 0;
+			sprintf(cmd, "timeout 30s ");
+			unsigned int cnt = strlen(cmd);
 			while (1) {
 				if (*cp == '\n' || *cp == '\0') {
 					cmd[cnt] = '\0';
@@ -709,7 +730,7 @@ while (1) {
 			fseek(fp, 0, SEEK_SET);
 
 			GetTarget(&raw);
-			if (lines_total == 1) {
+			if (lines_total <= 4) {
 				char result[4096];
 				fgets(result, 4095, fp);
 				sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
@@ -717,7 +738,7 @@ while (1) {
 				Log(buffer_cmd);
 				memset(buffer_cmd, 0, 4096);
 			}
-			else {
+			else if (lines_total > 4) {
 				system("cat cmd.output |nc termbin.com 9999 > cmd.url");
 				FILE *fp2 = fopen("cmd.url", "r");
 				if (fp2 == NULL) {
@@ -753,6 +774,10 @@ void ReadCommandLoop(void) {
 			continue;
 		else if (strcmp(buffer_cmd, "exit")==0 || strcmp(buffer_cmd, "quit")==0)
 			endmainloop = 1;
+/*		else if (strcmp(buffer_cmd, "sh_disable")==0)
+			sh_disabled = 1;
+		else if (strcmp(buffer_cmd, "sh_enable")==0)
+			sh_disabled = 0; */
 		else if (buffer_cmd[0]=='i' && buffer_cmd[1]=='d' && buffer_cmd[2]==' ') {
 			char *cp;
 			cp = buffer_cmd+3;
@@ -794,10 +819,7 @@ void ConnectClient(void) {
 	struct sockaddr_in addr;
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_family = AF_INET;
-	if (server_ip == server_ip_blinkenshell)
-		addr.sin_port = htons(16423);
-	else
-		addr.sin_port = htons(16424);
+	addr.sin_port = htons(local_port);
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		fprintf(stderr, "||codybot error: Cannot bind(): %s\n", strerror(errno));
 		close(socket_fd);
@@ -889,11 +911,11 @@ void ConnectClient(void) {
 	Log(buffer_cmd);
 
 	if (server_ip == server_ip_freenode) {
-		sprintf(buffer_cmd, "USER codybot %s irc.freenode.net %s\n", hostname, FullUserName);
+		sprintf(buffer_cmd, "USER codybot %s irc.freenode.net %s\n", hostname, full_user_name);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 	else {
-		sprintf(buffer_cmd, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, FullUserName);
+		sprintf(buffer_cmd, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, full_user_name);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 	Log(buffer_cmd);
@@ -951,15 +973,29 @@ int main(int argc, char **argv) {
 		case 'f':
 			server_ip = server_ip_freenode;
 			break;
+		case 'H':
+			hostname = (char *)malloc(strlen(optarg)+1);
+			sprintf(hostname, optarg);
+			break;
+		case 'l':
+			log_filename = (char *)malloc(strlen(optarg)+1);
+			sprintf(log_filename, "%s", optarg);
+			break;
+		case 'N':
+			full_user_name = (char *)malloc(strlen(optarg)+1);
+			sprintf(full_user_name, optarg);
+			break;
 		case 'n':
 			nick = (char *)malloc(strlen(optarg)+1);
 			sprintf(nick, "%s", optarg);
+			break;
+		case 'P':
+			local_port = atoi(optarg);
 			break;
 		case 'p':
 			server_port = atoi(optarg);
 			break;
 		case 's':
-			// set server addr
 			GetServerIP(optarg);
 			break;
 		default:
@@ -968,6 +1004,21 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (!full_user_name) {
+		char *name = getlogin();
+		full_user_name = (char *)malloc(strlen(name)+1);
+		sprintf(full_user_name, name);
+	}
+	if (!hostname) {
+		hostname = (char *)malloc(1024);
+		gethostname(hostname, 1023);
+	}
+	if (!local_port)
+		local_port = 16384;
+	if (!log_filename) {
+		log_filename = (char *)malloc(strlen("codybot.log")+1);
+		sprintf(log_filename, "codybot.log");
+	}
 	if (!nick) {
 		nick = (char *)malloc(strlen("codybot")+1);
 		sprintf(nick, "codybot");

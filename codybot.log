@@ -1,0 +1,287 @@
+
+05:14:26.144600 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+05:14:26.146345 ##privmsg #codybot :fortune: Let me put it this way: today is going to be a learning experience. 
+##
+05:14:55.269280 ##quit
+##
+05:14:55.284877 <<:SpringSprocket!~SpringSpr@unaffiliated/esselfe QUIT :Client Quit>>
+05:14:55.286803 ##privmsg Client :fortune: "The biggest problem facing software engineering is the one it will  never solve - politics." 
+##
+05:14:55.299353 <<ERROR :Closing Link: unaffiliated/esselfe (Client Quit)>>
+05:14:55.301937 ##privmsg Client :fortune: UNIX enhancements aren't. 
+##
+05:15:18.658564 ##PASS none
+##
+05:15:18.660076 ##NICK SpringSprocket
+##
+05:15:18.669529 ##USER SpringSprocket BSFC-VMLUNAR irc.freenode.net codybot
+##
+05:15:18.672449 <<:livingstone.freenode.net NOTICE * :*** Looking up your hostname...
+:livingstone.freenode.net NOTICE * :*** Checking Ident
+:livingstone.freenode.net NOTICE * :*** Found your hostname>>
+05:15:28.260899 <<:livingstone.freenode.net NOTICE * :*** No Ident response>>
+05:15:28.262312 <<:livingstone.freenode.net 001 SpringSprocket :Welcome to the freenode Internet Relay Chat Network SpringSprocket
+:livingstone.freenode.net 002 SpringSprocket :Your host is livingstone.freenode.net[107.182.226.199/6697], running version ircd-seven-1.1.7
+:livingstone.freenode.net 003 SpringSprocket :This server was created Thu Aug 23 2018 at 16:12:30 UTC
+:livingstone.freenode.net 004 SpringSprocket livingstone.freenode.net ircd-seven-1.1.7 DOQRSZaghilopsuwz CFILMPQSbcefgijklmnopqrstuvz bkloveqjfI>>
+05:15:28.268913 <<:livingstone.freenode.net 005 SpringSprocket CHANTYPES=# EXCEPTS INVEX CHANMODES=eIbq,k,flj,CFLMPQScgimnprstuz CHANLIMIT=#:120 PREFIX=(ov)@+ MAXLIST=bqeI:100 MODES=4 NETWORK=freenode STATUSMSG=@+ CALLERID=g CASEMAPPING=rfc1459 :are supported by this server>>
+05:15:28.271234 <<:livingstone.freenode.net 005 SpringSprocket CHARSET=ascii NICKLEN=16 CHANNELLEN=50 TOPICLEN=390 DEAF=D FNC TARGMAX=NAMES:1,LIST:1,KICK:1,WHOIS:1,PRIVMSG:4,NOTICE:4,ACCEPT:,MONITOR: EXTBAN=$,ajrxz CLIENTVER=3.0 CPRIVMSG CNOTICE ETRACE :are supported by this server>>
+05:15:28.285610 <<:livingstone.freenode.net 005 SpringSprocket KNOCK SAFELIST ELIST=CTU WHOX :are supported by this server
+:livingstone.freenode.net 251 SpringSprocket :There are 99 users and 83325 invisible on 25 servers>>
+05:15:28.288319 <<:livingstone.freenode.net 252 SpringSprocket 34 :IRC Operators online
+:livingstone.freenode.net 253 SpringSprocket 14 :unknown connection(s)>>
+05:15:28.290318 <<:livingstone.freenode.net 254 SpringSprocket 47542 :channels formed
+:livingstone.freenode.net 255 SpringSprocket :I have 7474 clients and 1 servers
+:livingstone.freenode.net 265 SpringSprocket 7474 7988 :Current local users 7474, max 7988>>
+05:15:28.293263 <<:livingstone.freenode.net 266 SpringSprocket 83424 94773 :Current global users 83424, max 94773>>
+05:15:28.294584 <<:livingstone.freenode.net 250 SpringSprocket :Highest connection count: 7989 (7988 clients) (2946746 connections received)>>
+05:15:28.295990 <<:livingstone.freenode.net 375 SpringSprocket :- livingstone.freenode.net Message of the Day - 
+:livingstone.freenode.net 372 SpringSprocket :- Welcome to livingstone.freenode.net in NY, USA.>>
+05:15:28.298307 <<:livingstone.freenode.net 372 SpringSprocket :- Welcome to freenode - supporting the free and open source>>
+05:15:28.299620 <<:livingstone.freenode.net 372 SpringSprocket :- software communities since 1998.>>
+05:15:28.300890 <<:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.301814 <<:livingstone.freenode.net 372 SpringSprocket :- By connecting to freenode you indicate that you have read and>>
+05:15:28.303262 <<:livingstone.freenode.net 372 SpringSprocket :- accept our policies and guidelines as set out on https://freenode.net
+:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.305359 <<:livingstone.freenode.net 372 SpringSprocket :- In the event that you observe behaviour that contravenes our policies,
+:livingstone.freenode.net 372 SpringSprocket :- please notify a volunteer staff member via private message, or send us an>>
+05:15:28.313660 <<:livingstone.freenode.net 372 SpringSprocket :- e-mail to complaints@freenode.net -- we will do our best to address the>>
+05:15:28.315109 <<:livingstone.freenode.net 372 SpringSprocket :- situation within a reasonable period of time, and we may request further
+:livingstone.freenode.net 372 SpringSprocket :- information or, as appropriate, involve other parties such as channel operators >>
+05:15:28.317735 <<:livingstone.freenode.net 372 SpringSprocket :- Group Contacts representing an on-topic group.
+:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.319710 <<:livingstone.freenode.net 372 SpringSprocket :- freenode runs an open proxy scanner.>>
+05:15:28.320994 <<:livingstone.freenode.net 372 SpringSprocket :-  
+:livingstone.freenode.net 372 SpringSprocket :- If you are looking for assistance, you may be able to find a list of >>
+05:15:28.323065 <<:livingstone.freenode.net 372 SpringSprocket :- volunteer staff on '/stats p' (shows only on-call staff) or by joining >>
+05:15:28.324499 <<:livingstone.freenode.net 372 SpringSprocket :- #freenode and using the '/who freenode/staff/*' command. You may message>>
+05:15:28.325904 <<:livingstone.freenode.net 372 SpringSprocket :- any of us at any time. Please note that freenode predominantly provides 
+:livingstone.freenode.net 372 SpringSprocket :- assistance via private message, and while we have a network channel the >>
+05:15:28.328461 <<:livingstone.freenode.net 372 SpringSprocket :- primary venue for support requests is via private message to a member 
+:livingstone.freenode.net 372 SpringSprocket :- of the volunteer staff team.>>
+05:15:28.330692 <<:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.331630 <<:livingstone.freenode.net 372 SpringSprocket :- From time to time, volunteer staff may send server-wide notices relating to>>
+05:15:28.333037 <<:livingstone.freenode.net 372 SpringSprocket :- the project, or the communities that we host. The majority of such notices>>
+05:15:28.334491 <<:livingstone.freenode.net 372 SpringSprocket :- will be sent as wallops, and you can '/mode <yournick> +w' to ensure that you
+:livingstone.freenode.net 372 SpringSprocket :- do not miss them. Important messages relating to the freenode project, including>>
+05:15:28.337126 <<:livingstone.freenode.net 372 SpringSprocket :- notices of upcoming maintenance and other scheduled downtime will be issued as>>
+05:15:28.338533 <<:livingstone.freenode.net 372 SpringSprocket :- global notices.
+:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.345794 <<:livingstone.freenode.net 372 SpringSprocket :- Representing an on-topic project? Don't forget to register, more information
+:livingstone.freenode.net 372 SpringSprocket :- can be found on the https://freenode.net website under "Group Registration".>>
+05:15:28.348485 <<:livingstone.freenode.net 372 SpringSprocket :-  
+:livingstone.freenode.net 372 SpringSprocket :- Thank you also to our server sponsors for the sustained support in keeping the>>
+05:15:28.350697 <<:livingstone.freenode.net 372 SpringSprocket :- network going for close to two decades.
+:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.353322 <<:livingstone.freenode.net 372 SpringSprocket :- Thank you to all of our attendees, sponsors, speakers, exhibitors, helpers,>>
+05:15:28.354781 <<:livingstone.freenode.net 372 SpringSprocket :- and everyone else who made this year's freenode #live conference amazing.
+:livingstone.freenode.net 372 SpringSprocket :- https://freenode.net/news/live-2018>>
+05:15:28.357190 <<:livingstone.freenode.net 372 SpringSprocket :-  >>
+05:15:28.358129 <<:livingstone.freenode.net 372 SpringSprocket :- Thank you for using freenode!
+:livingstone.freenode.net 376 SpringSprocket :End of /MOTD command.>>
+05:15:28.360070 <<:SpringSprocket MODE SpringSprocket :+Zi>>
+05:15:28.418989 <<:NickServ!NickServ@services. NOTICE SpringSprocket :This nickname is registered. Please choose a different nickname, or identify via /msg NickServ identify <password>.
+:NickServ!NickServ@services. NOTICE SpringSprocket :Invalid password for esselfe.>>
+05:15:28.638334 <<:freenode-connect!frigg@freenode/utility-bot/frigg NOTICE SpringSprocket :Welcome to freenode. To protect the network all new connections will be scanned for vulnerabilities. This will not harm your computer, and vulnerable hosts will be notified.
+:freenode-connect!frigg@freenode/utility-bot/frigg PRIVMSG SpringSprocket :VERSION>>
+05:15:37.631528 <<:NickServ!NickServ@services. NOTICE SpringSprocket :You are now identified for esselfe.>>
+05:15:37.646551 <<:NickServ!NickServ@services. NOTICE SpringSprocket :1 failed login since last login.
+:NickServ!NickServ@services. NOTICE SpringSprocket :Last failed attempt from: SpringSprocket!~SpringSpr@mtrlpq426kw-lp130-02-69-157-190-235.dsl.bell.ca on Sep 01 05:15:28 2019.>>
+05:15:37.649642 <<:livingstone.freenode.net 396 SpringSprocket unaffiliated/esselfe :is now your hidden host (set by services.)>>
+05:15:56.956214 ##join #codybot,##c-offtopic,##linux-offtopic
+##
+05:15:56.972083 <<:SpringSprocket!~SpringSpr@unaffiliated/esselfe JOIN #codybot
+:livingstone.freenode.net 353 SpringSprocket = #codybot :SpringSprocket esselfe
+:livingstone.freenode.net 366 SpringSprocket #codybot :End of /NAMES list.>>
+05:15:56.975120 <<:SpringSprocket!~SpringSpr@unaffiliated/esselfe JOIN ##c-offtopic
+:livingstone.freenode.net 332 SpringSprocket ##c-offtopic :Welcome to ##c-offtopic! Laugh, cry, shitpost, whatever. Join #cjeopardy to play C Jeopardy! Join ##battleship to play Battleship! Join ##spinach to play Spinach!
+:livingstone.freenode.net 333 SpringSprocket ##c-offtopic pragma- 1530684784>>
+05:15:56.988051 <<:livingstone.freenode.net 353 SpringSprocket @ ##c-offtopic :SpringSprocket esselfe rajrajraj nii nh zalt__ nil pragma- taylor jan64 banana tejr moldybits dansan Gaffel jonsykkel jl- zer0python zxd dodobrain computerquip Jesin klys Redfoxmoon Kaslai atk Kerr-A @candide varshit- a3f r1b e ski krizoek brimonk markus-k APic koollman agrecascino uso_ Remavas Headline22 bysin Chris joeyk victorqueiroz Amun_Ra Exagone313 Ranhir hoek caze nimaje guest4 Elladan nitrix dho izabera meth koisoke Learath2 mthowe
+:livingstone.freenode.net 353 SpringSprocket @ ##c-offtopic :freezing manny
+:livingstone.freenode.net 366 SpringSprocket ##c-offtopic :End of /NAMES list.
+:SpringSprocket!~SpringSpr@unaffiliated/esselfe JOIN ##Linux-offtopic
+:livingstone.freenode.net 332 SpringSprocket ##Linux-offtopic :Please, be polite and courteous to others. For assistance with the GNU/Linux Operating System (OS) please visit ##Linux or the channel of your distribution.
+:livingstone.freenode.net 333 SpringSprocket ##Linux-offtopic t1m!>>
+05:15:57.16915 <<im@unaffiliated/autarkis 1492228507>>
+05:15:57.17824 <<:livingstone.freenode.net 353 SpringSprocket @ ##Linux-offtopic :SpringSprocket esselfe chchjesus pingfloyd diogenese nopnopnop waveclaw mureena MrCrackPot jan6 zaratustra sauvin tejr ExeciN TheSilentLink astronavt trigg phogg pantato Gensi Guest57674 V7 wigums gnu3ra_ fleg benharri Ckat J_C nckx mawk UnitFor hendrix amcclure Mead SuperSeriousCat tmbg @tomaw benjamin_w_ Nizumzen JimBuntu e Guest33991 Alpha3031 mikeyloveslignux Psi-Jack trobotham jim ski Dan_au umbSublime BDiamond Aeres koollman
+:livingstone.freenode.net 353 SpringSprocket @ ##Linux-offtopic :codeahol1c devopsdeluxe o0ze @ChanServ tibaret cryptodan_mobile swein UndeadLeech greenbagels FireEgl dgurney leadbase1toy_wk
+:livingstone.freenode.net 366 SpringSprocket ##Linux-offtopic :End of /NAMES list.>>
+05:15:57.78052 <<:services. 328 SpringSprocket #codybot :https://github.com/cody1632/codybot>>
+05:16:02.541952 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+05:16:02.605016 ##privmsg #codybot :fortune: All the existing 2.0.x kernels are too buggy for 2.1.x to be the main goal. 
+##
+05:17:06.360001 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+05:17:06.362689 ##privmsg #codybot :fortune: The moving cursor writes, and having written, blinks on. 
+##
+05:18:24.638835 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^sh wc -l codybot.c>>
+05:18:24.640116 $$wc -l codybot.c &> cmd.output$$
+05:18:24.701420 ##privmsg #codybot :1011 codybot.c
+
+##
+05:19:23.296167 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG ##c-offtopic :^fortune>>
+05:19:23.300225 ##privmsg ##c-offtopic :fortune: 	The FIELD GUIDE to NORTH AMERICAN MALES  SPECIES:	Cranial Males SUBSPECIES:	The Hacker (homo computatis) Description: 
+##
+05:20:01.454898 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG ##Linux-offtopic :^fortune>>
+05:20:01.456467 ##privmsg ##Linux-offtopic :fortune: It's pretty hard to tell what does bring happiness; poverty and wealth have both failed. 
+##
+05:26:03.36036 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+05:26:03.40637 ##privmsg #codybot :fortune: Good news from afar can bring you a welcome visitor. 
+##
+05:43:30.587140 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG ##Linux-offtopic :omg my irc password was being logged all the time in codybot.log! I skipped calling Log() when input is "id passwdhere". I did echo "">codybot.log on all my copies. What terrible security vulnerability!>>
+05:46:09.305622 ##privmsg el :my email is bsfc8@hotmail.com for nick codybot
+##
+05:51:08.895111 <<:Jo-Anna!uid57472@gateway/web/irccloud.com/x-djlksvetnwcywqxh JOIN ##Linux-offtopic>>
+05:52:30.507872 ##quit
+##
+05:52:30.523167 <<:SpringSprocket!~SpringSpr@unaffiliated/esselfe QUIT :Quit: SpringSprocket>>
+05:52:30.535211 <<ERROR :Closing Link: unaffiliated/esselfe (Quit: SpringSprocket)>>
+05:52:37.560457 ##PASS none
+##
+05:52:37.562017 ##NICK codybot
+##
+05:52:37.563641 ##USER codybot BSFC-VMLUNAR irc.freenode.net codybot
+##
+05:52:37.571381 <<:livingstone.freenode.net NOTICE * :*** Looking up your hostname...
+:livingstone.freenode.net NOTICE * :*** Checking Ident
+:livingstone.freenode.net NOTICE * :*** Found your hostname>>
+05:52:43.398397 <<:livingstone.freenode.net NOTICE * :*** No Ident response>>
+05:52:43.400784 <<:livingstone.freenode.net 001 codybot :Welcome to the freenode Internet Relay Chat Network codybot
+:livingstone.freenode.net 002 codybot :Your host is livingstone.freenode.net[107.182.226.199/6697], running version ircd-seven-1.1.7
+:livingstone.freenode.net 003 codybot :This server was created Thu Aug 23 2018 at 16:12:30 UTC
+:livingstone.freenode.net 004 codybot livingstone.freenode.net ircd-seven-1.1.7 DOQRSZaghilopsuwz CFILMPQSbcefgijklmnopqrstuvz bkloveqjfI
+:livingstone.freenode.net 005 codybot CHANTYPES=# EXCEPTS INVEX CHANMODES=eIbq,k,flj,CFLMPQScgimnprstuz CHANLIMIT=#:120 PREFIX=(ov)@+ MAXLIST=bqeI:100 MODES=4 NETWORK=freenode STATUSMSG=@+ CALLERID=g CASEMAPPING=rfc1459 :are supported by this server>>
+05:52:43.408141 <<:livingstone.freenode.net 005 codybot CHARSET=ascii NICKLEN=16 CHANNELLEN=50 TOPICLEN=390 DEAF=D FNC TARGMAX=NAMES:1,LIST:1,KICK:1,WHOIS:1,PRIVMSG:4,NOTICE:4,ACCEPT:,MONITOR: EXTBAN=$,ajrxz CLIENTVER=3.0 CPRIVMSG CNOTICE ETRACE :are supported by this server
+:livingstone.freenode.net 005 codybot KNOCK SAFELIST ELIST=CTU WHOX :are supported by this server
+:livingstone.freenode.net 251 codybot :There are 99 users and 83367 invisible on 25 servers>>
+05:52:43.419764 <<:livingstone.freenode.net 252 codybot 34 :IRC Operators online
+:livingstone.freenode.net 253 codybot 27 :unknown connection(s)>>
+05:52:43.421604 <<:livingstone.freenode.net 254 codybot 47544 :channels formed
+:livingstone.freenode.net 255 codybot :I have 7459 clients and 1 servers>>
+05:52:43.423545 <<:livingstone.freenode.net 265 codybot 7459 7988 :Current local users 7459, max 7988
+:livingstone.freenode.net 266 codybot 83466 94773 :Current global users 83466, max 94773
+:livingstone.freenode.net 250 codybot :Highest connection count: 7989 (7988 clients) (2946945 connections received)>>
+05:52:43.427098 <<:livingstone.freenode.net 375 codybot :- livingstone.freenode.net Message of the Day - 
+:livingstone.freenode.net 372 codybot :- Welcome to livingstone.freenode.net in NY, USA.>>
+05:52:43.429316 <<:livingstone.freenode.net 372 codybot :- Welcome to freenode - supporting the free and open source>>
+05:52:43.430652 <<:livingstone.freenode.net 372 codybot :- software communities since 1998.
+:livingstone.freenode.net 372 codybot :-  >>
+05:52:43.432493 <<:livingstone.freenode.net 372 codybot :- By connecting to freenode you indicate that you have read and
+:livingstone.freenode.net 372 codybot :- accept our policies and guidelines as set out on https://freenode.net>>
+05:52:43.434979 <<:livingstone.freenode.net 372 codybot :-  
+:livingstone.freenode.net 372 codybot :- In the event that you observe behaviour that contravenes our policies,>>
+05:52:43.437031 <<:livingstone.freenode.net 372 codybot :- please notify a volunteer staff member via private message, or send us an
+:livingstone.freenode.net 372 codybot :- e-mail to complaints@freenode.net -- we will do our best to address the>>
+05:52:43.439492 <<:livingstone.freenode.net 372 codybot :- situation within a reasonable period of time, and we may request further
+:livingstone.freenode.net 372 codybot :- information or, as appropriate, involve other parties such as channel operators >>
+05:52:43.442099 <<:livingstone.freenode.net 372 codybot :- Group Contacts representing an on-topic group.
+:livingstone.freenode.net 372 codybot :-  >>
+05:52:43.444037 <<:livingstone.freenode.net 372 codybot :- freenode runs an open proxy scanner.
+:livingstone.freenode.net 372 codybot :-  >>
+05:52:43.451680 <<:livingstone.freenode.net 372 codybot :- If you are looking for assistance, you may be able to find a list of >>
+05:52:43.453045 <<:livingstone.freenode.net 372 codybot :- volunteer staff on '/stats p' (shows only on-call staff) or by joining 
+:livingstone.freenode.net 372 codybot :- #freenode and using the '/who freenode/staff/*' command. You may message>>
+05:52:43.455633 <<:livingstone.freenode.net 372 codybot :- any of us at any time. Please note that freenode predominantly provides 
+:livingstone.freenode.net 372 codybot :- assistance via private message, and while we have a network channel the >>
+05:52:43.458263 <<:livingstone.freenode.net 372 codybot :- primary venue for support requests is via private message to a member 
+:livingstone.freenode.net 372 codybot :- of the volunteer staff team.>>
+05:52:43.460440 <<:livingstone.freenode.net 372 codybot :-  
+:livingstone.freenode.net 372 codybot :- From time to time, volunteer staff may send server-wide notices relating to>>
+05:52:43.462447 <<:livingstone.freenode.net 372 codybot :- the project, or the communities that we host. The majority of such notices
+:livingstone.freenode.net 372 codybot :- will be sent as wallops, and you can '/mode <yournick> +w' to ensure that you>>
+05:52:43.464970 <<:livingstone.freenode.net 372 codybot :- do not miss them. Important messages relating to the freenode project, including>>
+05:52:43.466366 <<:livingstone.freenode.net 372 codybot :- notices of upcoming maintenance and other scheduled downtime will be issued as
+:livingstone.freenode.net 372 codybot :- global notices.>>
+05:52:43.468605 <<:livingstone.freenode.net 372 codybot :-  >>
+05:52:43.469508 <<:livingstone.freenode.net 372 codybot :- Representing an on-topic project? Don't forget to register, more information
+:livingstone.freenode.net 372 codybot :- can be found on the https://freenode.net website under "Group Registration".>>
+05:52:43.472034 <<:livingstone.freenode.net 372 codybot :-  
+:livingstone.freenode.net 372 codybot :- Thank you also to our server sponsors for the sustained support in keeping the>>
+05:52:43.474105 <<:livingstone.freenode.net 372 codybot :- network going for close to two decades.
+:livingstone.freenode.net 372 codybot :-  
+:livingstone.freenode.net 372 codybot :- Thank you to all of our attendees, sponsors, speakers, exhibitors, helpers,>>
+05:52:43.477094 <<:livingstone.freenode.net 372 codybot :- and everyone else who made this year's freenode #live conference amazing.
+:livingstone.freenode.net 372 codybot :- https://freenode.net/news/live-2018>>
+05:52:43.484747 <<:livingstone.freenode.net 372 codybot :-  
+:livingstone.freenode.net 372 codybot :- Thank you for using freenode!>>
+05:52:43.487444 <<:livingstone.freenode.net 376 codybot :End of /MOTD command.>>
+05:52:43.488459 <<:codybot MODE codybot :+Zi>>
+05:52:43.489348 <<:NickServ!NickServ@services. NOTICE codybot :This nickname is registered. Please choose a different nickname, or identify via /msg NickServ identify <password>.>>
+05:52:43.570193 <<:NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.>>
+05:52:44.496217 <<:freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode. To protect the network all new connections will be scanned for vulnerabilities. This will not harm your computer, and vulnerable hosts will be notified.
+:freenode-connect!frigg@freenode/utility-bot/frigg PRIVMSG codybot :VERSION>>
+05:52:49.778959 <<:NickServ!NickServ@services. NOTICE codybot :You are now identified for codybot.
+:NickServ!NickServ@services. NOTICE codybot :1 failed login since last login.
+:NickServ!NickServ@services. NOTICE codybot :Last failed attempt from: codybot!~codybot@mtrlpq426kw-lp130-02-69-157-190-235.dsl.bell.ca on Sep 01 05:52:43 2019.>>
+05:52:49.790198 <<:livingstone.freenode.net 396 codybot unaffiliated/esselfe/bot/codybot :is now your hidden host (set by services.)>>
+05:53:09.96265 ##join #codybot,##c-offtopic,##linux-offtopic
+##
+05:53:09.110011 <<:codybot!~codybot@unaffiliated/esselfe/bot/codybot JOIN #codybot
+:livingstone.freenode.net 353 codybot = #codybot :codybot esselfe
+:livingstone.freenode.net 366 codybot #codybot :End of /NAMES list.
+:codybot!~codybot@unaffiliated/esselfe/bot/codybot JOIN ##c-offtopic>>
+05:53:09.113728 <<:livingstone.freenode.net 332 codybot ##c-offtopic :Welcome to ##c-offtopic! Laugh, cry, shitpost, whatever. Join #cjeopardy to play C Jeopardy! Join ##battleship to play Battleship! Join ##spinach to play Spinach!
+:livingstone.freenode.net 333 codybot ##c-offtopic pragma- 1530684784>>
+05:53:09.116502 <<:livingstone.freenode.net 353 codybot @ ##c-offtopic :codybot esselfe rajrajraj nii nh zalt__ nil pragma- taylor jan64 banana tejr moldybits dansan Gaffel jonsykkel jl- zer0python zxd dodobrain computerquip Jesin klys Redfoxmoon Kaslai atk Kerr-A @candide varshit- a3f r1b e ski krizoek brimonk markus-k APic koollman agrecascino uso_ Remavas Headline22 bysin Chris joeyk victorqueiroz Amun_Ra Exagone313 Ranhir hoek caze nimaje guest4 Elladan nitrix dho izabera meth koisoke Learath2 mthowe freezing
+:livingstone.freenode.net 353 codybot @ ##c-offtopic :manny
+:livingstone.freenode.net 366 codybot ##c-offtopic :End of /NAMES list.
+:codybot!~codybot@unaffiliated/esselfe/bot/codybot JOIN ##Linux-offtopic
+:livingstone.freenode.net 332 codybot ##Linux-offtopic :Please, be polite and courteous to others. For assistance with the GNU/Linux Operating System (OS) please visit ##Linux or the channel of your distribution.
+:livingstone.freenode.net 333 codybot ##Linux-offtopic t1m!~tim@unaffiliated/autarkis 1492228507>>
+05:53:09.132989 <<:livingstone.freenode.net 353 codybot @ ##Linux-offtopic :codybot Jo-Anna esselfe chchjesus pingfloyd diogenese nopnopnop waveclaw mureena MrCrackPot jan6 zaratustra sauvin tejr ExeciN TheSilentLink astronavt trigg phogg pantato Gensi Guest57674 V7 wigums gnu3ra_ fleg benharri Ckat J_C nckx mawk UnitFor hendrix amcclure Mead SuperSeriousCat tmbg @tomaw benjamin_w_ Nizumzen JimBuntu e Guest33991 Alpha3031 mikeyloveslignux Psi-Jack trobotham jim ski Dan_au umbSublime BDiamond Aeres koollman codeahol1c
+:livingstone.freenode.net 353 codybot @ ##Linux-offtopic :devopsdeluxe o0ze @ChanServ tibaret cryptodan_mobile swein UndeadLeech greenbagels FireEgl dgurney leadbase1toy_wk
+:livingstone.freenode.net 366 codybot ##Linux-offtopic :End of /NAMES list.>>
+05:53:09.196495 <<:services. 328 codybot #codybot :https://github.com/cody1632/codybot>>
+05:53:51.513332 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^codybot_version>>
+05:53:51.514670 ##privmsg #codybot :codybot 0.1.18
+##
+05:56:09.382047 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^weather montreal>>
+05:56:10.162135 ##privmsg #codybot :montreal: Partly cloudy 17C/62F
+##
+05:57:22.197334 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+05:57:22.199260 ##privmsg #codybot :fortune: The so-called "desktop metaphor" of today's workstations is instead an "airplane-seat" metaphor.  Anyone who has shuffled a lap full of papers while seated between two portly passengers will recognize the difference -- one can see only a very few things at once. 
+##
+06:15:23.737337 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+06:15:23.768147 ##privmsg #codybot :fortune: "If that makes any sense to you, you have a big problem." 
+##
+06:25:01.774239 <<:FieldSobers!~Garfieldz@unaffiliated/user49 JOIN ##Linux-offtopic>>
+06:27:09.970336 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^weather cancun>>
+06:27:11.366768 ##privmsg #codybot :cancun: Partly cloudy 23C/73F
+##
+06:29:04.817671 <<:esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^fortune>>
+06:29:04.826426 ##privmsg #codybot :fortune: Anyway, I keep picturing all these little kids playing some game in this big field of rye and all.  Thousands of little kids, and nobody's around -- nobody big, I mean -- except me.  And I'm standing on the edge of some crazy cliff.  What I have to do, I have to catch everybody if they start to go over the cliff -- I mean if they're running and they don't look where they're going I have to come out from somewhere and catch them.  That's all I'd do all day.  I'd just be the catcher in the rye.  I know it;  I know it's crazy, but that's the only thing I'd really like to be.  I know it's crazy. 
+##
+21:25:47.716784 ##PASS none
+##
+21:25:47.716887 ##NICK esselfe_
+##
+21:25:47.716936 ##USER esselfe_ BSFC-LT04 irc.blinkenshell.org :bsfc
+##
+21:25:47.825641 <<:sao.blinkenshell.org NOTICE * :*** Looking up your hostname...>>
+21:25:47.835875 <<:sao.blinkenshell.org NOTICE * :*** Checking ident...>>
+21:25:48.104956 <<:sao.blinkenshell.org NOTICE * :*** Found your hostname>>
+21:25:51.12397 <<:sao.blinkenshell.org NOTICE * :*** No ident response; username prefixed with ~>>
+21:25:51.233809 <<:sao.blinkenshell.org 001 esselfe_ :Welcome to the BlinkenIRC IRC Network esselfe_!~esselfe_@mtrlpq426kw-lp130-02-69-157-190-235.dsl.bell.ca>>
+21:25:51.244111 <<:sao.blinkenshell.org 002 esselfe_ :Your host is sao.blinkenshell.org, running version UnrealIRCd-4.0.11>>
+21:25:51.254320 <<:sao.blinkenshell.org 003 esselfe_ :This server was created Sun May 7 2017 at 19:50:53 CEST>>
+21:25:51.264817 <<:sao.blinkenshell.org 004 esselfe_ sao.blinkenshell.org UnrealIRCd-4.0.11 iowrsxzdHtIDRqpWGTSB lvhopsmntikraqbeIzMQNRTOVKDdGLPZSCcf>>
+21:25:51.275009 <<:sao.blinkenshell.org 005 esselfe_ UHNAMES NAMESX SAFELIST HCN MAXCHANNELS=25 CHANLIMIT=#:25 MAXLIST=b:60,e:60,I:60 MAXNICKLEN=30 NICKLEN=30 CHANNELLEN=32 TOPICLEN=307 KICKLEN=307 AWAYLEN=307 :are supported by this server>>
+21:25:51.285210 <<:sao.blinkenshell.org 005 esselfe_ MAXTARGETS=20 WALLCHOPS WATCH=128 WATCHOPTS=A SILENCE=15 MODES=12 CHANTYPES=# PREFIX=(qaohv)~&@%+ CHANMODES=beI,kLf,l,psmntirzMQNRTOVKDdGPZSCc NETWORK=BlinkenIRC CASEMAPPING=ascii EXTBAN=~,SOcaRrnqj ELIST=MNUCT :are supported by this server>>
+21:25:51.295405 <<:sao.blinkenshell.org 005 esselfe_ STATUSMSG=~&@%+ EXCEPTS INVEX CMDS=USERIP,STARTTLS,KNOCK,DCCALLOW,MAP :are supported by this server>>
+21:25:51.305637 <<:sao.blinkenshell.org NOTICE esselfe_ :*** You are connected to sao.blinkenshell.org with TLSv1.2-ECDHE-RSA-AES256-GCM-SHA384-256bits>>
+21:25:51.354934 <<:sao.blinkenshell.org 251 esselfe_ :There are 1 users and 237 invisible on 3 servers>>
+21:25:51.365129 <<:sao.blinkenshell.org 252 esselfe_ 6 :operator(s) online>>
+21:25:51.375344 <<:sao.blinkenshell.org 254 esselfe_ 16 :channels formed>>
+21:25:51.385520 <<:sao.blinkenshell.org 255 esselfe_ :I have 199 clients and 2 servers>>
+21:25:51.395756 <<:sao.blinkenshell.org 265 esselfe_ 199 236 :Current local users 199, max 236>>
+21:25:51.405951 <<:sao.blinkenshell.org 266 esselfe_ 238 301 :Current global users 238, max 301>>
+21:25:51.416122 <<:sao.blinkenshell.org 422 esselfe_ :MOTD File is missing>>
+21:25:51.426307 <<:esselfe_ MODE esselfe_ :+iwz>>
+21:25:51.436519 <<:NickServ!services@ircservices.blinkenshell.org NOTICE esselfe_ :This nickname is registered and protected.  If it is your>>
+21:25:51.446748 <<:NickServ!services@ircservices.blinkenshell.org NOTICE esselfe_ :nick, type /msg NickServ IDENTIFY password.  Otherwise,>>
+21:25:51.456959 <<:NickServ!services@ircservices.blinkenshell.org NOTICE esselfe_ :please choose a different nick.>>
+21:25:51.467171 <<:NickServ!services@ircservices.blinkenshell.org NOTICE esselfe_ :Password incorrect.>>
+21:25:57.722259 <<:NickServ!services@ircservices.blinkenshell.org NOTICE esselfe_ :Password accepted - you are now recognized.>>
+21:25:57.830976 <<:NickServ MODE esselfe_ :+r>>
+21:26:03.762137 ##quit :done
+##
+21:26:03.877651 <<ERROR :Closing Link: esselfe_[mtrlpq426kw-lp130-02-69-157-190-235.dsl.bell.ca] (Quit: done)>>

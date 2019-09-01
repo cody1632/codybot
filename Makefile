@@ -2,7 +2,7 @@
 CFLAGS = -std=c11 -Wall -Werror -D_GNU_SOURCE
 LDFLAGS = -lpthread -lssl -lcrypto
 OBJDIR = obj
-OBJS = $(OBJDIR)/commands.o $(OBJDIR)/codybot.o
+OBJS = $(OBJDIR)/commands.o $(OBJDIR)/codybot.o $(OBJDIR)/server.o
 PROGNAME = codybot
 
 .PHONY: default all prepare clean
@@ -19,6 +19,9 @@ $(OBJDIR)/commands.o: commands.c
 
 $(OBJDIR)/codybot.o: codybot.c
 	gcc -c $(CFLAGS) codybot.c -o $(OBJDIR)/codybot.o
+
+$(OBJDIR)/server.o: server.c
+	gcc -c $(CFLAGS) server.c -o $(OBJDIR)/server.o
 
 $(PROGNAME): $(OBJS)
 	gcc $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(PROGNAME)

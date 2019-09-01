@@ -7,7 +7,7 @@ or 6697 by default for a SSL connection.
 
 To compile the program, just run 'make' within the source directory
 and run with './codybot -n YourNick'. Personally I run the bot in a virtual
-machine. 
+machine. Run './codybot --help' to see all program options.
 
 There is no installation mechanism, you should use the source directory
 or copy the files where you want. The files stats linux.fortune and jokes

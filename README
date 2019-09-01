@@ -1,25 +1,32 @@
 20190824
-codybot is an IRC bot written in C providing users with fortune cookies
-The bot can connect to irc.freenode.net using port 6697 for a SSL
-connection.
+codybot is an IRC bot written in C providing users with fortune cookies,
+jokes, shell access and weather per city.
+
+The bot can connect to irc.freenode.net or any server using specified port
+or 6697 by default for a SSL connection.
 
 To compile the program, just run 'make' within the source directory
 and run with './codybot -n YourNick'. I don't recommend the -P/--password
-options since the password can be seen when running '^sh ps -eo pid,cmd'
-
-Consider changing the 'nick' value at the top of codybot.c if you plan
-on registering a nick with NickServ as codybot is presently reserved, or
-use the -n/--nick options.
+options since the password can be seen when running '^sh ps -eo pid,cmd'.
+In the bot console you can type 'id yourpasswordhere' to identify to
+NickServ.
 
 You should register and identify with the IRC server's NickServer.
-You can type '/msg NickServ help' in your connected IRC client.
+You can type '/msg NickServ help' in your favorite connected IRC client
+(mIRC, irssi, weechat, hexchat, ...)
 
 To see available commands, send '^help' in the channel where the bot is.
 
 To trigger a fortune cookie, just type '^fortune' in a channel where the bot
-is present, like #codybot, ##c-offtopic or ##linux-offtopic
-
+is present, like #codybot, ##c-offtopic or ##linux-offtopic.
 The fortune cookie database file is linux.fortune. It's made of concatenation
 of linux, computers, miscellaneous and wisdom files from
 /usr/share/games/fortunes from the system-provided fortune program.
-(see https://github.com/shlomif/fortune-mod/archive/fortune-mod-2.6.2.tar.gz)
+(see https://github.com/shlomif/fortune-mod)
+
+To get a random joke type '^joke'. This database is hand written using
+https://www.funnyshortjokes.com content and is far from containing all
+the sites' jokes! There's about 20 jokes as of 20190901.
+
+To get weather report from https://wttr.in type '^weather citynamehere'
+This should return something like "cancun: Partly cloudy 23C/73F"

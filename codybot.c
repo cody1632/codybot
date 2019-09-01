@@ -14,7 +14,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.17";
+const char *codybot_version_string = "0.1.18";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -366,6 +366,73 @@ void Fortune(struct raw_line *rawp) {
 	fclose(fp);
 }
 
+void Joke(struct raw_line *rawp) {
+	printf("Joke() started\n");
+	FILE *fp = fopen("jokes", "r");
+	if (fp == NULL) {
+		sprintf(buffer_cmd, "privmsg %s :fortune error: cannot open jokes database\n", target);
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
+		return;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	unsigned long filesize = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	gettimeofday(&tv0, NULL);
+	srand((unsigned int)tv0.tv_usec);
+	unsigned int rnd = rand()%(filesize-200);
+	fseek(fp, rnd, SEEK_CUR);
+	printf("rnd: %u\n", rnd);
+
+	int c = 0, cprev, cnt = 0;
+	while (1) {
+		cprev = c;
+		c = fgetc(fp);
+		if (c == -1) {
+			break;
+		}
+		if (cprev == '\n' && c == '%') {
+			//skip the newline
+			fgetc(fp);
+			break;
+		}
+	}
+
+	char joke_line[4096];
+	memset(joke_line, 0, 4096);
+	cnt = 0, c = ' ';
+	while (1) {
+        cprev = c;
+        c = fgetc(fp);
+        if (c == -1)
+            break;
+        else if (c == '\t' && cprev == '\n')
+            break;
+        else if (c == '%' && cprev == '\n')
+            break;
+        else if (c == '\n' && cprev == '\n')
+            joke_line[cnt++] = ' ';
+        else if (c == '\n' && cprev != '\n')
+            joke_line[cnt++] = ' ';
+        else
+            joke_line[cnt++] = c;
+    }
+
+	if (strlen(joke_line) > 0) {
+		GetTarget(rawp);
+        sprintf(buffer_cmd, "privmsg %s :joke: %s\n", target, joke_line);
+        SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+        Log(buffer_cmd);
+        memset(buffer_cmd, 0, 4096);
+    }
+	else
+		printf("joke_line is empty\n");
+
+	fclose(fp);
+}
+
 char *slap_items[20] = {
 "an USB cord", "a power cord", "a laptop", "a slice of ham", "a keyboard", "a laptop cord",
 "a banana peel", "a dictionary", "an atlas book", "a biography book", "an encyclopedia",
@@ -543,7 +610,7 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^help")==0) {
-			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune sh stats weather\n",
+			sprintf(buffer_cmd, "privmsg %s :commands: about codybot_version help fortune joke sh stats weather\n",
 				target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -565,6 +632,8 @@ strcmp(raw.command, "NICK")!=0) {
 			debug = 0;
 			Log("##debug off##");
 		}
+		else if(strcmp(raw.text, "^joke")==0)
+			Joke(&raw);
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
 		else if (strcmp(raw.text, "^weather")==0) {
@@ -701,7 +770,6 @@ void ReadCommandLoop(void) {
 
 			sprintf(buffer_cmd, "privmsg nickserv :identify %s\n", pass);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else {

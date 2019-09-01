@@ -53,8 +53,5 @@ void Joke(struct raw_line *rawp);
 void SlapCheck(struct raw_line *rawp);
 void Stats(struct raw_line *rawp);
 void Weather(struct raw_line *rawp);
-void AsciiArt(struct raw_line *rawp);
-void AsciiArt(struct raw_line *rawp);
-void AsciiArt(struct raw_line *rawp);
 
 #endif /* CODYBOT_H */

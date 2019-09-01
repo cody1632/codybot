@@ -360,6 +360,31 @@ void AsciiArt(struct raw_line *rawp) {
 	fclose(fp);
 }
 
+void Chars(struct raw_line *rawp) {
+	FILE *fp = fopen("data-chars.txt", "r");
+	if (fp == NULL) {
+		sprintf(buffer_cmd, "privmsg %s :codybot::Chars() error: Cannot open data-chars.txt: %s\n",
+			target, strerror(errno));
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
+		return;
+	}
+
+	char chars_line[4096];
+	char *str;
+	while (1) {
+		str = fgets(chars_line, 4095, fp);
+		if (str == NULL) break;
+		sprintf(buffer_cmd, "privmsg %s :%s: %s\n", target, raw.nick, chars_line);
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
+	}
+
+	fclose(fp);
+}
+
 void Fortune(struct raw_line *rawp) {
 	FILE *fp = fopen("data-fortunes.txt", "r");
 	if (fp == NULL) {
@@ -687,9 +712,11 @@ strcmp(raw.command, "NICK")!=0) {
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
+		else if (strcmp(raw.text, "^chars")==0)
+			Chars(&raw);
 		else if (strcmp(raw.text, "^help")==0) {
-			sprintf(buffer_cmd, "privmsg %s :commands: about ascii codybot_version help fortune joke sh stats weather\n",
-				target);
+			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^codybot_version ^help"
+				" ^fortune ^joke ^sh ^stats ^weather\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);

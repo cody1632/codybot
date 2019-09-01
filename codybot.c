@@ -15,7 +15,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-const char *codybot_version_string = "0.1.22";
+const char *codybot_version_string = "0.1.23";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -302,9 +302,9 @@ char *GetTarget(struct raw_line *rawp) {
 }
 
 void AsciiArt(struct raw_line *rawp) {
-	FILE *fp = fopen("ascii-art", "r");
+	FILE *fp = fopen("data-ascii.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer_cmd, "privmsg %s :codybot::AsciiArt() error: cannot open ascii-art database\n", target);
+		sprintf(buffer_cmd, "privmsg %s :codybot::AsciiArt() error: cannot open data-ascii.txt\n", target);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
@@ -361,13 +361,13 @@ void AsciiArt(struct raw_line *rawp) {
 }
 
 void Fortune(struct raw_line *rawp) {
-	FILE *fp = fopen("fortunes", "r");
+	FILE *fp = fopen("data-fortunes.txt", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Fortune() error: Cannot open fortunes database: %s\n", strerror(errno));
+		fprintf(stderr, "##codybot::Fortune() error: Cannot open data-fortunes.txt: %s\n", strerror(errno));
 		if (server_ip == server_ip_blinkenshell)
-			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open fortunes database\n");
+			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open data-fortunes.txt\n");
 		else
-			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open fortunes database\n");
+			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open data-fortunes.txt\n");
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
@@ -439,7 +439,7 @@ void Fortune(struct raw_line *rawp) {
 }
 
 void Joke(struct raw_line *rawp) {
-	FILE *fp = fopen("jokes", "r");
+	FILE *fp = fopen("data-jokes.txt", "r");
 	if (fp == NULL) {
 		sprintf(buffer_cmd, "privmsg %s :codybot::Joke() error: cannot open jokes database\n", target);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -730,8 +730,11 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
+			if (strcmp(raw.nick, "esselfe")!=0) {
 			if (sh_disabled) {
-				sprintf(buffer_cmd, "privmsg %s :sh is temporarily disabled, try again later\n", target);
+				sprintf(buffer_cmd, 
+					"privmsg %s :%s: sh is temporarily disabled, try again later or ask esselfe to enable it\n",
+					target, raw.nick);
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 				Log(buffer_cmd);
 				memset(buffer_cmd, 0, 4096);
@@ -739,11 +742,14 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 			struct stat st;
 			if (stat("sh_disable", &st) == 0) {
-				sprintf(buffer_cmd, "privmsg %s :sh is temporarily disabled, try again later\n", target);
+				sprintf(buffer_cmd,
+					"privmsg %s :%s: sh is temporarily disabled, try again later or ask esselfe to enable it\n",
+					target, raw.nick);
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 				Log(buffer_cmd);
 				memset(buffer_cmd, 0, 4096);
 				continue;
+			}
 			}
 
 			char *cp = raw.text + 4;
@@ -804,15 +810,19 @@ while (1) {
 			fseek(fp, 0, SEEK_SET);
 
 			GetTarget(&raw);
-			if (lines_total <= 4) {
+			if (lines_total <= 9) {
+				char *retstr;
 				char result[4096];
-				fgets(result, 4095, fp);
-				sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
+				while (1) {
+					retstr = fgets(result, 4095, fp);
+					if (retstr == NULL) break;
+					sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
+					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+					Log(buffer_cmd);
+					memset(buffer_cmd, 0, 4096);
+				}
 			}
-			else if (lines_total > 4) {
+			else if (lines_total > 10) {
 				system("cat cmd.output |nc termbin.com 9999 > cmd.url");
 				FILE *fp2 = fopen("cmd.url", "r");
 				if (fp2 == NULL) {
@@ -828,7 +838,7 @@ while (1) {
 					memset(buffer_cmd, 0, 4096);
 				}
 			}
-			//system("rm cmd.output cmd.url");
+			//system("rm cmd.output cmd.url 2>/dev/null");
 
 			fclose(fp);
 

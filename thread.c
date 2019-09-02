@@ -200,8 +200,35 @@ strcmp(raw.command, "NICK")!=0) {
 			Joke(&raw);
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
+		else if (raw.text[0]=='^'&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
+			raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]==' ') {
+			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, "esselfe")==0 || strcmp(raw.nick, "SpringSprocket")==0) {
+				raw.text[0] = ' ';
+				raw.text[1] = ' ';
+				raw.text[2] = ' ';
+				raw.text[3] = ' ';
+				raw.text[4] = ' ';
+				raw.text[5] = ' ';
+				raw.text[6] = ' ';
+				raw.text[7] = ' ';
+				raw.text[8] = ' ';
+				cmd_timeout = atoi(raw.text);
+				if (cmd_timeout == 0)
+					cmd_timeout = 5;
+				sprintf(buffer_cmd, "privmsg %s :sh: timeout set to %d seconds\n", target, cmd_timeout);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+			}
+			else {
+				sprintf(buffer_cmd, "privmsg %s :sh: timeout can only be set by codybot and esselfe\n", target);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+			}
+		}
 		else if (strcmp(raw.text, "^weather")==0) {
-		sprintf(buffer_cmd, "privmsg %s :weather: missing city argument, example: '^weather montreal'\n", target);
+			sprintf(buffer_cmd, "privmsg %s :weather: missing city argument, example: '^weather montreal'\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);

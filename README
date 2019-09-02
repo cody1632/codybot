@@ -23,15 +23,16 @@ You should register and identify with the IRC server's NickServer.
 You can type '/msg NickServ help' in your favorite connected IRC client
 (mIRC, irssi, weechat, hexchat, ...) Otherwise you can identify by typing
 'id yourpasswordhere' or 'privmsg NickServ :identify pass' in the
-console when running the codybot program.
+console when running the codybot program. Another console-only command you
+need to run is 'join #channel_name_here'.
 
 To see available commands, send '^help' in the channel where the bot is.
 
 To trigger a fortune cookie, just type '^fortune' in a channel where the bot
 is present, like #codybot, ##c-offtopic or ##linux-offtopic.
-The fortune cookie database file is linux.fortune. It's made of concatenation
-of linux, computers, miscellaneous and wisdom files from
-/usr/share/games/fortunes from the system-provided fortune program.
+The fortune cookie database file is data-fortunes.txt. It's made of
+concatenation of the linux, computers, miscellaneous and wisdom files from
+/usr/share/games/fortunes using my system-provided fortune package.
 (see https://github.com/shlomif/fortune-mod)
 
 To get a random joke type '^joke'. This database is hand written using
@@ -43,6 +44,5 @@ This should return something like "cancun: Partly cloudy 23C/73F"
 
 To run a shell command from the chat onto the host of codybot, type
 '^sh COMMAND ARGS' ie: '^sh ls /home/codybot'. You can disable this
-command by touching sh_disable in the program's current directory.
-I recommend to run 'touch sh_disable' and 'rm sh_disable' as the
-root user.
+command by touching sh_disable in the program's current directory
+as the root user or by using the sudo program.

@@ -34,5 +34,5 @@ $(PROGNAME): $(OBJS)
 	gcc $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(PROGNAME)
 
 clean:
-	@rm -rv $(OBJDIR) $(PROGNAME) 2>/dev/null || true
+	@rm -rv $(OBJDIR) $(PROGNAME) $(PROGRUN) 2>/dev/null || true
 

@@ -6,7 +6,7 @@
 
 // Globals from codybot.c
 extern const char *codybot_version_string;
-extern int debug, socket_fd, ret, endmainloop, sh_disabled;
+extern int debug, socket_fd, ret, endmainloop, sh_disabled, cmd_timeout;
 extern unsigned long long fortune_total;
 extern struct timeval tv0;
 extern struct tm *tm0;
@@ -66,6 +66,8 @@ void ServerGetIP(char *hostname);
 void ServerConnect(void);
 void ServerClose(void);
 // from thread.c
+void ThreadRunStart(char *command);
+void *ThreadRunFunc(void *argp);
 void ThreadRXStart(void);
 void *ThreadRXFunc(void *argp);
 

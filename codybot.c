@@ -17,7 +17,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.3";
+const char *codybot_version_string = "0.2.4";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -42,7 +42,7 @@ void HelpShow(void) {
 	printf("               { -n/--nick NICK | -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR }\n");
 }
 
-int debug, socket_fd, ret, endmainloop, sh_disabled;
+int debug, socket_fd, ret, endmainloop, sh_disabled, cmd_timeout = 30;
 unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
@@ -114,10 +114,36 @@ void ReadCommandLoop(void) {
 	while (!endmainloop) {
 		memset(buffer_cmd, 0, 4096);
 		fgets(buffer_cmd, 4095, stdin);
+		char *cp;
+		cp = buffer_cmd;
 		if (buffer_cmd[0] == '\n')
 			continue;
 		else if (strcmp(buffer_cmd, "exit\n")==0 || strcmp(buffer_cmd, "quit\n")==0)
 			endmainloop = 1;
+		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)==' ') {
+			char str[1024];
+			memset(str, 0, 1024);
+			unsigned int cnt = 0;
+			cp += 8;
+			while (1) {
+				if (*cp=='\n' || *cp=='\0') {
+					str[cnt] = '\0';
+					break;
+				}
+				else {
+					str[cnt] = *cp;
+					++cp;
+					++cnt;
+				}
+			}
+			cmd_timeout = atoi(str);
+			if (cmd_timeout == 0)
+				cmd_timeout = 10;
+			sprintf(buffer_cmd, "privmsg %s :sh: timeout set to %d seconds\n", target, cmd_timeout);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
 		else if (strcmp(buffer_cmd, "debug on\n")==0) {
 			debug = 1;
 			printf("##debug on\n");

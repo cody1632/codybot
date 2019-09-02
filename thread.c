@@ -14,8 +14,108 @@
 
 #include "codybot.h"
 
-void *ThreadRXFunc(void *argp);
+void ThreadRunStart(char *command) {
+	pthread_t thr;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&thr, &attr, ThreadRunFunc, (void *)command);
+    pthread_detach(thr);
+    pthread_attr_destroy(&attr);
+}
 
+void *ThreadRunFunc(void *argp) {
+	printf("&& Thread started, pid: %d\n", getpid());
+	//char *cp = argp;
+	char *cp = raw.text;
+	char cmd[4096];
+	sprintf(cmd, "timeout %ds ", cmd_timeout);
+	unsigned int cnt = strlen(cmd);
+	while (1) {
+		if (*cp == '\n' || *cp == '\0') {
+			cmd[cnt] = '\0';
+			break;
+		}
+		cmd[cnt] = *cp;
+		++cp;
+		++cnt;
+	}
+	strcat(cmd, " &> cmd.output; echo $? >cmd.ret");
+	Logx(cmd);
+	system(cmd);
+
+	FILE *fp = fopen("cmd.ret", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "\n##codybot::ThreadRunFunc() error: Cannot open cmd.ret: %s\n", strerror(errno));
+	}
+	fgets(buffer, 4096, fp);
+	fclose(fp);
+
+	ret = atoi(buffer);
+	if (ret == 124) {
+		sprintf(buffer_cmd, "privmsg %s :sh: timeout\n", target);
+		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+		Log(buffer_cmd);
+		memset(buffer_cmd, 0, 4096);
+		return NULL;
+	}
+
+	fp = fopen("cmd.output", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "\n##codybot::ThreadRunFunc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		return NULL;
+	}
+
+	// count the line number
+	char c;
+	unsigned int lines_total = 0;
+	while (1) {
+		c = fgetc(fp);
+		if (c == -1)
+			break;
+		else if (c == '\n')
+			++lines_total;
+	}
+	fseek(fp, 0, SEEK_SET);
+
+	if (lines_total <= 10) {
+		char *result = (char *)malloc(4096);
+		memset(result, 0, 4096);
+		size_t size = 4095;
+		while (1) {
+			int ret2 = getline(&result, &size, fp);
+			if (ret2 < 0) break;
+			sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
+	}
+	else if (lines_total > 10) {
+		system("cat cmd.output |nc termbin.com 9999 > cmd.url");
+		FILE *fp2 = fopen("cmd.url", "r");
+		if (fp2 == NULL)
+			fprintf(stderr, "##codybot::ThreadRXFunc() error: Cannot open cmd.url: %s\n", strerror(errno));
+		else {
+			char url[1024];
+			fgets(url, 1023, fp2);
+			fclose(fp2);
+			sprintf(buffer_cmd, "privmsg %s :%s\n", target, url);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
+	}
+	//system("rm cmd.output cmd.url 2>/dev/null");
+
+	fclose(fp);
+
+	printf("&& Thread stopped, pid: %d ret: %d\n", getpid(), ret);
+
+	return NULL;
+}
+
+void *ThreadRXFunc(void *argp);
 void ThreadRXStart(void) {
 	pthread_t thr;
     pthread_attr_t attr;
@@ -58,10 +158,10 @@ void *ThreadRXFunc(void *argp) {
 		}
 
 		RawLineParse(&raw, buffer_rx);
+		RawGetTarget(&raw);
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
-		RawGetTarget(&raw);
 		if (strcmp(raw.text, "^ascii")==0)
 			AsciiArt(&raw);
 		else if (strcmp(raw.text, "^about")==0) {
@@ -160,75 +260,16 @@ while (1) {
 				sprintf(raw.text, "^stats");
 				continue;
 			}
-			cp = raw.text + 4;
-			char cmd[1024];
-			sprintf(cmd, "timeout 30s ");
-			unsigned int cnt = strlen(cmd);
-			while (1) {
-				if (*cp == '\n' || *cp == '\0') {
-					cmd[cnt] = '\0';
-					break;
-				}
-				cmd[cnt] = *cp;
-				++cp;
-				++cnt;
-			}
-			strcat(cmd, " &> cmd.output");
-			Logx(cmd);
-			system(cmd);
 
-			FILE *fp = fopen("cmd.output", "r");
-			if (fp == NULL) {
-				fprintf(stderr, "\n##codybot::ThreadRXFunc() error: Cannot open cmd.output: %s\n", strerror(errno));
-				continue;
-			}
+			raw.text[0] = ' ';
+			raw.text[1] = ' ';
+			raw.text[2] = ' ';
+			
+			if (debug)
+				printf("starting thread for ::%s::\n", raw.text);
+			ThreadRunStart(raw.text);
 
-			// count the line number
-			char c;
-			unsigned int lines_total = 0;
-			while (1) {
-				c = fgetc(fp);
-				if (c == -1)
-					break;
-				else if (c == '\n')
-					++lines_total;
-			}
-			fseek(fp, 0, SEEK_SET);
-
-			RawGetTarget(&raw);
-			if (lines_total <= 9) {
-				char *retstr;
-				char result[4096];
-				while (1) {
-					retstr = fgets(result, 4095, fp);
-					if (retstr == NULL) break;
-					sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
-					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-					Log(buffer_cmd);
-					memset(buffer_cmd, 0, 4096);
-				}
-			}
-			else if (lines_total > 10) {
-				system("cat cmd.output |nc termbin.com 9999 > cmd.url");
-				FILE *fp2 = fopen("cmd.url", "r");
-				if (fp2 == NULL) {
-					fprintf(stderr, "##codybot::ThreadRXFunc() error: Cannot open cmd.url: %s\n", strerror(errno));
-				}
-				else {
-					char url[1024];
-					fgets(url, 1023, fp2);
-					fclose(fp2);
-					sprintf(buffer_cmd, "privmsg %s :%s\n", target, url);
-					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-					Log(buffer_cmd);
-					memset(buffer_cmd, 0, 4096);
-				}
-			}
-			//system("rm cmd.output cmd.url 2>/dev/null");
-
-			fclose(fp);
-
-			RawLineClear(&raw);
+//			RawLineClear(&raw);
 		}
 
 		usleep(10000);

@@ -155,6 +155,9 @@ void ReadCommandLoop(void) {
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			memset(buffer_cmd, 0, 4096);
 		}
+		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)=='\n') {
+			printf("##timeout: %d seconds\n", cmd_timeout);
+		}
 		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)==' ') {
 			char str[1024];
 			memset(str, 0, 1024);

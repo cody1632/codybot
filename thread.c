@@ -25,7 +25,7 @@ void ThreadRunStart(char *command) {
 }
 
 void *ThreadRunFunc(void *argp) {
-	printf("&& Thread started, pid: %d\n", getpid());
+	printf("&& Thread started, pid: %ld\n", (long)pthread_self());
 	//char *cp = argp;
 	char *cp = raw.text;
 	char cmd[4096];
@@ -110,7 +110,7 @@ void *ThreadRunFunc(void *argp) {
 
 	fclose(fp);
 
-	printf("&& Thread stopped, pid: %d ret: %d\n", getpid(), ret);
+	printf("&& Thread stopped, pid: %ld ret: %d\n", (long)pthread_self(), ret);
 
 	return NULL;
 }
@@ -200,6 +200,13 @@ strcmp(raw.command, "NICK")!=0) {
 			Joke(&raw);
 		else if (strcmp(raw.text, "^stats")==0)
 			Stats(&raw);
+		else if (raw.text[0]=='^'&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
+		  raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]=='\0') {
+			sprintf(buffer_cmd, "privmsg %s :sh: timeout is %d seconds\n", target, cmd_timeout);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
 		else if (raw.text[0]=='^'&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 			raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]==' ') {
 			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, "esselfe")==0 || strcmp(raw.nick, "SpringSprocket")==0) {

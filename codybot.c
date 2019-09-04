@@ -42,7 +42,7 @@ void HelpShow(void) {
 	printf("               { -n/--nick NICK | -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR }\n");
 }
 
-int debug, socket_fd, ret, endmainloop, sh_disabled, cmd_timeout = 30;
+int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 30;
 unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
@@ -137,6 +137,20 @@ void ReadCommandLoop(void) {
 		else if (strcmp(buffer_cmd, "sh_enable\n")==0) {
 			sh_disabled = 0;
 			printf("##sh enabled\n");
+		}
+		else if (strcmp(buffer_cmd, "sh_lock\n")==0) {
+			sh_locked = 1;
+			sprintf(buffer_cmd, "privmsg %s :sh_locked: %d\n", target, sh_locked);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
+		else if (strcmp(buffer_cmd, "sh_unlock\n")==0) {
+			sh_locked = 0;
+			sprintf(buffer_cmd, "privmsg %s :sh_locked: %d\n", target, sh_locked);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
 		}
 		else if (buffer_cmd[0]=='i' && buffer_cmd[1]=='d' && buffer_cmd[2]==' ') {
 			char *cp;
@@ -289,6 +303,12 @@ int main(int argc, char **argv) {
 	memset(buffer_log, 0, 4096);
 	buffer = (char *)malloc(4096);
 	memset(buffer, 0, 4096);
+
+	struct stat st;
+	if(stat("sh_locked", &st)==0)
+		sh_locked = 1;
+	
+	printf("##sh_locked: %d\n", sh_locked);
 	
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {

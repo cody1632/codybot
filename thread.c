@@ -258,8 +258,21 @@ strcmp(raw.command, "NICK")!=0) {
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
+		else if (strcmp(raw.text, "^sh_lock")==0 && strcmp(raw.nick, "esselfe")==0) {
+			sh_locked = 1;
+			sprintf(buffer_cmd, "privmsg %s :sh_locked: 1\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
+		else if (strcmp(raw.text, "^sh_unlock")==0 && strcmp(raw.nick, "esselfe")==0) {
+			sh_locked = 0;
+			sprintf(buffer_cmd, "privmsg %s :sh_locked: 0\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
-			if (strcmp(raw.nick, "esselfe")!=0) {
 			if (sh_disabled) {
 				sprintf(buffer_cmd,
 					"privmsg %s :%s: sh is temporarily disabled, try again later or ask esselfe to enable it\n",
@@ -280,7 +293,7 @@ strcmp(raw.command, "NICK")!=0) {
 				continue;
 			}
 			// touch $srcdir/sh_lock to have ^sh commands run in a chroot
-			else if(stat("sh_lock", &st) == 0) {
+			else if(sh_locked || (stat("sh_lock", &st) == 0)) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
@@ -304,30 +317,31 @@ strcmp(raw.command, "NICK")!=0) {
 					continue;
 				}
 	
-				unsigned int cnt = 1;
-				size_t size = 4096, retsize;
+				//unsigned int cnt = 1;
+				//size_t size = 4096, retsize;
+				size_t size = 4096;
 				char *output = (char *)malloc(size);
 				memset(output, 0, size);
-				//fgets(output, 4096, fr);
-				while (1) {
-					retsize = getline(&output, &size, fr);
-					if (retsize) {
-						sprintf(buffer_cmd, "privmsg %s :!!%s!!\n", target, output);
+				fgets(output, 4096, fr);
+				//while (1) {
+				//	retsize = getline(&output, &size, fr);
+					//getline(&output, &size, fr);
+				//	if (retsize) {
+						sprintf(buffer_cmd, "privmsg %s :%s\n", target, output);
 						SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 						Log(buffer_cmd);
 						memset(buffer_cmd, 0, 4096);
-						++cnt;
-						if (cnt >= 5) {
-							break;
-						}
-					} 
-					else
-						break;
-				}
+				//		++cnt;
+				//		if (cnt >= 5) {
+				//			break;
+				//		}
+				//	} 
+				//	else
+				//		break;
+				//}
 
 				fclose(fr);
 				continue;
-			}
 			}
 
 			char *cp = raw.text + 4;

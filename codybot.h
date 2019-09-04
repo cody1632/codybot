@@ -54,6 +54,7 @@ void AsciiArt(struct raw_line *rawp);
 void Chars(struct raw_line *rawp);
 void Fortune(struct raw_line *rawp);
 void Joke(struct raw_line *rawp);
+void Rainbow(struct raw_line *rawp);
 void SlapCheck(struct raw_line *rawp);
 void Stats(struct raw_line *rawp);
 void Weather(struct raw_line *rawp);

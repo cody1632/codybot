@@ -25,9 +25,10 @@ void ThreadRunStart(char *command) {
 }
 
 void *ThreadRunFunc(void *argp) {
-	printf("&& Thread started, pid: %ld\n", (long)pthread_self());
+	char *text = strdup(raw.text);
+	printf("&& Thread started ::%s::\n", text);
 	//char *cp = argp;
-	char *cp = raw.text;
+	char *cp = text;
 	char cmd[4096];
 	sprintf(cmd, "timeout %ds ", cmd_timeout);
 	unsigned int cnt = strlen(cmd);
@@ -110,7 +111,7 @@ void *ThreadRunFunc(void *argp) {
 
 	fclose(fp);
 
-	printf("&& Thread stopped, pid: %ld ret: %d\n", (long)pthread_self(), ret);
+	printf("&& Thread stopped, ret: %d ::%s::\n", ret, text);
 
 	return NULL;
 }
@@ -165,29 +166,30 @@ strcmp(raw.command, "NICK")!=0) {
 		if (strcmp(raw.text, "^ascii")==0)
 			AsciiArt(&raw);
 		else if (strcmp(raw.text, "^about")==0) {
-			sprintf(buffer_cmd, "privmsg %s :codybot(%s) is an IRC bot written in C by esselfe, "
-				"sources @ https://github.com/cody1632/codybot\n", target, nick);	
+			if (strcmp(nick, "codybot")==0)
+				sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
+					"sources @ https://github.com/cody1632/codybot\n", target);
+			else
+				sprintf(buffer_cmd, "privmsg %s :codybot(%s) is an IRC bot written in C by esselfe, "
+					"sources @ https://github.com/cody1632/codybot\n", target, nick);	
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^chars")==0)
 			Chars(&raw);
+		else if (raw.text[0]=='^'&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
+		  raw.text[5]=='b'&&raw.text[6]=='o'&&raw.text[7]=='w'&&raw.text[8]==' ')
+			Rainbow(&raw);
 		else if (strcmp(raw.text, "^help")==0) {
-			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^version ^help"
-				" ^fortune ^joke ^sh ^stats ^weather\n", target);
+			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^help ^fortune"
+				" ^joke ^rainbow ^sh ^stats ^version ^weather\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strcmp(raw.text, "^fortune")==0)
 			Fortune(&raw);
-		else if (strcmp(raw.text, "^version")==0) {
-			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
-		}
 		else if (strcmp(raw.text, "^debug on")==0) {
 			debug = 1;
 			Log("##debug on##");
@@ -234,6 +236,12 @@ strcmp(raw.command, "NICK")!=0) {
 				memset(buffer_cmd, 0, 4096);
 			}
 		}
+		else if (strcmp(raw.text, "^version")==0) {
+			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
 		else if (strcmp(raw.text, "^weather")==0) {
 			sprintf(buffer_cmd, "privmsg %s :weather: missing city argument, example: '^weather montreal'\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
@@ -269,6 +277,31 @@ strcmp(raw.command, "NICK")!=0) {
 				Log(buffer_cmd);
 				memset(buffer_cmd, 0, 4096);
 				continue;
+			}
+			else if(stat("sh_lock", &st) == 0) {
+				raw.text[0] = ' ';
+				raw.text[1] = ' ';
+				raw.text[2] = ' ';
+				sprintf(buffer_cmd, "echo \"%s\" >lunar/home/dummy/run.fifo", raw.text);
+				system(buffer_cmd);
+
+				FILE *fr = fopen("lunar/home/dummy/cmd.output", "r");
+				if (fr == NULL) {
+					sprintf(buffer_cmd, "privmsg %s :codybot::ThreadRXFunc() error: Cannot open lunar/home/dummy/cmd.output\n", target);
+					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+					Log(buffer_cmd);
+					memset(buffer_cmd, 0, 4096);
+					continue;
+				}
+				
+				char output[4096];
+				fgets(output, 4096, fr);
+				sprintf(buffer_cmd, "privmsg %s :%s\n", target, output);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+
+				fclose(fr);
 			}
 			}
 

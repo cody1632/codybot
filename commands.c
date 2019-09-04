@@ -23,10 +23,7 @@ void AsciiArt(struct raw_line *rawp) {
 	fseek(fp, 0, SEEK_SET);
 	gettimeofday(&tv0, NULL);
 	srand((unsigned int)tv0.tv_usec);
-	unsigned int rnd = rand()%(filesize-100);
-	fseek(fp, rnd, SEEK_CUR);
-	if (debug)
-		printf("##filesize: %lu\n##rnd: %u\n", filesize, rnd);
+	fseek(fp, rand()%(filesize-100), SEEK_CUR);
 
 	int c = 0, cprev, cnt = 0;
 	while (1) {
@@ -42,7 +39,6 @@ void AsciiArt(struct raw_line *rawp) {
 		}
 	}
 
-	RawGetTarget(rawp);
 	char line[1024];
 	memset(line, 0, 1024);
 	cnt = 0, c = ' ';
@@ -56,6 +52,7 @@ void AsciiArt(struct raw_line *rawp) {
 		else if (c == '\n') {
 			sprintf(buffer_cmd, "privmsg %s :%s\n", target, line);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 			memset(line, 0, 1024);
 			cnt = 0;
@@ -241,6 +238,31 @@ void Joke(struct raw_line *rawp) {
 	fclose(fp);
 }
 
+void Rainbow(struct raw_line *rawp) {
+	char *colors[] = { "\003", "\00301", "\00302", "\00303", "\00304", "\00305", "\00306", "\00307", "\00308",
+		"\00309", "\00310", "\00311", "\00312", "\00313", "\00314", "\00315"};
+	char *cp = raw.text;
+
+	while (*cp != ' ')
+		++cp;
+	++cp;
+	
+	char result[4096];
+	memset(result, 0, 4096);
+	while (1) {
+		strcat(result, colors[rand()%13+2]);
+		strncat(result, cp++, 1);
+		if (*cp == '\0')
+			break;
+	}
+	strcat(result, colors[0]);
+
+	sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
+	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+	Log(buffer_cmd);
+	memset(buffer_cmd, 0, 4096);
+}
+
 char *slap_items[20] = {
 "an USB cord", "a power cord", "a laptop", "a slice of ham", "a keyboard", "a laptop cord",
 "a banana peel", "a dictionary", "an atlas book", "a biography book", "an encyclopedia",
@@ -309,17 +331,17 @@ void Weather(struct raw_line *rawp) {
 	}
 	memset(rawp->text, 0, strlen(rawp->text));
 
-	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O %s.html\n", city, city);
+	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O weather-%s.html\n", city, city);
 	system(buffer);
 	sprintf(buffer,
-		"sed -n \"3p\" %s.html |sed 's///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > %s.temp", city, city);
+		"sed -n \"3p\" weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > weather-%s.temp", city, city);
 	system(buffer);
 	sprintf(buffer, 
-		"sed -n \"4p\" %s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > %s.temp2", city, city);
+		"sed -n \"4p\" weather-%s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > weather-%s.temp2", city, city);
 	system(buffer);
 
 	char temp[1024], temp2[1024];
-	sprintf(buffer, "%s.temp", city);
+	sprintf(buffer, "weather-%s.temp", city);
 	FILE *fp = fopen(buffer, "r");
 	if (fp == NULL) {
 		sprintf(buffer_cmd, "##codybot::Weather() error: Cannot open %s: %s\n", buffer, strerror(errno));
@@ -349,7 +371,7 @@ void Weather(struct raw_line *rawp) {
 	}
 	temp[cnt+1] = '\0';
 
-	sprintf(buffer, "%s.temp2", city);
+	sprintf(buffer, "weather-%s.temp2", city);
 	fp = fopen(buffer, "r");
 	if (fp == NULL) {
 		sprintf(buffer_cmd, "##codybot::Weather() error: Cannot open %s: %s\n", buffer, strerror(errno));
@@ -368,7 +390,7 @@ void Weather(struct raw_line *rawp) {
 	Log(buffer_cmd);
 	memset(buffer_cmd, 0, 4096);
 
-	sprintf(buffer, "rm %s.*\n", city);
+	sprintf(buffer, "rm weather-%s.*\n", city);
 	system(buffer);
 	memset(buffer, 0, 4096);
 }

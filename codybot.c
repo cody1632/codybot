@@ -63,8 +63,10 @@ void Log(char *text) {
 	gettimeofday(&tv0, NULL);
 	t0 = (time_t)tv0.tv_sec;
 	tm0 = gmtime(&t0);
+	char *str = strdup(text);
+	str[strlen(str)-1] = '\0';
 	sprintf(buffer_log, "%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-		tv0.tv_usec, text);
+		tv0.tv_usec, str);
 	fputs(buffer_log, fp);
 	fputs(buffer_log, stdout);
 	memset(buffer_log, 0, 4096);

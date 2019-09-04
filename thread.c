@@ -86,6 +86,7 @@ void *ThreadRunFunc(void *argp) {
 		while (1) {
 			int ret2 = getline(&result, &size, fp);
 			if (ret2 < 0) break;
+			result[strlen(result)-1] = '\0';
 			sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -153,7 +154,7 @@ void *ThreadRXFunc(void *argp) {
 			else {
 				SSL_write(pSSL, "PONG\n", 5);
 				if (debug)
-					Log("PONG");
+					Log("PONG\n");
 			}
 			continue;
 		}
@@ -278,30 +279,54 @@ strcmp(raw.command, "NICK")!=0) {
 				memset(buffer_cmd, 0, 4096);
 				continue;
 			}
+			// touch $srcdir/sh_lock to have ^sh commands run in a chroot
 			else if(stat("sh_lock", &st) == 0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
-				sprintf(buffer_cmd, "echo \"%s\" >lunar/home/dummy/run.fifo", raw.text);
+				sprintf(buffer_cmd, "echo \"%s\" > lunar/home/dummy/run.fifo", raw.text);
 				system(buffer_cmd);
+
+				// wait for run.sh to write in run.status
+				//sleep(5);
+				printf("++tail lunar/home/dummy/run.status++\n");
+				sprintf(buffer_cmd, "tail lunar/home/dummy/run.status");
+				system(buffer_cmd);
+				printf("++tail lunar/home/dummy/run.status++ done\n");
 
 				FILE *fr = fopen("lunar/home/dummy/cmd.output", "r");
 				if (fr == NULL) {
-					sprintf(buffer_cmd, "privmsg %s :codybot::ThreadRXFunc() error: Cannot open lunar/home/dummy/cmd.output\n", target);
+					sprintf(buffer_cmd,
+						"privmsg %s :codybot::ThreadRXFunc() error: Cannot open lunar/home/dummy/cmd.output\n", target);
 					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 					Log(buffer_cmd);
 					memset(buffer_cmd, 0, 4096);
 					continue;
 				}
-				
-				char output[4096];
-				fgets(output, 4096, fr);
-				sprintf(buffer_cmd, "privmsg %s :%s\n", target, output);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
+	
+				unsigned int cnt = 1;
+				size_t size = 4096, retsize;
+				char *output = (char *)malloc(size);
+				memset(output, 0, size);
+				//fgets(output, 4096, fr);
+				while (1) {
+					retsize = getline(&output, &size, fr);
+					if (retsize) {
+						sprintf(buffer_cmd, "privmsg %s :!!%s!!\n", target, output);
+						SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+						Log(buffer_cmd);
+						memset(buffer_cmd, 0, 4096);
+						++cnt;
+						if (cnt >= 5) {
+							break;
+						}
+					} 
+					else
+						break;
+				}
 
 				fclose(fr);
+				continue;
 			}
 			}
 

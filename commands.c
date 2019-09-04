@@ -331,23 +331,24 @@ void Weather(struct raw_line *rawp) {
 	}
 	memset(rawp->text, 0, strlen(rawp->text));
 
-	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O weather-%s.html\n", city, city);
+	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O /tmp/weather-%s.html\n", city, city);
 	system(buffer);
 	sprintf(buffer,
-		"sed -n \"3p\" weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > weather-%s.temp", city, city);
+		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
 	system(buffer);
 	sprintf(buffer, 
-		"sed -n \"4p\" weather-%s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > weather-%s.temp2", city, city);
+		"sed -n \"4p\" /tmp/weather-%s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > /tmp/weather-%s.temp2", city, city);
 	system(buffer);
 
 	char temp[1024], temp2[1024];
-	sprintf(buffer, "weather-%s.temp", city);
+	sprintf(buffer, "/tmp/weather-%s.temp", city);
 	FILE *fp = fopen(buffer, "r");
 	if (fp == NULL) {
 		sprintf(buffer_cmd, "##codybot::Weather() error: Cannot open %s: %s\n", buffer, strerror(errno));
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 		Log(buffer_cmd);
 		memset(buffer_cmd, 0, 4096);
+		return;
 	}
 	fgets(temp2, 1023, fp);
 	fclose(fp);
@@ -371,7 +372,7 @@ void Weather(struct raw_line *rawp) {
 	}
 	temp[cnt+1] = '\0';
 
-	sprintf(buffer, "weather-%s.temp2", city);
+	sprintf(buffer, "/tmp/weather-%s.temp2", city);
 	fp = fopen(buffer, "r");
 	if (fp == NULL) {
 		sprintf(buffer_cmd, "##codybot::Weather() error: Cannot open %s: %s\n", buffer, strerror(errno));
@@ -390,7 +391,7 @@ void Weather(struct raw_line *rawp) {
 	Log(buffer_cmd);
 	memset(buffer_cmd, 0, 4096);
 
-	sprintf(buffer, "rm weather-%s.*\n", city);
+	sprintf(buffer, "rm /tmp/weather-%s.*\n", city);
 	system(buffer);
 	memset(buffer, 0, 4096);
 }

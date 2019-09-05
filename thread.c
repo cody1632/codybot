@@ -163,9 +163,9 @@ void *ThreadRXFunc(void *argp) {
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
-		if (strcmp(raw.text, "^ascii")==0)
+		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0)
 			AsciiArt(&raw);
-		else if (strcmp(raw.text, "^about")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "about")==0) {
 			if (strcmp(nick, "codybot")==0)
 				sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
 					"sources @ https://github.com/cody1632/codybot\n", target);
@@ -176,40 +176,46 @@ strcmp(raw.command, "NICK")!=0) {
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "^chars")==0)
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "chars")==0)
 			Chars(&raw);
-		else if (raw.text[0]=='^'&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
 		  raw.text[5]=='b'&&raw.text[6]=='o'&&raw.text[7]=='w'&&raw.text[8]==' ')
 			Rainbow(&raw);
-		else if (strcmp(raw.text, "^help")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
 			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^help ^fortune"
 				" ^joke ^rainbow ^sh ^stats ^version ^weather\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "^fortune")==0)
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "fortune")==0)
 			Fortune(&raw);
-		else if (strcmp(raw.text, "^debug on")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0) {
 			debug = 1;
-			Log("##debug on##");
+			sprintf(buffer_cmd, "privmsg %s :debug on\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "^debug off")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0) {
 			debug = 0;
-			Log("##debug off##");
+			sprintf(buffer_cmd, "privmsg %s :debug off\n", target);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
 		}
-		else if(strcmp(raw.text, "^joke")==0)
+		else if(raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
 			Joke(&raw);
-		else if (strcmp(raw.text, "^stats")==0)
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats")==0)
 			Stats(&raw);
-		else if (raw.text[0]=='^'&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 		  raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]=='\0') {
 			sprintf(buffer_cmd, "privmsg %s :sh: timeout is %d seconds\n", target, cmd_timeout);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (raw.text[0]=='^'&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 			raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]==' ') {
 			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, "esselfe")==0 || strcmp(raw.nick, "SpringSprocket")==0) {
 				raw.text[0] = ' ';
@@ -236,19 +242,27 @@ strcmp(raw.command, "NICK")!=0) {
 				memset(buffer_cmd, 0, 4096);
 			}
 		}
-		else if (strcmp(raw.text, "^version")==0) {
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&raw.text[3]=='i'&&raw.text[4]=='g'&&
+			raw.text[5]=='g'&&raw.text[6]=='e'&&raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
+			trigger_char = raw.text[9];
+			sprintf(buffer_cmd, "privmsg %s :trigger_char: %c\n", target, trigger_char);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version")==0) {
 			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "^weather")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather")==0) {
 			sprintf(buffer_cmd, "privmsg %s :weather: missing city argument, example: '^weather montreal'\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (raw.text[0]=='^' && raw.text[1]=='w' && raw.text[2]=='e' && raw.text[3]=='a' &&
+		else if (raw.text[0]==trigger_char && raw.text[1]=='w' && raw.text[2]=='e' && raw.text[3]=='a' &&
 			raw.text[4]=='t' && raw.text[5]=='h' && raw.text[6]=='e' && raw.text[7]=='r' && raw.text[8]==' ')
 			Weather(&raw);
 		else if (strcmp(raw.text, "^sh")==0) {
@@ -257,21 +271,21 @@ strcmp(raw.command, "NICK")!=0) {
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "^sh_lock")==0 && strcmp(raw.nick, "esselfe")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0 && strcmp(raw.nick, "esselfe")==0) {
 			sh_locked = 1;
 			sprintf(buffer_cmd, "privmsg %s :sh_locked: 1\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (strcmp(raw.text, "^sh_unlock")==0 && strcmp(raw.nick, "esselfe")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0 && strcmp(raw.nick, "esselfe")==0) {
 			sh_locked = 0;
 			sprintf(buffer_cmd, "privmsg %s :sh_locked: 0\n", target);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
+		else if (raw.text[0]==trigger_char && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
 				sprintf(buffer_cmd,
@@ -369,8 +383,11 @@ while (1) {
 	++cp;
 }
 			if (dontrun) {
-				Log("#### Will not run kill!\n");
-				sprintf(raw.text, "^stats");
+				sprintf(buffer_cmd, "privmsg %s :Will not run kill!\n",	target);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+				sprintf(raw.text, "%cstats", trigger_char);
 				continue;
 			}
 

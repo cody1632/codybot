@@ -13,6 +13,7 @@ extern struct tm *tm0;
 extern time_t t0;
 extern char *log_filename;
 extern char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
+extern char trigger_char;
 extern char *nick;
 extern char *full_user_name;
 extern char *hostname;

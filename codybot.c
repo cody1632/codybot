@@ -32,14 +32,15 @@ static const struct option long_options[] = {
 	{"localport", required_argument, NULL, 'P'},
 	{"port", required_argument, NULL, 'p'},
 	{"server", required_argument, NULL, 's'},
+	{"trigger", required_argument, NULL, 't'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVdbfH:l:N:n:P:p:s:";
+static const char *short_options = "hVdbfH:l:N:n:P:p:s:t:";
 
 void HelpShow(void) {
-	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode }\n");
-	printf("               { -d/--debug | -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME }\n");
-	printf("               { -n/--nick NICK | -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR }\n");
+	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode | -d/--debug }\n");
+	printf("               { -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME | -n/--nick NICK }\n");
+	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
 }
 
 int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 30;
@@ -49,6 +50,7 @@ struct tm *tm0;
 time_t t0;
 char *log_filename;
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
+char trigger_char;
 char *nick;
 char *full_user_name;
 char *hostname;
@@ -198,6 +200,14 @@ void ReadCommandLoop(void) {
 			Log(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 		}
+		else if (*cp=='t'&&*(cp+1)=='r'&&*(cp+2)=='i'&&*(cp+3)=='g'&&*(cp+4)=='g'&&*(cp+5)=='e'&&*(cp+6)=='r'&&*(cp+7)==' ') {
+			if (*(cp+8)!='\n')
+				trigger_char = *(cp+8);
+			sprintf(buffer_cmd, "privmsg %s :trigger_char: %c\n", target, trigger_char);
+			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			Log(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
+		}
 		else {
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);
@@ -258,6 +268,9 @@ int main(int argc, char **argv) {
 		case 's':
 			ServerGetIP(optarg);
 			break;
+		case 't':
+			trigger_char = *optarg;
+			break;
 		default:
 			fprintf(stderr, "##codybot::main() error: Unknown argument: %c/%d\n", (char)c, c);
 			break;
@@ -279,6 +292,8 @@ int main(int argc, char **argv) {
 		log_filename = (char *)malloc(strlen("codybot.log")+1);
 		sprintf(log_filename, "codybot.log");
 	}
+	if (!trigger_char)
+		trigger_char = '^';
 	if (!nick) {
 		nick = (char *)malloc(strlen("codybot")+1);
 		sprintf(nick, "codybot");

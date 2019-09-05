@@ -263,7 +263,7 @@ strcmp(raw.command, "NICK")!=0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
-				sprintf(buffer_cmd, "echo \"%s\" > lunar/home/dummy/run.fifo", raw.text);
+				sprintf(buffer_cmd, "echo \"timeout %ds %s\" > lunar/home/dummy/run.fifo", cmd_timeout, raw.text);
 				system(buffer_cmd);
 
 				// wait for lunar/home/dummy/run.sh to write in cmd.output

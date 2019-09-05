@@ -316,7 +316,7 @@ strcmp(raw.command, "NICK")!=0) {
 					memset(buffer_cmd, 0, 4096);
 					continue;
 				}
-	
+
 				//unsigned int cnt = 1;
 				//size_t size = 4096, retsize;
 				size_t size = 4096;

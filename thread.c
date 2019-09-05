@@ -244,7 +244,8 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&raw.text[3]=='i'&&raw.text[4]=='g'&&
 			raw.text[5]=='g'&&raw.text[6]=='e'&&raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
-			trigger_char = raw.text[9];
+			if (strcmp(raw.nick, "esselfe")==0)
+				trigger_char = raw.text[9];
 			sprintf(buffer_cmd, "privmsg %s :trigger_char: %c\n", target, trigger_char);
 			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			Log(buffer_cmd);

@@ -23,7 +23,7 @@ void ServerGetIP(char *hostname) {
 
     he = gethostbyname(hostname);
     if (he == NULL) {
-        fprintf(stderr, "##codybot error: Cannot gethostbyname()\n");
+        fprintf(stderr, "##codybot::ServerGetIP() error: Cannot gethostbyname()\n");
         exit(1);
     }
 
@@ -43,7 +43,7 @@ void ServerGetIP(char *hostname) {
 void ServerConnect(void) {
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_fd < 0) {
-		fprintf(stderr, "||codybot error: Cannot socket(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot socket(): %s\n", strerror(errno));
 		exit(1);
 	}
 	else {
@@ -56,7 +56,7 @@ void ServerConnect(void) {
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(local_port);
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		fprintf(stderr, "||codybot error: Cannot bind(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot bind(): %s\n", strerror(errno));
 		close(socket_fd);
 		exit(1);
 	}
@@ -72,7 +72,7 @@ void ServerConnect(void) {
 	host.sin_port = htons(server_port);
 	printf("####htons()\n");
 	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
-		fprintf(stderr, "||codybot error: Cannot connect(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot connect(): %s\n", strerror(errno));
 		close(socket_fd);
 		exit(1);
 	}
@@ -88,7 +88,7 @@ void ServerConnect(void) {
 	const SSL_METHOD *method = TLS_method();
 	SSL_CTX *ctx = SSL_CTX_new(method);
 	if (!ctx) {
-		fprintf(stderr, "||codybot error: Cannot create SSL context\n");
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot create SSL context\n");
 		close(socket_fd);
 		exit(1);
 	}
@@ -124,7 +124,7 @@ void ServerConnect(void) {
 	SSL_connect(pSSL);
 	ret = SSL_accept(pSSL);
 	if (ret <= 0) {
-		fprintf(stderr, "||codybot error: SSL_accept() failed, ret: %d\n", ret);
+		fprintf(stderr, "||codybot::ServerConnect() error: SSL_accept() failed, ret: %d\n", ret);
 		fprintf(stderr, "||SSL error number: %d\n", SSL_get_error(pSSL, 0));
 		close(socket_fd);
 		exit(1);
@@ -139,7 +139,7 @@ void ServerConnect(void) {
 	Log(buffer_cmd);
 
 	if (server_ip == server_ip_freenode) {
-		sprintf(buffer_cmd, "USER codybot %s irc.freenode.net %s\n", hostname, full_user_name);
+		sprintf(buffer_cmd, "USER %s %s irc.freenode.net %s\n", nick, hostname, full_user_name);
 		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 	}
 	else {

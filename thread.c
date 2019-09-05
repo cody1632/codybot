@@ -47,23 +47,22 @@ void *ThreadRunFunc(void *argp) {
 
 	FILE *fp = fopen("cmd.ret", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "\n##codybot::ThreadRunFunc() error: Cannot open cmd.ret: %s\n", strerror(errno));
+		sprintf(buffer, "codybot::ThreadRunFunc() error: Cannot open cmd.ret: %s", strerror(errno));
+		Msg(buffer);
 	}
 	fgets(buffer, 4096, fp);
 	fclose(fp);
 
 	ret = atoi(buffer);
 	if (ret == 124) {
-		sprintf(buffer_cmd, "privmsg %s :sh: timeout\n", target);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		Msg("sh: timed out");
 		return NULL;
 	}
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "\n##codybot::ThreadRunFunc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		sprintf(buffer, "codybot::ThreadRunFunc() error: Cannot open cmd.output: %s", strerror(errno));
+		Msg(buffer);
 		return NULL;
 	}
 
@@ -87,10 +86,7 @@ void *ThreadRunFunc(void *argp) {
 			int ret2 = getline(&result, &size, fp);
 			if (ret2 < 0) break;
 			result[strlen(result)-1] = '\0';
-			sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg(result);
 		}
 	}
 	else if (lines_total > 10) {
@@ -102,10 +98,7 @@ void *ThreadRunFunc(void *argp) {
 			char url[1024];
 			fgets(url, 1023, fp2);
 			fclose(fp2);
-			sprintf(buffer_cmd, "privmsg %s :%s\n", target, url);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg(url);
 		}
 	}
 
@@ -163,46 +156,39 @@ void *ThreadRXFunc(void *argp) {
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
-		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0)
+		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
+			char c = trigger_char;
+			sprintf(buffer, "commands: %cabout %cascii %cchars %chelp %cfortune"
+				" %cjoke %crainbow %csh %cstats %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c);
+			Msg(buffer);
+			continue;
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0)
 			AsciiArt(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "about")==0) {
 			if (strcmp(nick, "codybot")==0)
-				sprintf(buffer_cmd, "privmsg %s :codybot is an IRC bot written in C by esselfe, "
-					"sources @ https://github.com/cody1632/codybot\n", target);
-			else
-				sprintf(buffer_cmd, "privmsg %s :codybot(%s) is an IRC bot written in C by esselfe, "
-					"sources @ https://github.com/cody1632/codybot\n", target, nick);	
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+				Msg("codybot is an IRC bot written in C by esselfe, "
+					"sources @ https://github.com/cody1632/codybot");
+			else {
+				sprintf(buffer, "codybot(%s) is an IRC bot written in C by esselfe, "
+					"sources @ https://github.com/cody1632/codybot\n", nick);
+				Msg(buffer);
+			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "chars")==0)
 			Chars(&raw);
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
 		  raw.text[5]=='b'&&raw.text[6]=='o'&&raw.text[7]=='w'&&raw.text[8]==' ')
 			Rainbow(&raw);
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
-			sprintf(buffer_cmd, "privmsg %s :commands: ^about ^ascii ^chars ^help ^fortune"
-				" ^joke ^rainbow ^sh ^stats ^version ^weather\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
-		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "fortune")==0)
 			Fortune(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0) {
 			debug = 1;
-			sprintf(buffer_cmd, "privmsg %s :debug on\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg("debug = 1");
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0) {
 			debug = 0;
-			sprintf(buffer_cmd, "privmsg %s :debug off\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg("debug = 0");
 		}
 		else if(raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
 			Joke(&raw);
@@ -210,14 +196,12 @@ strcmp(raw.command, "NICK")!=0) {
 			Stats(&raw);
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 		  raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]=='\0') {
-			sprintf(buffer_cmd, "privmsg %s :sh: timeout is %d seconds\n", target, cmd_timeout);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "timeout = %d", cmd_timeout);
+			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 			raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]==' ') {
-			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, "esselfe")==0 || strcmp(raw.nick, "SpringSprocket")==0) {
+			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, "esselfe")==0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
@@ -230,71 +214,48 @@ strcmp(raw.command, "NICK")!=0) {
 				cmd_timeout = atoi(raw.text);
 				if (cmd_timeout == 0)
 					cmd_timeout = 5;
-				sprintf(buffer_cmd, "privmsg %s :sh: timeout set to %d seconds\n", target, cmd_timeout);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
+				sprintf(buffer, "timeout = %d", cmd_timeout);
+				Msg(buffer);
 			}
-			else {
-				sprintf(buffer_cmd, "privmsg %s :sh: timeout can only be set by codybot and esselfe\n", target);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
-			}
+			else
+				Msg("timeout can only be set by codybot and esselfe");
 		}
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&raw.text[3]=='i'&&raw.text[4]=='g'&&
 			raw.text[5]=='g'&&raw.text[6]=='e'&&raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
 			if (strcmp(raw.nick, "esselfe")==0)
 				trigger_char = raw.text[9];
-			sprintf(buffer_cmd, "privmsg %s :trigger_char: %c\n", target, trigger_char);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "trigger = %c", trigger_char);
+			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version")==0) {
-			sprintf(buffer_cmd, "privmsg %s :codybot %s\n", target, codybot_version_string);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "codybot %s", codybot_version_string);
+			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather")==0) {
-			sprintf(buffer_cmd, "privmsg %s :weather: missing city argument, example: '^weather montreal'\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "weather: missing city argument, example: '%cweather montreal'", trigger_char);
+			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && raw.text[1]=='w' && raw.text[2]=='e' && raw.text[3]=='a' &&
 			raw.text[4]=='t' && raw.text[5]=='h' && raw.text[6]=='e' && raw.text[7]=='r' && raw.text[8]==' ')
 			Weather(&raw);
 		else if (strcmp(raw.text, "^sh")==0) {
-			sprintf(buffer_cmd, "privmsg %s :sh: missing argument, example: '^sh ls -ld /tmp'\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'", trigger_char);
+			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0 && strcmp(raw.nick, "esselfe")==0) {
 			sh_locked = 1;
-			sprintf(buffer_cmd, "privmsg %s :sh_locked: 1\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg("sh_locked = 1");
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0 && strcmp(raw.nick, "esselfe")==0) {
 			sh_locked = 0;
-			sprintf(buffer_cmd, "privmsg %s :sh_locked: 0\n", target);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg("sh_locked = 0");
 		}
 		else if (raw.text[0]==trigger_char && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
-				sprintf(buffer_cmd,
-					"privmsg %s :%s: sh is temporarily disabled, try again later or ask esselfe to enable it\n",
-					target, raw.nick);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
+				sprintf(buffer,
+					"%s: sh is temporarily disabled, try again later or ask esselfe to enable it", raw.nick);
+				Msg(buffer);
 				continue;
 			}
 			// rem touch $srcdir/sh_lock to have ^sh commands run in a chroot
@@ -313,11 +274,9 @@ strcmp(raw.command, "NICK")!=0) {
 
 				FILE *fr = fopen("lunar/home/dummy/cmd.output", "r");
 				if (fr == NULL) {
-					sprintf(buffer_cmd,
-						"privmsg %s :codybot::ThreadRXFunc() error: Cannot open lunar/home/dummy/cmd.output\n", target);
-					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-					Log(buffer_cmd);
-					memset(buffer_cmd, 0, 4096);
+					sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot open lunar/home/dummy/cmd.output: %s",
+						strerror(errno));
+					Msg(buffer);
 					continue;
 				}
 
@@ -337,28 +296,19 @@ strcmp(raw.command, "NICK")!=0) {
 				char *output = (char *)malloc(size);
 				memset(output, 0, size);
 				fgets(output, 4096, fr);
-				sprintf(buffer_cmd, "privmsg %s :%s\n", target, output);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
 				fclose(fr);
+				Msg(output);
 
 				if (line_total >= 2) {
 					system("cat lunar/home/dummy/cmd.output |nc termbin.com 9999 >cmd.url");
 					fr = fopen("cmd.url", "r");
 					if (fr == NULL) {
-						sprintf(buffer_cmd, "privmsg %s :ThreadRXFunc() error: Cannot open cmd.url: %s\n",
-							target, strerror(errno));
-						SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-						Log(buffer_cmd);
-						memset(buffer_cmd, 0, 4096);
+						sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot open cmd.url: %s", strerror(errno));
+						Msg(buffer);
 						continue;
 					}
 					fgets(output, 4096, fr);
-					sprintf(buffer_cmd, "privmsg %s :%s\n",	target, output);
-					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-					Log(buffer_cmd);
-					memset(buffer_cmd, 0, 4096);
+					Msg(output);
 				
 					fclose(fr);
 				}
@@ -384,11 +334,7 @@ while (1) {
 	++cp;
 }
 			if (dontrun) {
-				sprintf(buffer_cmd, "privmsg %s :Will not run kill!\n",	target);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
-				sprintf(raw.text, "%cstats", trigger_char);
+				Msg("Will not run kill!");
 				continue;
 			}
 
@@ -397,7 +343,7 @@ while (1) {
 			raw.text[2] = ' ';
 			
 			if (debug)
-				printf("starting thread for ::%s::\n", raw.text);
+				printf("codybot::ThreadRXFunc() starting thread for ::%s::\n", raw.text);
 			ThreadRunStart(raw.text);
 
 //			RawLineClear(&raw);

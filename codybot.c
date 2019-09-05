@@ -114,49 +114,51 @@ void Logx(char *text) {
 	fclose(fp);
 }
 
+void Msg(char *text) {
+	sprintf(buffer_log, "privmsg %s :%s\n", target, text);
+	SSL_write(pSSL, buffer_log, strlen(buffer_log));
+	Log(buffer_log);
+	memset(buffer_log, 0, 4096);
+}
+
 void ReadCommandLoop(void) {
+	char buffer_line[4096];
 	while (!endmainloop) {
-		memset(buffer_cmd, 0, 4096);
-		fgets(buffer_cmd, 4095, stdin);
+		memset(buffer_line, 0, 4096);
+		fgets(buffer_line, 4095, stdin);
 		char *cp;
-		cp = buffer_cmd;
-		if (buffer_cmd[0] == '\n')
+		cp = buffer_line;
+		if (buffer_line[0] == '\n')
 			continue;
-		else if (strcmp(buffer_cmd, "exit\n")==0 || strcmp(buffer_cmd, "quit\n")==0)
+		else if (strcmp(buffer_line, "exit\n")==0 || strcmp(buffer_line, "quit\n")==0)
 			endmainloop = 1;
-		else if (strcmp(buffer_cmd, "debug on\n")==0) {
+		else if (strcmp(buffer_line, "debug on\n")==0) {
 			debug = 1;
-			printf("##debug on\n");
+			Msg("debug = 1");
 		}
-		else if (strcmp(buffer_cmd, "debug off\n")==0) {
+		else if (strcmp(buffer_line, "debug off\n")==0) {
 			debug = 0;
-			printf("##debug off\n");
+			Msg("debug = 0");
 		}
-		else if (strcmp(buffer_cmd, "sh_disable\n")==0) {
+		else if (strcmp(buffer_line, "sh_disable\n")==0) {
 			sh_disabled = 1;
-			printf("##sh disabled\n");
+			Msg("sh_disabled = 1");
 		}
-		else if (strcmp(buffer_cmd, "sh_enable\n")==0) {
+		else if (strcmp(buffer_line, "sh_enable\n")==0) {
 			sh_disabled = 0;
-			printf("##sh enabled\n");
+			Msg("sh_disabled = 1");
 		}
-		else if (strcmp(buffer_cmd, "sh_lock\n")==0) {
+		else if (strcmp(buffer_line, "sh_lock\n")==0) {
 			sh_locked = 1;
-			sprintf(buffer_cmd, "privmsg %s :sh_locked: %d\n", target, sh_locked);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg("sh_locked = 1");
 		}
-		else if (strcmp(buffer_cmd, "sh_unlock\n")==0) {
+		else if (strcmp(buffer_line, "sh_unlock\n")==0) {
 			sh_locked = 0;
-			sprintf(buffer_cmd, "privmsg %s :sh_locked: %d\n", target, sh_locked);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg("sh_locked = 0");
 		}
-		else if (buffer_cmd[0]=='i' && buffer_cmd[1]=='d' && buffer_cmd[2]==' ') {
+		else if (buffer_line[0]=='i' && buffer_line[1]=='d' && buffer_line[2]==' ') {
 			char *cp;
-			cp = buffer_cmd+3;
+			cp = buffer_line+3;
 			char pass[1024];
 			unsigned int cnt = 0;
 			while (1) {
@@ -174,7 +176,8 @@ void ReadCommandLoop(void) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)=='\n') {
-			printf("##timeout: %d seconds\n", cmd_timeout);
+			sprintf(buffer, "timeout = %d", cmd_timeout);
+			Msg(buffer);
 		}
 		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)==' ') {
 			char str[1024];
@@ -195,23 +198,18 @@ void ReadCommandLoop(void) {
 			cmd_timeout = atoi(str);
 			if (cmd_timeout == 0)
 				cmd_timeout = 10;
-			sprintf(buffer_cmd, "privmsg %s :sh: timeout set to %d seconds\n", target, cmd_timeout);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "timeout = %d\n", cmd_timeout);
+			Msg(buffer);
 		}
 		else if (*cp=='t'&&*(cp+1)=='r'&&*(cp+2)=='i'&&*(cp+3)=='g'&&*(cp+4)=='g'&&*(cp+5)=='e'&&*(cp+6)=='r'&&*(cp+7)==' ') {
 			if (*(cp+8)!='\n')
 				trigger_char = *(cp+8);
-			sprintf(buffer_cmd, "privmsg %s :trigger_char: %c\n", target, trigger_char);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			sprintf(buffer, "trigger_char = %c", trigger_char);
+			Msg(buffer);
 		}
 		else {
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			SSL_write(pSSL, buffer_line, strlen(buffer_line));
+			memset(buffer_line, 0, 4096);
 		}
 	}
 }

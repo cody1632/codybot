@@ -11,10 +11,7 @@
 void AsciiArt(struct raw_line *rawp) {
 	FILE *fp = fopen("data-ascii.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer_cmd, "privmsg %s :codybot::AsciiArt() error: cannot open data-ascii.txt\n", target);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		Msg("codybot::AsciiArt() error: cannot open data-ascii.txt");
 		return;
 	}
 
@@ -50,10 +47,7 @@ void AsciiArt(struct raw_line *rawp) {
         else if (c == '%' && cprev == '\n')
             break;
 		else if (c == '\n') {
-			sprintf(buffer_cmd, "privmsg %s :%s\n", target, line);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-			Log(buffer_cmd);
-			memset(buffer_cmd, 0, 4096);
+			Msg(line);
 			memset(line, 0, 1024);
 			cnt = 0;
 		}
@@ -67,11 +61,7 @@ void AsciiArt(struct raw_line *rawp) {
 void Chars(struct raw_line *rawp) {
 	FILE *fp = fopen("data-chars.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer_cmd, "privmsg %s :codybot::Chars() error: Cannot open data-chars.txt: %s\n",
-			target, strerror(errno));
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		Msg("codybot::Chars() error: Cannot open data-chars.txt: %s\n");
 		return;
 	}
 
@@ -80,10 +70,8 @@ void Chars(struct raw_line *rawp) {
 	while (1) {
 		str = fgets(chars_line, 4095, fp);
 		if (str == NULL) break;
-		sprintf(buffer_cmd, "privmsg %s :%s: %s\n", target, raw.nick, chars_line);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer, "%s: %s\n", raw.nick, chars_line);
+		Msg(buffer);
 	}
 
 	fclose(fp);
@@ -92,14 +80,8 @@ void Chars(struct raw_line *rawp) {
 void Fortune(struct raw_line *rawp) {
 	FILE *fp = fopen("data-fortunes.txt", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Fortune() error: Cannot open data-fortunes.txt: %s\n", strerror(errno));
-		if (server_ip == server_ip_blinkenshell)
-			sprintf(buffer_cmd, "privmsg #blinkenshell :fortune error: cannot open data-fortunes.txt\n");
-		else
-			sprintf(buffer_cmd, "privmsg #codybot :fortune error: cannot open data-fortunes.txt\n");
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer, "##codybot::Fortune() error: Cannot open data-fortunes.txt: %s", strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
@@ -147,15 +129,14 @@ void Fortune(struct raw_line *rawp) {
 
 	if (strlen(fortune_line) > 0) {
 		RawGetTarget(rawp);
-		sprintf(buffer_cmd, "privmsg %s :fortune: %s\n", target, fortune_line);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer, "fortune: %s\n", fortune_line);
+		Msg(buffer);
 	
 		fclose(fp);
 		fp = fopen("stats", "w");
 		if (fp == NULL) {
-			fprintf(stderr, "##codybot::Fortune() error: Cannot open stats file\n");
+			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s", strerror(errno));
+			Msg(buffer);
 			return;
 		}
 
@@ -170,10 +151,8 @@ void Fortune(struct raw_line *rawp) {
 void Joke(struct raw_line *rawp) {
 	FILE *fp = fopen("data-jokes.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer_cmd, "privmsg %s :codybot::Joke() error: cannot open jokes database\n", target);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer, "codybot::Joke() error: cannot open data-jokes.txt: %s", strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
@@ -223,16 +202,11 @@ void Joke(struct raw_line *rawp) {
 
 	RawGetTarget(rawp);
 	if (strlen(joke_line) > 0) {
-        sprintf(buffer_cmd, "privmsg %s :joke: %s\n", target, joke_line);
-        SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-        Log(buffer_cmd);
-        memset(buffer_cmd, 0, 4096);
+        sprintf(buffer, "joke: %s", joke_line);
+		Msg(buffer);
     }
 	else {
-		sprintf("privmsg %s :codybot::Joke(): joke_line is empty!\n", target);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		Msg("codybot::Joke(): joke_line is empty!");
 	}
 
 	fclose(fp);
@@ -257,10 +231,7 @@ void Rainbow(struct raw_line *rawp) {
 	}
 	strcat(result, colors[0]);
 
-	sprintf(buffer_cmd, "privmsg %s :%s\n", target, result);
-	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	Log(buffer_cmd);
-	memset(buffer_cmd, 0, 4096);
+	Msg(result);
 }
 
 char *slap_items[20] = {
@@ -284,18 +255,16 @@ void SlapCheck(struct raw_line *rawp) {
 		RawGetTarget(rawp);
 		gettimeofday(&tv0, NULL);
 		srand((unsigned int)tv0.tv_usec);
-		sprintf(buffer_cmd, "privmsg %s :%cACTION slaps %s with %s%c\n", 
-			target, 1, rawp->nick, slap_items[rand()%20], 1);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer, "%cACTION slaps %s with %s%c", 1, rawp->nick, slap_items[rand()%20], 1);
+		Msg(buffer);
 	}
 }
 
 void Stats(struct raw_line *rawp) {
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Stats() error: Cannot open stats file\n");
+		sprintf(buffer, "##codybot::Stats() error: Cannot open stats file: %s", strerror(errno));
+		Msg(buffer);
 		return;
 	}
 	else {
@@ -305,10 +274,8 @@ void Stats(struct raw_line *rawp) {
 		fortune_total = atoi(str);
 	}
 	RawGetTarget(rawp);
-	sprintf(buffer_cmd, "privmsg %s :Given fortune cookies: %llu\n", target, fortune_total);
-	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	Log(buffer_cmd);
-	memset(buffer_cmd, 0, 4096);
+	sprintf(buffer, "Given fortune cookies: %llu", fortune_total);
+	Msg(buffer);
 }
 
 void Weather(struct raw_line *rawp) {
@@ -344,10 +311,8 @@ void Weather(struct raw_line *rawp) {
 	sprintf(buffer, "/tmp/weather-%s.temp", city);
 	FILE *fp = fopen(buffer, "r");
 	if (fp == NULL) {
-		sprintf(buffer_cmd, "##codybot::Weather() error: Cannot open %s: %s\n", buffer, strerror(errno));
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer_cmd, "codybot::Weather() error: Cannot open %s: %s", buffer, strerror(errno));
+		Msg(buffer_cmd);
 		return;
 	}
 	fgets(temp2, 1023, fp);
@@ -375,10 +340,8 @@ void Weather(struct raw_line *rawp) {
 	sprintf(buffer, "/tmp/weather-%s.temp2", city);
 	fp = fopen(buffer, "r");
 	if (fp == NULL) {
-		sprintf(buffer_cmd, "##codybot::Weather() error: Cannot open %s: %s\n", buffer, strerror(errno));
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-		Log(buffer_cmd);
-		memset(buffer_cmd, 0, 4096);
+		sprintf(buffer_cmd, "codybot::Weather() error: Cannot open %s: %s", buffer, strerror(errno));
+		Msg(buffer_cmd);
 	}
 	fgets(temp2, 1023, fp);
 	fclose(fp);
@@ -386,10 +349,8 @@ void Weather(struct raw_line *rawp) {
 	temp2[strlen(temp2)-1] = ' ';
 	int deg_celsius = atoi(temp2);
 	int deg_farenheit = (deg_celsius * 9 / 5) + 32;
-	sprintf(buffer_cmd, "privmsg %s :%s: %s %dC/%dF\n", target, city, temp, deg_celsius, deg_farenheit);
-	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	Log(buffer_cmd);
-	memset(buffer_cmd, 0, 4096);
+	sprintf(buffer_cmd, "%s: %s %dC/%dF", city, temp, deg_celsius, deg_farenheit);
+	Msg(buffer_cmd);
 
 	sprintf(buffer, "rm /tmp/weather-%s.*\n", city);
 	system(buffer);

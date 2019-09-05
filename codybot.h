@@ -49,6 +49,7 @@ extern struct raw_line raw;
 void Log(char *text);
 void Logr(char *text);
 void Logx(char *text);
+void Msg(char *text);
 void *ThreadRXFunc(void *argp);
 // from commands.c
 void AsciiArt(struct raw_line *rawp);

@@ -45,3 +45,12 @@ To run a shell command from the chat onto the host of codybot, type
 '^sh COMMAND ARGS' ie: '^sh ls /home/codybot'. You can disable this
 command by touching sh_disable in the program's current directory
 as the root user or by using the sudo program.
+
+To run all shell commands in a locked chroot, touch './sh_lock' or
+type '^sh_lock' or '^sh_unlock'. You have to run:
+./lunar-mnt 1
+chroot ./lunar /bin/bash
+su - dummy
+run.sh
+You should ensure that the codybot user can write to
+lunar/home/dummy/run.fifo

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rsync -uv bsfc@BSFC-LT04:/home/bsfc/code/codybot/{*.c,*.h,Makefile,data-*} . && make
+

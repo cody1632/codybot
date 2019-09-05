@@ -54,3 +54,7 @@ su - dummy
 run.sh
 You should ensure that the codybot user can write to
 lunar/home/dummy/run.fifo
+
+Speaking of the lunar directory... it is a x86/i686 system I use
+within a virtual machine (qemu-system-i386), those files may not
+execute on 64 bit machines...

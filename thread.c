@@ -108,7 +108,6 @@ void *ThreadRunFunc(void *argp) {
 			memset(buffer_cmd, 0, 4096);
 		}
 	}
-	//system("rm cmd.output cmd.url 2>/dev/null");
 
 	fclose(fp);
 
@@ -273,17 +272,8 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (raw.text[0]=='^' && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
-			if (sh_disabled) {
-				sprintf(buffer_cmd,
-					"privmsg %s :%s: sh is temporarily disabled, try again later or ask esselfe to enable it\n",
-					target, raw.nick);
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
-				continue;
-			}
 			struct stat st;
-			if (stat("sh_disable", &st) == 0) {
+			if (sh_disabled || stat("sh_disable", &st) == 0) {
 				sprintf(buffer_cmd,
 					"privmsg %s :%s: sh is temporarily disabled, try again later or ask esselfe to enable it\n",
 					target, raw.nick);
@@ -292,7 +282,7 @@ strcmp(raw.command, "NICK")!=0) {
 				memset(buffer_cmd, 0, 4096);
 				continue;
 			}
-			// touch $srcdir/sh_lock to have ^sh commands run in a chroot
+			// rem touch $srcdir/sh_lock to have ^sh commands run in a chroot
 			else if(sh_locked || (stat("sh_lock", &st) == 0)) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
@@ -300,8 +290,7 @@ strcmp(raw.command, "NICK")!=0) {
 				sprintf(buffer_cmd, "echo \"%s\" > lunar/home/dummy/run.fifo", raw.text);
 				system(buffer_cmd);
 
-				// wait for run.sh to write in run.status
-				//sleep(5);
+				// wait for lunar/home/dummy/run.sh to write in cmd.output
 				printf("++tail lunar/home/dummy/run.status++\n");
 				sprintf(buffer_cmd, "tail lunar/home/dummy/run.status");
 				system(buffer_cmd);
@@ -317,30 +306,48 @@ strcmp(raw.command, "NICK")!=0) {
 					continue;
 				}
 
-				//unsigned int cnt = 1;
-				//size_t size = 4096, retsize;
+				// count lines total
+				int c;
+				unsigned int line_total = 0;
+				while (1) {
+					c = fgetc(fr);
+					if (c == -1)
+						break;
+					else if (c == '\n')
+						++line_total;
+				}
+				fseek(fr, 0, SEEK_SET);
+
 				size_t size = 4096;
 				char *output = (char *)malloc(size);
 				memset(output, 0, size);
 				fgets(output, 4096, fr);
-				//while (1) {
-				//	retsize = getline(&output, &size, fr);
-					//getline(&output, &size, fr);
-				//	if (retsize) {
-						sprintf(buffer_cmd, "privmsg %s :%s\n", target, output);
+				sprintf(buffer_cmd, "privmsg %s :%s\n", target, output);
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+				Log(buffer_cmd);
+				memset(buffer_cmd, 0, 4096);
+				fclose(fr);
+
+				if (line_total >= 2) {
+					system("cat lunar/home/dummy/cmd.output |nc termbin.com 9999 >cmd.url");
+					fr = fopen("cmd.url", "r");
+					if (fr == NULL) {
+						sprintf(buffer_cmd, "privmsg %s :ThreadRXFunc() error: Cannot open cmd.url: %s\n",
+							target, strerror(errno));
 						SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 						Log(buffer_cmd);
 						memset(buffer_cmd, 0, 4096);
-				//		++cnt;
-				//		if (cnt >= 5) {
-				//			break;
-				//		}
-				//	} 
-				//	else
-				//		break;
-				//}
+						continue;
+					}
+					fgets(output, 4096, fr);
+					sprintf(buffer_cmd, "privmsg %s :%s\n",	target, output);
+					SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+					Log(buffer_cmd);
+					memset(buffer_cmd, 0, 4096);
+				
+					fclose(fr);
+				}
 
-				fclose(fr);
 				continue;
 			}
 

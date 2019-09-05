@@ -17,7 +17,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.7";
+const char *codybot_version_string = "0.2.8";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},

@@ -127,12 +127,13 @@ void Fortune(struct raw_line *rawp) {
 			fortune_line[cnt++] = c;
 	}
 
+	fclose(fp);
+
 	if (strlen(fortune_line) > 0) {
 		RawGetTarget(rawp);
 		sprintf(buffer, "fortune: %s\n", fortune_line);
 		Msg(buffer);
 	
-		fclose(fp);
 		fp = fopen("stats", "w");
 		if (fp == NULL) {
 			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s", strerror(errno));
@@ -140,12 +141,11 @@ void Fortune(struct raw_line *rawp) {
 			return;
 		}
 
-		char str[1024];
-		sprintf(str, "%llu\n", ++fortune_total);
-		fputs(str, fp);
+		fprintf(fp, "%llu\n", ++fortune_total);
+
+		fclose(fp);
 	}
 
-	fclose(fp);
 }
 
 void Joke(struct raw_line *rawp) {
@@ -300,6 +300,7 @@ void Weather(struct raw_line *rawp) {
 
 	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O /tmp/weather-%s.html\n", city, city);
 	system(buffer);
+
 	sprintf(buffer,
 		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s/\\[38\\;5\\;240\\;1m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
 	system(buffer);

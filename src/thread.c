@@ -42,7 +42,7 @@ void *ThreadRunFunc(void *argp) {
 		++cnt;
 	}
 	strcat(cmd, "\" &> cmd.output; echo $? >cmd.ret");
-	Logx(cmd);
+	Log(cmd);
 	system(cmd);
 
 	FILE *fp = fopen("cmd.ret", "r");
@@ -131,7 +131,7 @@ void *ThreadRXFunc(void *argp) {
 		buffer_rx[strlen(buffer_rx)-2] = '\0';
 		if (buffer_rx[0] != 'P' && buffer_rx[1] != 'I' && buffer_rx[2] != 'N' &&
 		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ')
-			Logr(buffer_rx);
+			Log(buffer_rx);
 		// respond to ping request from the server with a pong
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
@@ -190,8 +190,12 @@ strcmp(raw.command, "NICK")!=0) {
 			debug = 0;
 			Msg("debug = 0");
 		}
-		else if(raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
 			Joke(&raw);
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig")==0) {
+			memset(buffer, '#', 4095);
+			Msg(buffer);
+		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats")==0)
 			Stats(&raw);
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&

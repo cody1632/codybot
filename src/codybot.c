@@ -17,7 +17,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.9";
+const char *codybot_version_string = "0.2.10";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -66,7 +66,8 @@ void Log(char *text) {
 	t0 = (time_t)tv0.tv_sec;
 	tm0 = gmtime(&t0);
 	char *str = strdup(text);
-	str[strlen(str)-1] = '\0';
+	// remove trailing newline
+	str[strlen(str)] = '\0';
 	sprintf(buffer_log, "%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 		tv0.tv_usec, str);
 	fputs(buffer_log, fp);
@@ -76,47 +77,15 @@ void Log(char *text) {
 	fclose(fp);
 }
 
-void Logr(char *text) {
-	FILE *fp = fopen(log_filename, "a+");
-	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Logr() error: Cannot open %s: %s\n", log_filename, strerror(errno));
-		return;
-	}
-
-	gettimeofday(&tv0, NULL);
-	t0 = (time_t)tv0.tv_sec;
-	tm0 = gmtime(&t0);
-	sprintf(buffer_log, "%02d:%02d:%02d.%03ld <<%s>>\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-		tv0.tv_usec, text);
-	fputs(buffer_log, fp);
-	fputs(buffer_log, stdout);
-	memset(buffer_log, 0, 4096);
-
-	fclose(fp);
-}
-
-void Logx(char *text) {
-	FILE *fp = fopen(log_filename, "a+");
-	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Logx() error: Cannot open %s: %s\n", log_filename, strerror(errno));
-		return;
-	}
-
-	gettimeofday(&tv0, NULL);
-	t0 = (time_t)tv0.tv_sec;
-	tm0 = gmtime(&t0);
-	sprintf(buffer_log, "%02d:%02d:%02d.%03ld $$%s$$\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
-		tv0.tv_usec, text);
-	fputs(buffer_log, fp);
-	fputs(buffer_log, stdout);
-	memset(buffer_log, 0, 4096);
-
-	fclose(fp);
-}
-
 void Msg(char *text) {
-/*	unsigned int total_len = strlen(text);
-	if (total_len > 400) {
+	unsigned int total_len = strlen(text);
+	if (total_len <= 400) {
+		sprintf(buffer_log, "privmsg %s :%s\n", target, text);
+		SSL_write(pSSL, buffer_log, strlen(buffer_log));
+		Log(buffer_log);
+		memset(buffer_log, 0, 4096);
+	}
+	else if (total_len > 400) {
 		char str[400], *cp = text;
 		unsigned int cnt, cnt2 = 0;
 		memset(str, 0, 400);
@@ -126,9 +95,13 @@ void Msg(char *text) {
 			str[cnt] = *(cp+cnt2);
 			++cnt;
 			++cnt2;
-			if (cnt2 >= total_len)
+			if (cnt2 >= total_len) {
+				str[cnt] = '\n';
+				SSL_write(pSSL, str, strlen(str));
+				Log(str);
 				break;
-			if (cnt >= 400) {
+			}
+			else if (cnt >= 400) {
 				str[cnt] = '\n';
 				SSL_write(pSSL, str, strlen(str));
 				Log(str);
@@ -139,11 +112,6 @@ void Msg(char *text) {
 		}
 		return;
 	}
-*/
-	sprintf(buffer_log, "privmsg %s :%s\n", target, text);
-	SSL_write(pSSL, buffer_log, strlen(buffer_log));
-	Log(buffer_log);
-	memset(buffer_log, 0, 4096);
 }
 
 void ReadCommandLoop(void) {

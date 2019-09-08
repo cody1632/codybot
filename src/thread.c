@@ -199,7 +199,8 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
 			Joke(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig")==0) {
-			memset(buffer, '#', 4095);
+			memset(buffer, 0, 4096);
+			memset(buffer, '#', 1024);
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats")==0)

@@ -43,7 +43,7 @@ void HelpShow(void) {
 	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
 }
 
-int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 30;
+int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 10;
 unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
@@ -67,7 +67,10 @@ void Log(char *text) {
 	tm0 = gmtime(&t0);
 	char *str = strdup(text);
 	// remove trailing newline
-	str[strlen(str)] = '\0';
+	if (str[strlen(str)-1] == '\n')
+		str[strlen(str)-1] = '\0';
+	else if (str[strlen(str)] == '\n')
+		str[strlen(str)-1] = '\0';
 	sprintf(buffer_log, "%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_hour, tm0->tm_min, tm0->tm_sec,
 		tv0.tv_usec, str);
 	fputs(buffer_log, fp);
@@ -97,12 +100,15 @@ void Msg(char *text) {
 			++cnt2;
 			if (cnt2 >= total_len) {
 				str[cnt] = '\n';
+				str[cnt+1] = '\0';
 				SSL_write(pSSL, str, strlen(str));
 				Log(str);
+				memset(str, 0, 400);
 				break;
 			}
-			else if (cnt >= 400) {
+			else if (cnt >= 399) {
 				str[cnt] = '\n';
+				str[cnt+1] = '\0';
 				SSL_write(pSSL, str, strlen(str));
 				Log(str);
 				memset(str, 0, 400);

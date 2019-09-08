@@ -110,6 +110,11 @@ void Fortune(struct raw_line *rawp) {
 		}
 	}
 
+	if (debug) {
+		sprintf(buffer, "&&&&fortune pos: %ld&&&&", ftell(fp));
+		Log(buffer);
+	}
+
 	while (1) {
 		cprev = c;
 		c = fgetc(fp);
@@ -131,7 +136,7 @@ void Fortune(struct raw_line *rawp) {
 
 	if (strlen(fortune_line) > 0) {
 		RawGetTarget(rawp);
-		sprintf(buffer, "fortune: %s\n", fortune_line);
+		sprintf(buffer, "fortune: %s", fortune_line);
 		Msg(buffer);
 	
 		fp = fopen("stats", "w");

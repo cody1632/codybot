@@ -37,9 +37,15 @@ void *ThreadRunFunc(void *argp) {
 			cmd[cnt] = '\0';
 			break;
 		}
-		cmd[cnt] = *cp;
+		else if (*cp == '"') {
+			cmd[cnt++] = '\\';
+			cmd[cnt++] = '"';
+		}
+		else {
+			cmd[cnt] = *cp;
+			++cnt;
+		}
 		++cp;
-		++cnt;
 	}
 	strcat(cmd, "\" &> cmd.output; echo $? >cmd.ret");
 	Log(cmd);

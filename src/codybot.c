@@ -17,7 +17,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.8";
+const char *codybot_version_string = "0.2.9";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -115,6 +115,31 @@ void Logx(char *text) {
 }
 
 void Msg(char *text) {
+/*	unsigned int total_len = strlen(text);
+	if (total_len > 400) {
+		char str[400], *cp = text;
+		unsigned int cnt, cnt2 = 0;
+		memset(str, 0, 400);
+		sprintf(str, "privmsg %s :", target);
+		cnt = strlen(str);
+		while (1) {
+			str[cnt] = *(cp+cnt2);
+			++cnt;
+			++cnt2;
+			if (cnt2 >= total_len)
+				break;
+			if (cnt >= 400) {
+				str[cnt] = '\n';
+				SSL_write(pSSL, str, strlen(str));
+				Log(str);
+				memset(str, 0, 400);
+				sprintf(str, "privmsg %s :", target);
+				cnt = strlen(str);
+			}
+		}
+		return;
+	}
+*/
 	sprintf(buffer_log, "privmsg %s :%s\n", target, text);
 	SSL_write(pSSL, buffer_log, strlen(buffer_log));
 	Log(buffer_log);

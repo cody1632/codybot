@@ -30,7 +30,7 @@ void *ThreadRunFunc(void *argp) {
 	//char *cp = argp;
 	char *cp = text;
 	char cmd[4096];
-	sprintf(cmd, "timeout %ds ", cmd_timeout);
+	sprintf(cmd, "timeout %ds bash -c \"", cmd_timeout);
 	unsigned int cnt = strlen(cmd);
 	while (1) {
 		if (*cp == '\n' || *cp == '\0') {
@@ -41,7 +41,7 @@ void *ThreadRunFunc(void *argp) {
 		++cp;
 		++cnt;
 	}
-	strcat(cmd, " &> cmd.output; echo $? >cmd.ret");
+	strcat(cmd, "\" &> cmd.output; echo $? >cmd.ret");
 	Logx(cmd);
 	system(cmd);
 
@@ -263,7 +263,7 @@ strcmp(raw.command, "NICK")!=0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
-				sprintf(buffer_cmd, "echo \"timeout %ds %s\" > lunar/home/dummy/run.fifo", cmd_timeout, raw.text);
+				sprintf(buffer_cmd, "echo '%s' > lunar/home/dummy/run.fifo", raw.text);
 				system(buffer_cmd);
 
 				// wait for lunar/home/dummy/run.sh to write in cmd.output

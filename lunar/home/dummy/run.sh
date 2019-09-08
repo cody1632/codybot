@@ -3,7 +3,7 @@
 echo "#### UID $UID listening to run.fifo...####"
 tail -f run.fifo | while read CMD; do
 	echo "##start##$CMD####"
-	$CMD &>cmd.output
+	timeout 10s bash -c "$CMD" &>cmd.output
 	echo $? > cmd.ret
 	[[ -e run.status ]] || mkfifo run.status
 	if [[ "$(grep 124 cmd.ret)" = "124" ]]; then

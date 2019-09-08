@@ -301,7 +301,7 @@ void Weather(struct raw_line *rawp) {
 	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s -O /tmp/weather-%s.html\n", city, city);
 	system(buffer);
 	sprintf(buffer,
-		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
+		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s/\\[38\\;5\\;240\\;1m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
 	system(buffer);
 	sprintf(buffer, 
 		"sed -n \"4p\" /tmp/weather-%s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[0-9]*' > /tmp/weather-%s.temp2", city, city);
@@ -351,8 +351,10 @@ void Weather(struct raw_line *rawp) {
 	int deg_farenheit = (deg_celsius * 9 / 5) + 32;
 	sprintf(buffer_cmd, "%s: %s %dC/%dF", city, temp, deg_celsius, deg_farenheit);
 	Msg(buffer_cmd);
-
-	sprintf(buffer, "rm /tmp/weather-%s.*\n", city);
-	system(buffer);
-	memset(buffer, 0, 4096);
+	
+	if (!debug) {
+		sprintf(buffer, "rm /tmp/weather-%s.*\n", city);
+		system(buffer);
+		memset(buffer, 0, 4096);
+	}
 }

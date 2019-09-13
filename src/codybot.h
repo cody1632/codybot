@@ -14,7 +14,7 @@ extern time_t t0;
 extern char *log_filename;
 extern char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 extern char trigger_char;
-extern char *nick;
+extern char *nick, *nick_admin;
 extern char *full_user_name;
 extern char *hostname;
 extern char *target;

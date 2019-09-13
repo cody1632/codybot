@@ -17,7 +17,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.10";
+const char *codybot_version_string = "0.2.11";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -51,7 +51,8 @@ time_t t0;
 char *log_filename;
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 char trigger_char;
-char *nick;
+char *nick, // nick used by the bot
+	*nick_admin = "esselfe"; // change this to your usual/normal nick for controlling the bot
 char *full_user_name;
 char *hostname;
 

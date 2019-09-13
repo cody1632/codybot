@@ -188,17 +188,20 @@ strcmp(raw.command, "NICK")!=0) {
 			Rainbow(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "fortune")==0)
 			Fortune(&raw);
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0 &&
+			strcmp(raw.nick, nick_admin)==0) {
 			debug = 1;
 			Msg("debug = 1");
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0 &&
+			strcmp(raw.nick, nick_admin)==0) {
 			debug = 0;
 			Msg("debug = 0");
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
 			Joke(&raw);
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig")==0 &&
+			strcmp(raw.nick, nick_admin)==0) {
 			memset(buffer, 0, 4096);
 			memset(buffer, '#', 1024);
 			Msg(buffer);
@@ -212,7 +215,7 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 			raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]==' ') {
-			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, "esselfe")==0) {
+			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, nick_admin)==0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
@@ -228,12 +231,14 @@ strcmp(raw.command, "NICK")!=0) {
 				sprintf(buffer, "timeout = %d", cmd_timeout);
 				Msg(buffer);
 			}
-			else
-				Msg("timeout can only be set by codybot and esselfe");
+			else {
+				sprintf(buffer, "timeout can only be set by codybot and %s", nick_admin);
+				Msg(buffer);
+			}
 		}
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&raw.text[3]=='i'&&raw.text[4]=='g'&&
 			raw.text[5]=='g'&&raw.text[6]=='e'&&raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
-			if (strcmp(raw.nick, "esselfe")==0)
+			if (strcmp(raw.nick, nick_admin)==0)
 				trigger_char = raw.text[9];
 			sprintf(buffer, "trigger = %c", trigger_char);
 			Msg(buffer);
@@ -253,11 +258,11 @@ strcmp(raw.command, "NICK")!=0) {
 			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0 && strcmp(raw.nick, "esselfe")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0 && strcmp(raw.nick, nick_admin)==0) {
 			sh_locked = 1;
 			Msg("sh_locked = 1");
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0 && strcmp(raw.nick, "esselfe")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0 && strcmp(raw.nick, nick_admin)==0) {
 			sh_locked = 0;
 			Msg("sh_locked = 0");
 		}

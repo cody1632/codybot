@@ -58,6 +58,30 @@ void AsciiArt(struct raw_line *rawp) {
 	fclose(fp);
 }
 
+void Calc(struct raw_line *rawp) {
+	// remove '^calc' from the line
+	rawp->text[0] = ' ';
+	rawp->text[1] = ' ';
+	rawp->text[2] = ' ';
+	rawp->text[3] = ' ';
+	rawp->text[4] = ' ';
+
+	sprintf(buffer, "echo \"%s\" |bc >cmd.output", rawp->text);
+	system(buffer);
+
+	FILE *fp = fopen("cmd.output", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "##codybot::Calc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		return;
+	}
+
+	char line[128];
+	fgets(line, 127, fp);
+	Msg(line);
+
+	fclose(fp);
+}
+
 void Chars(struct raw_line *rawp) {
 	FILE *fp = fopen("data-chars.txt", "r");
 	if (fp == NULL) {
@@ -166,7 +190,7 @@ void Joke(struct raw_line *rawp) {
 	fseek(fp, 0, SEEK_SET);
 	gettimeofday(&tv0, NULL);
 	srand((unsigned int)tv0.tv_usec);
-	unsigned int rnd = rand()%(filesize-200);
+	unsigned int rnd = rand()%(filesize-100);
 	fseek(fp, rnd, SEEK_CUR);
 	if (debug)
 		printf("##filesize: %lu\n##rnd: %u\n", filesize, rnd);
@@ -294,8 +318,12 @@ void Weather(struct raw_line *rawp) {
 			++cp;
 			continue;
 		}
-		else if (*cp == ' ')
-			break;
+		else if (*cp == '"') {
+			++cp;
+			continue;
+		}
+		//else if (*cp == ' ')
+		//	break;
 		
 		city[cnt] = *cp;
 		++cnt;

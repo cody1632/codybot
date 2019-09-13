@@ -53,6 +53,7 @@ void Msg(char *text);
 void *ThreadRXFunc(void *argp);
 // from commands.c
 void AsciiArt(struct raw_line *rawp);
+void Calc(struct raw_line *rawp);
 void Chars(struct raw_line *rawp);
 void Fortune(struct raw_line *rawp);
 void Joke(struct raw_line *rawp);

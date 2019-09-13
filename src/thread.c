@@ -181,6 +181,12 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
+			raw.text[5]=='\0')
+			Msg("calc  example: '^calc 10+20'");
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
+			raw.text[5]==' ')
+			Calc(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "chars")==0)
 			Chars(&raw);
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&

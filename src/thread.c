@@ -84,7 +84,10 @@ void *ThreadRunFunc(void *argp) {
 	}
 	fseek(fp, 0, SEEK_SET);
 
-	if (lines_total <= 4) {
+	unsigned int lines_max = 4;
+	if (strcmp(raw.channel, "#codybot")==0)
+		lines_max = 10;
+	if (lines_total <= lines_max) {
 		char *result = (char *)malloc(4096);
 		memset(result, 0, 4096);
 		size_t size = 4095;
@@ -96,7 +99,7 @@ void *ThreadRunFunc(void *argp) {
 			Msg(result);
 		}
 	}
-	else if (lines_total >= 5) {
+	else if (lines_total >= lines_max+1) {
 		system("cat cmd.output |nc termbin.com 9999 > cmd.url");
 		FILE *fp2 = fopen("cmd.url", "r");
 		if (fp2 == NULL)

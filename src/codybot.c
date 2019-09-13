@@ -4,20 +4,15 @@
 #include <errno.h>
 #include <string.h>
 #include <getopt.h>
-#include <pthread.h>
 #include <signal.h>
-#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.12";
+const char *codybot_version_string = "0.2.13";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -43,7 +38,7 @@ void HelpShow(void) {
 	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
 }
 
-int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 10;
+int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 10, use_ssl;
 unsigned long long fortune_total;
 struct timeval tv0;
 struct tm *tm0;
@@ -85,7 +80,10 @@ void Msg(char *text) {
 	unsigned int total_len = strlen(text);
 	if (total_len <= 400) {
 		sprintf(buffer_log, "privmsg %s :%s\n", target, text);
-		SSL_write(pSSL, buffer_log, strlen(buffer_log));
+		if (use_ssl)
+			SSL_write(pSSL, buffer_log, strlen(buffer_log));
+		else
+			write(socket_fd, buffer_log, strlen(buffer_log));
 		Log(buffer_log);
 		memset(buffer_log, 0, 4096);
 	}
@@ -102,7 +100,10 @@ void Msg(char *text) {
 			if (cnt2 >= total_len) {
 				str[cnt] = '\n';
 				str[cnt+1] = '\0';
-				SSL_write(pSSL, str, strlen(str));
+				if (use_ssl)
+					SSL_write(pSSL, str, strlen(str));
+				else
+					write(socket_fd, str, strlen(str));
 				Log(str);
 				memset(str, 0, 400);
 				break;
@@ -110,7 +111,10 @@ void Msg(char *text) {
 			else if (cnt >= 399) {
 				str[cnt] = '\n';
 				str[cnt+1] = '\0';
-				SSL_write(pSSL, str, strlen(str));
+				if (use_ssl)
+					SSL_write(pSSL, str, strlen(str));
+				else
+					write(socket_fd, str, strlen(str));
 				Log(str);
 				memset(str, 0, 400);
 				sprintf(str, "privmsg %s :", target);
@@ -172,7 +176,11 @@ void ReadCommandLoop(void) {
 			pass[cnt] = '\0';
 
 			sprintf(buffer_cmd, "privmsg nickserv :identify %s\n", pass);
-			SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			if (use_ssl)
+				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
+			else
+				write(socket_fd, buffer_cmd, strlen(buffer_cmd));
+			Log("privmsg nickserv :identify *********");
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)=='\n') {
@@ -208,7 +216,10 @@ void ReadCommandLoop(void) {
 			Msg(buffer);
 		}
 		else {
-			SSL_write(pSSL, buffer_line, strlen(buffer_line));
+			if (use_ssl)
+				SSL_write(pSSL, buffer_line, strlen(buffer_line));
+			else
+				write(socket_fd, buffer_line, strlen(buffer_line));
 			memset(buffer_line, 0, 4096);
 		}
 	}
@@ -262,6 +273,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'p':
 			server_port = atoi(optarg);
+			if (server_port == 6697)
+				use_ssl = 1;
 			break;
 		case 's':
 			ServerGetIP(optarg);
@@ -296,8 +309,10 @@ int main(int argc, char **argv) {
 		nick = (char *)malloc(strlen("codybot")+1);
 		sprintf(nick, "codybot");
 	}
-	if (!server_port)
+	if (!server_port) {
 		server_port = 6697;
+		use_ssl = 1;
+	}
 	if (!server_ip)
 		server_ip = server_ip_freenode;
 

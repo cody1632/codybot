@@ -173,8 +173,12 @@ strcmp(raw.command, "NICK")!=0) {
 			Msg(buffer);
 			continue;
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0)
-			AsciiArt(&raw);
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0) {
+			if (strcmp(raw.channel, "#codybot")==0)
+				AsciiArt(&raw);
+			else
+				Msg("ascii: can only be run in #codybot (due to output > 4 lines)");
+		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "about")==0) {
 			if (strcmp(nick, "codybot")==0)
 				Msg("codybot is an IRC bot written in C by esselfe, "

@@ -81,78 +81,74 @@ void ServerConnect(void) {
 			printf("||connect() %s successful\n", server_ip);
 	}
 
-	SSL_load_error_strings();
-	SSL_library_init();
-	OpenSSL_add_all_algorithms();
+	if (use_ssl) {
+		SSL_load_error_strings();
+		SSL_library_init();
+		OpenSSL_add_all_algorithms();
 
-	const SSL_METHOD *method = TLS_method();
-	SSL_CTX *ctx = SSL_CTX_new(method);
-	if (!ctx) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot create SSL context\n");
-		close(socket_fd);
-		exit(1);
+		const SSL_METHOD *method = TLS_method();
+		SSL_CTX *ctx = SSL_CTX_new(method);
+		if (!ctx) {
+			fprintf(stderr, "||codybot::ServerConnect() error: Cannot create SSL context\n");
+			close(socket_fd);
+			exit(1);
+		}
+		long opt_ctx;
+		if (debug) {
+			opt_ctx = SSL_CTX_get_options(ctx);
+			printf("||opt_ctx: %ld\n", opt_ctx);
+			SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
+			opt_ctx = SSL_CTX_get_options(ctx);
+			printf("||opt_ctx: %ld\n", opt_ctx);
+			SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
+		}
+		else
+			SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
+	
+		pSSL = SSL_new(ctx);
+		long opt_ssl;
+		if (debug) {
+			opt_ssl = SSL_get_options(pSSL);
+			printf("||opt_ssl: %ld\n", opt_ssl);
+			SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
+			opt_ssl = SSL_get_options(pSSL);
+			printf("||opt_ssl: %ld\n", opt_ssl);
+			SSL_set_fd(pSSL, socket_fd);
+			opt_ssl = SSL_get_options(pSSL);
+			printf("||opt_ssl: %ld\n", opt_ssl);
+		}
+		else
+			SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
+	
+		BIO *bio = BIO_new_socket(socket_fd, BIO_CLOSE);
+		SSL_set_bio(pSSL, bio, bio);
+		SSL_connect(pSSL);
+		ret = SSL_accept(pSSL);
+		if (ret <= 0) {
+			fprintf(stderr, "||codybot::ServerConnect() error: SSL_accept() failed, ret: %d\n", ret);
+			fprintf(stderr, "||SSL error number: %d\n", SSL_get_error(pSSL, 0));
+			close(socket_fd);
+			exit(1);
+		}
 	}
-	long opt_ctx;
-	if (debug) {
-		opt_ctx = SSL_CTX_get_options(ctx);
-		printf("||opt_ctx: %ld\n", opt_ctx);
-		SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
-		opt_ctx = SSL_CTX_get_options(ctx);
-		printf("||opt_ctx: %ld\n", opt_ctx);
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
-	}
+
+	Msg("PASS none");
+
+	sprintf(buffer, "NICK %s\n", nick);
+	Msg(buffer);
+
+	if (server_ip == server_ip_freenode)
+		sprintf(buffer, "USER %s %s irc.freenode.net %s\n", nick, hostname, full_user_name);
 	else
-		SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
-
-	pSSL = SSL_new(ctx);
-	long opt_ssl;
-	if (debug) {
-		opt_ssl = SSL_get_options(pSSL);
-		printf("||opt_ssl: %ld\n", opt_ssl);
-		SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
-		opt_ssl = SSL_get_options(pSSL);
-		printf("||opt_ssl: %ld\n", opt_ssl);
-		SSL_set_fd(pSSL, socket_fd);
-		opt_ssl = SSL_get_options(pSSL);
-		printf("||opt_ssl: %ld\n", opt_ssl);
-	}
-	else
-		SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
-
-	BIO *bio = BIO_new_socket(socket_fd, BIO_CLOSE);
-	SSL_set_bio(pSSL, bio, bio);
-	SSL_connect(pSSL);
-	ret = SSL_accept(pSSL);
-	if (ret <= 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: SSL_accept() failed, ret: %d\n", ret);
-		fprintf(stderr, "||SSL error number: %d\n", SSL_get_error(pSSL, 0));
-		close(socket_fd);
-		exit(1);
-	}
-
-	sprintf(buffer_cmd, "PASS none\n");
-	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	Log(buffer_cmd);
-
-	sprintf(buffer_cmd, "NICK %s\n", nick);
-	SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	Log(buffer_cmd);
-
-	if (server_ip == server_ip_freenode) {
-		sprintf(buffer_cmd, "USER %s %s irc.freenode.net %s\n", nick, hostname, full_user_name);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	}
-	else {
-		sprintf(buffer_cmd, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, full_user_name);
-		SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-	}
-	Log(buffer_cmd);
-	memset(buffer_cmd, 0, 4096);
+		sprintf(buffer, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, full_user_name);
+	Msg(buffer);
 }
 
 void ServerClose(void) {
-	SSL_shutdown(pSSL);
-    SSL_free(pSSL);
+	if (use_ssl) {
+		SSL_shutdown(pSSL);
+    	SSL_free(pSSL);
+	}
     close(socket_fd);
 }
 

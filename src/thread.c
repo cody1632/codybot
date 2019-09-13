@@ -84,18 +84,19 @@ void *ThreadRunFunc(void *argp) {
 	}
 	fseek(fp, 0, SEEK_SET);
 
-	if (lines_total <= 10) {
+	if (lines_total <= 4) {
 		char *result = (char *)malloc(4096);
 		memset(result, 0, 4096);
 		size_t size = 4095;
 		while (1) {
 			int ret2 = getline(&result, &size, fp);
 			if (ret2 < 0) break;
-			result[strlen(result)-1] = '\0';
+			if (result[strlen(result)-1] == '\n')
+				result[strlen(result)-1] = '\0';
 			Msg(result);
 		}
 	}
-	else if (lines_total > 10) {
+	else if (lines_total >= 5) {
 		system("cat cmd.output |nc termbin.com 9999 > cmd.url");
 		FILE *fp2 = fopen("cmd.url", "r");
 		if (fp2 == NULL)
@@ -317,7 +318,7 @@ strcmp(raw.command, "NICK")!=0) {
 				size_t size = 4096;
 				char *output = (char *)malloc(size);
 				memset(output, 0, size);
-				fgets(output, 4096, fr);
+				fgets(output, 400, fr);
 				fclose(fr);
 				Msg(output);
 
@@ -348,6 +349,10 @@ while (1) {
 		++cp;
 		continue;
 	}
+	else if (*(cp+1)==':' && *(cp+2)=='(' && *(cp+3)==')') {
+		dontrun = 1;
+		break;
+	}
 	else if (*cp=='k' && *(cp+1)=='i' && *(cp+2)=='l' && *(cp+3)=='l' && *(cp+4)==' ') {
 		dontrun = 1;
 		break;
@@ -356,7 +361,7 @@ while (1) {
 	++cp;
 }
 			if (dontrun) {
-				Msg("Will not run kill!");
+				Msg("Will not run this!");
 				continue;
 			}
 

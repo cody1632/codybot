@@ -66,18 +66,39 @@ void Calc(struct raw_line *rawp) {
 	rawp->text[3] = ' ';
 	rawp->text[4] = ' ';
 
-	sprintf(buffer, "echo \"%s\" |bc >cmd.output", rawp->text);
+	sprintf(buffer, "echo \"%s\" | bc -l &> cmd.output", rawp->text);
 	system(buffer);
 
 	FILE *fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Calc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
-	char line[128];
-	fgets(line, 127, fp);
-	Msg(line);
+	char line[400];
+	char *str;
+	unsigned int cnt = 0;
+	while (1) {
+		str = fgets(line, 399, fp);
+		if (str == NULL)
+			break;
+		Msg(line);
+		++cnt;
+		if (cnt >= 4) {
+			system("cat cmd.output |nc termbin.com 9999 > cmd.url");
+			FILE *fu = fopen("cmd.url", "r");
+			if (fu == NULL) {
+				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n", strerror(errno));
+				Msg(buffer);
+				break;
+			}
+			fgets(line, 399, fu);
+			fclose(fu);
+			Msg(line);
+			break;
+		}
+	}
 
 	fclose(fp);
 }

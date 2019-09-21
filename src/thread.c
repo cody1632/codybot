@@ -169,7 +169,7 @@ strcmp(raw.command, "NICK")!=0) {
 		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
 			char c = trigger_char;
 			sprintf(buffer, "commands: %cabout %cascii %cchars %chelp %cfortune"
-				" %cjoke %crainbow %csh %cstats %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c);
+				" %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c,c);
 			Msg(buffer);
 			continue;
 		}
@@ -255,6 +255,17 @@ strcmp(raw.command, "NICK")!=0) {
 			if (strcmp(raw.nick, nick_admin)==0)
 				trigger_char = raw.text[9];
 			sprintf(buffer, "trigger = %c", trigger_char);
+			Msg(buffer);
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "uptime")==0) {
+			gettimeofday(&tv0, NULL);
+			t0 = (time_t)tv0.tv_sec - tv_start.tv_sec;
+			tm0 = gmtime(&t0);
+			if (tm0->tm_mday > 1)
+				sprintf(buffer, "uptime: %02d day%s %02d:%02d:%02d", tm0->tm_mday-1, (tm0->tm_mday>2)?"s":"",
+					tm0->tm_hour, tm0->tm_min, tm0->tm_sec);
+			else
+				sprintf(buffer, "uptime: %02d:%02d:%02d", tm0->tm_hour, tm0->tm_min, tm0->tm_sec);
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version")==0) {

@@ -324,7 +324,7 @@ void Stats(struct raw_line *rawp) {
 		fortune_total = atoi(str);
 	}
 	RawGetTarget(rawp);
-	sprintf(buffer, "Given fortune cookies: %llu", fortune_total);
+	sprintf(buffer, "Given fortunes: %llu", fortune_total);
 	Msg(buffer);
 }
 

@@ -132,16 +132,25 @@ void ServerConnect(void) {
 		}
 	}
 
-	Msg("PASS none");
+	if (use_ssl)
+		SSL_write(pSSL, "PASS none\n", 10);
+	else
+		write(socket_fd, "PASS none\n", 10);
 
 	sprintf(buffer, "NICK %s\n", nick);
-	Msg(buffer);
+	if (use_ssl)
+		SSL_write(pSSL, buffer, strlen(buffer));
+	else
+		write(socket_fd, buffer, strlen(buffer));
 
 	if (server_ip == server_ip_freenode)
 		sprintf(buffer, "USER %s %s irc.freenode.net %s\n", nick, hostname, full_user_name);
 	else
 		sprintf(buffer, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, full_user_name);
-	Msg(buffer);
+	if (use_ssl)
+		SSL_write(pSSL, buffer, strlen(buffer));
+	else
+		write(socket_fd, buffer, strlen(buffer));
 }
 
 void ServerClose(void) {

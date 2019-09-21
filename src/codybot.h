@@ -8,7 +8,7 @@
 extern const char *codybot_version_string;
 extern int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout, use_ssl;
 extern unsigned long long fortune_total;
-extern struct timeval tv0;
+extern struct timeval tv0, tv_start;
 extern struct tm *tm0;
 extern time_t t0;
 extern char *log_filename;

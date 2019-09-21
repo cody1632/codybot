@@ -40,7 +40,7 @@ void HelpShow(void) {
 
 int debug, socket_fd, ret, endmainloop, sh_disabled, sh_locked, cmd_timeout = 10, use_ssl;
 unsigned long long fortune_total;
-struct timeval tv0;
+struct timeval tv0, tv_start;
 struct tm *tm0;
 time_t t0;
 char *log_filename;
@@ -230,7 +230,9 @@ void SignalFunc(int signum) {
 }
 
 int main(int argc, char **argv) {
+	gettimeofday(&tv_start, NULL);
 	signal(SIGINT, SignalFunc);
+
 	int c;
 	while (1) {
 		c = getopt_long(argc, argv, short_options, long_options, NULL);

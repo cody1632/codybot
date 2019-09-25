@@ -1,8 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
 
 #include "codybot.h"
 
@@ -69,7 +66,7 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 		return;
 
 	if (debug)
-		printf("\n##RawLineParse() started\n");
+		printf("\n\e[01;32m##RawLineParse() started\e[00m\n");
 	
 	while (1) {
 		if (*c == '\0')
@@ -165,6 +162,6 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 	}
 
 	if (debug)
-		printf("##RawLineParse() ended\n\n");
+		printf("\e[01;32m##RawLineParse() ended\e[00m\n\n");
 }
 

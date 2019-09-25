@@ -4,12 +4,8 @@
 #include <errno.h>
 #include <string.h>
 #include <pthread.h>
-#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 #include <openssl/ssl.h>
 
 #include "codybot.h"
@@ -166,6 +162,7 @@ void *ThreadRXFunc(void *argp) {
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
+// help
 		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
 			char c = trigger_char;
 			sprintf(buffer, "commands: %cabout %cascii %cchars %chelp %cfortune"
@@ -173,12 +170,14 @@ strcmp(raw.command, "NICK")!=0) {
 			Msg(buffer);
 			continue;
 		}
+// ascii
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0) {
 			if (strcmp(raw.channel, "#codybot")==0)
 				AsciiArt(&raw);
 			else
 				Msg("ascii: can only be run in #codybot (due to output > 4 lines)");
 		}
+// about
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "about")==0) {
 			if (strcmp(nick, "codybot")==0)
 				Msg("codybot is an IRC bot written in C by esselfe, "
@@ -189,17 +188,16 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
+// calc
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
 			raw.text[5]=='\0')
 			Msg("calc  example: '^calc 10+20'");
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
 			raw.text[5]==' ')
 			Calc(&raw);
+// chars
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "chars")==0)
 			Chars(&raw);
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
-		  raw.text[5]=='b'&&raw.text[6]=='o'&&raw.text[7]=='w'&&raw.text[8]==' ')
-			Rainbow(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "fortune")==0)
 			Fortune(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0 &&
@@ -220,8 +218,18 @@ strcmp(raw.command, "NICK")!=0) {
 			memset(buffer, '#', 1024);
 			Msg(buffer);
 		}
+// rainbow
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "rainbow")==0) {
+			sprintf(buffer, "Usage: %crainbow some random text", trigger_char);
+			Msg(buffer);
+		}
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
+		  raw.text[5]=='b'&&raw.text[6]=='o'&&raw.text[7]=='w'&&raw.text[8]==' ')
+			Rainbow(&raw);
+// stats
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats")==0)
 			Stats(&raw);
+// timeout
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
 		  raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]=='\0') {
 			sprintf(buffer, "timeout = %d", cmd_timeout);
@@ -250,6 +258,7 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
+// trigger
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&raw.text[3]=='i'&&raw.text[4]=='g'&&
 			raw.text[5]=='g'&&raw.text[6]=='e'&&raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
 			if (strcmp(raw.nick, nick_admin)==0)
@@ -291,6 +300,7 @@ strcmp(raw.command, "NICK")!=0) {
 			sh_locked = 0;
 			Msg("sh_locked = 0");
 		}
+// sh
 		else if (raw.text[0]==trigger_char && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {

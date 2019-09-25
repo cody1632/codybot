@@ -183,6 +183,16 @@ void Fortune(struct raw_line *rawp) {
 		RawGetTarget(rawp);
 		sprintf(buffer, "fortune: %s", fortune_line);
 		Msg(buffer);
+
+		fp = fopen("stats", "r");
+		if (fp == NULL) {
+			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s", strerror(errno));
+			Msg(buffer);
+			return;
+		}
+		fgets(buffer, 4095, fp);
+		fortune_total = atoi(buffer);
+		fclose(fp);
 	
 		fp = fopen("stats", "w");
 		if (fp == NULL) {

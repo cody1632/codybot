@@ -8,6 +8,24 @@
 
 #include "codybot.h"
 
+char *colors[] = {
+	"\003", // default/restore
+	"\00301", //black
+//	"\00302", // blue
+	"\00303", // green
+	"\00304", // red
+	"\00305", // brown
+	"\00306", // purple
+	"\00307", // orange
+	"\00308", // yellow
+	"\00309", // light green
+	"\00310", // cyan
+	"\00311", // light cyan
+	"\00312", // light blue
+	"\00313", // pink
+	"\00314", // grey
+	"\00315"}; // light grey
+
 void AsciiArt(struct raw_line *rawp) {
 	FILE *fp = fopen("data-ascii.txt", "r");
 	if (fp == NULL) {
@@ -120,6 +138,26 @@ void Chars(struct raw_line *rawp) {
 	}
 
 	fclose(fp);
+}
+
+void Colorize(struct raw_line *rawp) {
+	char *cp = raw.text;
+
+	while (*cp != ' ')
+		++cp;
+	++cp;
+	
+	char result[4096];
+	memset(result, 0, 4096);
+	while (1) {
+		strcat(result, colors[(rand()%13)+2]);
+		strncat(result, cp++, 1);
+		if (*cp == '\0')
+			break;
+	}
+	strcat(result, colors[0]);
+
+	Msg(result);
 }
 
 void Fortune(struct raw_line *rawp) {
@@ -273,23 +311,34 @@ void Joke(struct raw_line *rawp) {
 }
 
 void Rainbow(struct raw_line *rawp) {
-	char *colors[] = { "\003", "\00301", "\00302", "\00303", "\00304", "\00305", "\00306", "\00307", "\00308",
-		"\00309", "\00310", "\00311", "\00312", "\00313", "\00314", "\00315"};
 	char *cp = raw.text;
 
 	while (*cp != ' ')
 		++cp;
 	++cp;
 	
+	char *colors2[8] = {
+	"\003", // restore/default
+	"\00305", // red
+	"\00304", // orange
+	"\00308", // yellow
+	"\00310", // green
+	"\00311", // light cyan
+	"\00312", // purple
+	"\00302"}; // light cyan
+	unsigned int cnt = 1;
 	char result[4096];
 	memset(result, 0, 4096);
 	while (1) {
-		strcat(result, colors[rand()%13+2]);
+		strcat(result, colors2[cnt++]);
 		strncat(result, cp++, 1);
-		if (*cp == '\0')
+		if (cnt >= 8)
+			cnt = 1;
+		if (*cp == '\0') {
+			strcat(result, colors[0]);
 			break;
+		}
 	}
-	strcat(result, colors[0]);
 
 	Msg(result);
 }

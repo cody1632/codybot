@@ -165,8 +165,8 @@ strcmp(raw.command, "NICK")!=0) {
 // help
 		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
 			char c = trigger_char;
-			sprintf(buffer, "commands: %cabout %cascii %cchars %chelp %cfortune"
-				" %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c,c);
+			sprintf(buffer, "commands: %cabout %cascii %cchars %ccolorize %chelp %cfortune"
+				" %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c,c,c);
 			Msg(buffer);
 			continue;
 		}
@@ -198,6 +198,18 @@ strcmp(raw.command, "NICK")!=0) {
 // chars
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "chars")==0)
 			Chars(&raw);
+// colorize
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorlist")==0) {
+			Msg("\003011\003022\003044\003055\003066\003077\003088\00309\0031010\0031111\0031212\0031313\0031414\0031515");
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorize")==0) {
+			sprintf(buffer, "Usage: %ccolorize some text to process", trigger_char);
+			Msg(buffer);
+		}
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='o'&&raw.text[3]=='l'&&raw.text[4]=='o'&&
+		  raw.text[5]=='r'&&raw.text[6]=='i'&&raw.text[7]=='z'&&raw.text[8]=='e'&&raw.text[9]==' ')
+			Colorize(&raw);
+// fortune
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "fortune")==0)
 			Fortune(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0 &&

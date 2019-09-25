@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.13";
+const char *codybot_version_string = "0.2.14";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -67,10 +67,16 @@ void Log(char *text) {
 		str[strlen(str)-1] = '\0';
 	else if (str[strlen(str)] == '\n')
 		str[strlen(str)-1] = '\0';
+
 	sprintf(buffer_log, "%02d%02d%02d-%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_year+1900-2000, tm0->tm_mon+1,
 		tm0->tm_mday, tm0->tm_hour, tm0->tm_min, tm0->tm_sec, tv0.tv_usec, str);
 	fputs(buffer_log, fp);
+
+	sprintf(buffer_log, "\e[00;36m%02d%02d%02d-%02d:%02d:%02d.%03ld ##\e[00m%s\e[00;36m##\e[00m\n", 
+		tm0->tm_year+1900-2000, tm0->tm_mon+1,
+		tm0->tm_mday, tm0->tm_hour, tm0->tm_min, tm0->tm_sec, tv0.tv_usec, str);
 	fputs(buffer_log, stdout);
+	
 	memset(buffer_log, 0, 4096);
 
 	fclose(fp);
@@ -226,6 +232,7 @@ void ReadCommandLoop(void) {
 }
 
 void SignalFunc(int signum) {
+	ServerClose();
 	close(socket_fd);
 }
 

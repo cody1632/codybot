@@ -1,4 +1,4 @@
-20190824
+20190824-20191018
 codybot is an IRC bot written in C providing users with fortune cookies,
 jokes, shell access and weather per city.
 
@@ -48,13 +48,13 @@ as the root user or by using the sudo program.
 
 To run all shell commands in a locked chroot, touch './sh_lock' or
 type '^sh_lock' or '^sh_unlock'. You have to run:
-./lunar-mnt 1
 chroot ./lunar /bin/bash
 su - dummy
 run.sh
 You should ensure that the codybot user can write to
 lunar/home/dummy/run.fifo
 
-Speaking of the lunar directory... it is a x86/i686 system I use
+Speaking of the lunar directory... it is a 64bit system I use
 within a virtual machine (qemu-system-i386), those files may not
-execute on 64 bit machines...
+execute on 64 bit machines... all ^sh commands will be run within
+the chroot setup previously.

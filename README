@@ -55,6 +55,6 @@ You should ensure that the codybot user can write to
 lunar/home/dummy/run.fifo
 
 Speaking of the lunar directory... it is a 64bit system I use
-within a virtual machine (qemu-system-i386), those files may not
+within a virtual machine (qemu-system-x86_64), those files may not
 execute on 64 bit machines... all ^sh commands will be run within
 the chroot setup previously.

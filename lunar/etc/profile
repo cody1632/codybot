@@ -32,4 +32,5 @@ export  PATH
 umask   022
 enable -n kill
 alias kill='/usr/bin/kill'
-
+alias ls='ls -A --color=auto'
+alias qw='exit'

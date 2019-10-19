@@ -21,5 +21,8 @@ export EDITOR LANG PAPER PATH TZ
 # bare necessities:
 umask   022
 
+alias ls='ls -A --color=auto'
+alias qw='exit'
+
 # finished
-. ~/.bashrc
+#. ~/.bashrc

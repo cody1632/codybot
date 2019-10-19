@@ -7,7 +7,7 @@ tail -f run.fifo | while read CMD; do
 	echo $? > cmd.ret
 	[[ -e run.status ]] || mkfifo run.status
 	if [[ "$(grep 124 cmd.ret)" = "124" ]]; then
-		echo "sh: timedout" >cmd.output
+		echo "sh: '$CMD': timed out" >cmd.output
 		echo "timedout" > run.status
 		echo "timedout"
 	else

@@ -330,8 +330,10 @@ void Rainbow(struct raw_line *rawp) {
 	char result[4096];
 	memset(result, 0, 4096);
 	while (1) {
-		strcat(result, colors2[cnt++]);
+		strcat(result, colors2[cnt]);
 		strncat(result, cp++, 1);
+		if (*cp != ' ')
+			++cnt;
 		if (cnt >= 8)
 			cnt = 1;
 		if (*cp == '\0') {

@@ -7,6 +7,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <openssl/ssl.h>
+#include <magic.h>
 
 #include "codybot.h"
 
@@ -57,7 +58,8 @@ void *ThreadRunFunc(void *argp) {
 
 	ret = atoi(buffer);
 	if (ret == 124) {
-		Msg("sh: timed out");
+		sprintf(buffer_cmd, "sh: %s: timed out", text);
+		Msg(buffer_cmd);
 		return NULL;
 	}
 
@@ -304,13 +306,25 @@ strcmp(raw.command, "NICK")!=0) {
 			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0 && strcmp(raw.nick, nick_admin)==0) {
-			sh_locked = 1;
-			Msg("sh_locked = 1");
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				sh_locked = 1;
+				Msg("sh_locked = 1");
+			}
+			else {
+				sprintf(buffer, "sh_lock can only be used by %s\n", nick_admin);
+				Msg(buffer);
+			}
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0 && strcmp(raw.nick, nick_admin)==0) {
-			sh_locked = 0;
-			Msg("sh_locked = 0");
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				sh_locked = 0;
+				Msg("sh_locked = 0");
+			}
+			else {
+				sprintf(buffer, "sh_unlock can only be used by %s\n", nick_admin);
+				Msg(buffer);
+			}
 		}
 // sh
 		else if (raw.text[0]==trigger_char && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
@@ -400,6 +414,37 @@ while (1) {
 
 	++cp;
 }
+
+if (!dontrun) {
+// check if running the cat program with an executable
+if (strncmp(raw.text+4, "cat", 3)==0) {
+	char *filename = malloc(1024);
+	memset(filename, 0, 1024);
+	char *c = raw.text+8;
+	unsigned int cnt = 0;
+	while (1) {
+		if (*c == ' ' || *c == '\n' || *c == '\0') {
+			magic_t mgc = magic_open (MAGIC_SYMLINK | MAGIC_PRESERVE_ATIME | MAGIC_MIME_TYPE);
+		    if (mgc == NULL) {
+		        Msg ("codybot error: magic_open() failed\n");
+				break;
+		    }
+		    magic_load (mgc, NULL);
+	    	char *magic_str;
+	        magic_str = (char *)magic_file (mgc, filename);
+			if (strcmp(magic_str, "application/x-executable")==0)
+				dontrun = 1;
+			break;
+		}
+		else {
+			filename[cnt] = *c;
+			++c;
+			++cnt;
+		}
+	}
+}
+}
+
 			if (dontrun) {
 				Msg("Will not run this!");
 				continue;

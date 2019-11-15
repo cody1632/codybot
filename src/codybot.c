@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.14";
+const char *codybot_version_string = "0.2.16";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -45,7 +45,8 @@ struct tm *tm0;
 time_t t0;
 char *log_filename;
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
-char trigger_char;
+char trigger_char, trigger_char_default = ',';
+char *current_channel;
 char *nick, // nick used by the bot
 	*nick_admin = "esselfe"; // change this to your usual/normal nick for controlling the bot
 char *full_user_name;
@@ -65,8 +66,8 @@ void Log(char *text) {
 	// remove trailing newline
 	if (str[strlen(str)-1] == '\n')
 		str[strlen(str)-1] = '\0';
-	else if (str[strlen(str)] == '\n')
-		str[strlen(str)-1] = '\0';
+	if (str[strlen(str)] == '\n')
+		str[strlen(str)] = '\0';
 
 	sprintf(buffer_log, "%02d%02d%02d-%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_year+1900-2000, tm0->tm_mon+1,
 		tm0->tm_mday, tm0->tm_hour, tm0->tm_min, tm0->tm_sec, tv0.tv_usec, str);
@@ -142,6 +143,9 @@ void ReadCommandLoop(void) {
 			continue;
 		else if (strcmp(buffer_line, "exit\n")==0 || strcmp(buffer_line, "quit\n")==0)
 			endmainloop = 1;
+		else if (strncmp(buffer_line, "cursh", 5)==0) {
+			sprintf(current_channel, "%s", buffer_line+6);
+		}
 		else if (strcmp(buffer_line, "debug on\n")==0) {
 			debug = 1;
 			Msg("debug = 1");
@@ -149,6 +153,12 @@ void ReadCommandLoop(void) {
 		else if (strcmp(buffer_line, "debug off\n")==0) {
 			debug = 0;
 			Msg("debug = 0");
+		}
+		else if (strncmp(buffer_line, "msg", 3)==0) {
+			sprintf(buffer, "%s", buffer_line+4);
+			sprintf(raw.channel, "%s", current_channel);
+			target = raw.channel;
+			Msg(buffer);
 		}
 		else if (strcmp(buffer_line, "sh_disable\n")==0) {
 			sh_disabled = 1;
@@ -313,7 +323,11 @@ int main(int argc, char **argv) {
 		sprintf(log_filename, "codybot.log");
 	}
 	if (!trigger_char)
-		trigger_char = '^';
+		trigger_char = trigger_char_default;
+	if (!current_channel) {
+		current_channel = malloc(1024);
+		sprintf(current_channel, "#codybot");
+	}
 	if (!nick) {
 		nick = (char *)malloc(strlen("codybot")+1);
 		sprintf(nick, "codybot");

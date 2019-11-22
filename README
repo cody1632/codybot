@@ -56,5 +56,5 @@ lunar/home/dummy/run.fifo
 
 Speaking of the lunar directory... it is a 64bit system I use
 within a virtual machine (qemu-system-x86_64), those files may not
-execute on 64 bit machines... all ^sh commands will be run within
+execute on 32bit machines... all ^sh commands will be run within
 the chroot setup previously.

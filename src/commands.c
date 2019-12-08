@@ -143,8 +143,17 @@ void CC(struct raw_line *rawp) {
 
 	fclose(fp);
 
-	system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog");
-	system("./prog 2>&1 > cmd.output");
+	ret = system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog 2>cmd.output");
+/*	fp = fopen("cmd.ret", "r");
+	if (fp == NULL) {
+		Msg("codybot error: Cannot open cmd.ret");
+		return;
+	}
+	char *retstr = malloc(1024);
+	fgets(retstr, 1024, fp);
+	ret = atoi(retstr);
+*/	if (ret == 0)
+		system("./prog 2>&1 > cmd.output; echo $? > cmd.ret");
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
@@ -476,10 +485,10 @@ void Weather(struct raw_line *rawp) {
 	system(buffer);
 
 	sprintf(buffer,
-		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s/\\[38\\;5\\;240\\;1m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
+		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s/\\[38\\;5\\;240\\;1m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
 	system(buffer);
 	sprintf(buffer, 
-		"sed -n \"4p\" /tmp/weather-%s.html |sed 's/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[-0-9]*' > /tmp/weather-%s.temp2", city, city);
+		"sed -n \"4p\" /tmp/weather-%s.html |sed 's/--//g;s/\\[38\\;5\\;240\\;1m//g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[-0-9]*' > /tmp/weather-%s.temp2", city, city);
 	system(buffer);
 
 	char temp[1024], temp2[1024];

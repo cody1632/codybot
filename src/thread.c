@@ -165,22 +165,22 @@ if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
 // help
-		if (raw.text[0]==trigger_char && strcmp(raw.text+1, "help")==0) {
+		if (raw.text[0]==trigger_char && strncmp(raw.text+1, "help", 4)==0) {
 			char c = trigger_char;
-			sprintf(buffer, "commands: %cabout %cascii %cchars %ccolorize %chelp %cfortune"
-				" %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c,c,c);
+			sprintf(buffer, "commands: %cabout %cascii %ccc %cchars %ccolorize %chelp %cfortune"
+				" %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c,c,c,c);
 			Msg(buffer);
 			continue;
 		}
 // ascii
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "ascii")==0) {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "ascii", 5)==0) {
 			if (strcmp(raw.channel, "#codybot")==0)
 				AsciiArt(&raw);
 			else
 				Msg("ascii: can only be run in #codybot (due to output > 4 lines)");
 		}
 // about
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "about")==0) {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "about", 5)==0) {
 			if (strcmp(nick, "codybot")==0)
 				Msg("codybot is an IRC bot written in C by esselfe, "
 					"sources @ https://github.com/cody1632/codybot");
@@ -197,8 +197,11 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
 			raw.text[5]==' ')
 			Calc(&raw);
+// cc
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3)==0)
+			CC(&raw);
 // chars
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "chars")==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "chars", 5)==0)
 			Chars(&raw);
 // colorize
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorlist")==0) {
@@ -212,19 +215,25 @@ strcmp(raw.command, "NICK")!=0) {
 		  raw.text[5]=='r'&&raw.text[6]=='i'&&raw.text[7]=='z'&&raw.text[8]=='e'&&raw.text[9]==' ')
 			Colorize(&raw);
 // fortune
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "fortune")==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7)==0)
 			Fortune(&raw);
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0 &&
-			strcmp(raw.nick, nick_admin)==0) {
-			debug = 1;
-			Msg("debug = 1");
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				debug = 1;
+				Msg("debug = 1");
+			}
+			else
+				Msg("debug mode can only be changed by the admin");
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0 &&
-			strcmp(raw.nick, nick_admin)==0) {
-			debug = 0;
-			Msg("debug = 0");
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				debug = 0;
+				Msg("debug = 0");
+			}
+			else
+				Msg("debug mode can only be changed by the admin");
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "joke")==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4)==0)
 			Joke(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig")==0 &&
 			strcmp(raw.nick, nick_admin)==0) {
@@ -417,10 +426,28 @@ while (1) {
 
 if (!dontrun) {
 // check if running the cat program with an executable
-if (strncmp(raw.text+4, "cat", 3)==0) {
+char *c = raw.text + 4;
+// ignore whitespaces
+while (1) {
+	if (*c == ' ') {
+		++c;
+		continue;
+	}
+	else
+		break;
+}
+if (strncmp(c, "cat ", 4)==0) {
+	c += 3;
+	while (1) {
+		if (*c == ' ') {
+			++c;
+			continue;
+		}
+		else
+			break;
+	}
 	char *filename = malloc(1024);
 	memset(filename, 0, 1024);
-	char *c = raw.text+8;
 	unsigned int cnt = 0;
 	while (1) {
 		if (*c == ' ' || *c == '\n' || *c == '\0') {

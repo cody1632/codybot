@@ -55,6 +55,7 @@ void *ThreadRXFunc(void *argp);
 // from commands.c
 void AsciiArt(struct raw_line *rawp);
 void Calc(struct raw_line *rawp);
+void CC(struct raw_line *rawp);
 void Chars(struct raw_line *rawp);
 void Colorize(struct raw_line *rawp);
 void Fortune(struct raw_line *rawp);

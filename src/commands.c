@@ -121,6 +121,65 @@ void Calc(struct raw_line *rawp) {
 	fclose(fp);
 }
 
+void CC(struct raw_line *rawp) {
+	rawp->text[0] = ' ';
+	rawp->text[1] = ' ';
+	rawp->text[2] = ' ';
+
+	FILE *fp = fopen("prog.c", "w+");
+	if (fp == NULL) {
+		Msg("codybot error: Cannot open prog.c");
+		return;
+	}
+
+	fprintf(fp, "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n");
+	fprintf(fp, "#include <string.h>\n#include <errno.h>\n#include <sys/types.h>\n");
+	fprintf(fp, "#include <time.h>\n#include <sys/time.h>\n\n");
+	fprintf(fp, "int main(int argc, char **argv) {\n");
+
+	fprintf(fp, "%s\n", rawp->text);
+
+	fprintf(fp, "\n}\n");
+
+	fclose(fp);
+
+	system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog");
+	system("./prog 2>&1 > cmd.output");
+
+	fp = fopen("cmd.output", "r");
+	if (fp == NULL) {
+		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		Msg(buffer);
+		return;
+	}
+
+	char line[400];
+	char *str;
+	unsigned int cnt = 0;
+	while (1) {
+		str = fgets(line, 399, fp);
+		if (str == NULL)
+			break;
+		Msg(line);
+		++cnt;
+		if (cnt >= 4) {
+			system("cat cmd.output |nc termbin.com 9999 > cmd.url");
+			FILE *fu = fopen("cmd.url", "r");
+			if (fu == NULL) {
+				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n", strerror(errno));
+				Msg(buffer);
+				break;
+			}
+			fgets(line, 399, fu);
+			fclose(fu);
+			Msg(line);
+			break;
+		}
+	}
+
+	fclose(fp);
+}
+
 void Chars(struct raw_line *rawp) {
 	FILE *fp = fopen("data-chars.txt", "r");
 	if (fp == NULL) {

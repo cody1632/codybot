@@ -488,7 +488,7 @@ void Weather(struct raw_line *rawp) {
 		"sed -n \"3p\" /tmp/weather-%s.html |sed 's/_//g;s/-//g;s/\\.//g;s/`//g;s/\\\"//g;s///g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g;s/\\[38\\;5\\;240\\;1m//g;s@\\\\@@g;s@/@@g;s/^ *//g' > /tmp/weather-%s.temp", city, city);
 	system(buffer);
 	sprintf(buffer, 
-		"sed -n \"4p\" /tmp/weather-%s.html |sed 's/--//g;s/\\[38\\;5\\;240\\;1m//g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[-0-9]*' > /tmp/weather-%s.temp2", city, city);
+		"sed -n \"4p\" /tmp/weather-%s.html |sed 's/-\\.//g;s/\\.//g;s/--//g;s/\\[38\\;5\\;240\\;1m//g;s/\\[0m//g;s/\\[38\\;5\\;[0-9][0-9][0-9]m//g' |grep -o '[-0-9]*' > /tmp/weather-%s.temp2", city, city);
 	system(buffer);
 
 	char temp[1024], temp2[1024];

@@ -1,6 +1,6 @@
 20190824-20191018
 codybot is an IRC bot written in C providing users with fortune cookies,
-jokes, shell access and weather per city.
+jokes, oneliner C compilation, shell access and weather per city.
 
 The bot can connect to irc.freenode.net or any server using specified port
 or 6697 by default for a SSL connection.

@@ -66,6 +66,7 @@ void AsciiArt(struct raw_line *rawp) {
             break;
 		else if (c == '\n') {
 			Msg(line);
+			// throttled due to server notice of flooding
 			sleep(2);
 			memset(line, 0, 1024);
 			cnt = 0;

@@ -154,8 +154,26 @@ void CC(struct raw_line *rawp) {
 	char *retstr = malloc(1024);
 	fgets(retstr, 1024, fp);
 	ret = atoi(retstr);
-*/	if (ret == 0)
-		system("./prog 2>&1 > cmd.output; echo $? > cmd.ret");
+*/	if (ret == 0) {
+		sprintf(buffer, "timeout %ds ./prog &> cmd.output; echo $? > cmd.ret", cmd_timeout);
+		system(buffer);
+	}
+
+	fp = fopen("cmd.ret", "r");
+    if (fp == NULL) {
+        sprintf(buffer, "codybot::CC() error: Cannot open cmd.ret: %s", strerror(errno));
+        Msg(buffer);
+		return;
+    }
+    fgets(buffer, 4096, fp);
+    fclose(fp);
+
+    ret = atoi(buffer);
+    if (ret == 124) {
+        sprintf(buffer_cmd, "cc: timed out");
+        Msg(buffer_cmd);
+        return;
+    }
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
@@ -173,7 +191,7 @@ void CC(struct raw_line *rawp) {
 			break;
 		Msg(line);
 		++cnt;
-		if (cnt >= 4) {
+		if (cnt >= 10) {
 			system("cat cmd.output |nc termbin.com 9999 > cmd.url");
 			FILE *fu = fopen("cmd.url", "r");
 			if (fu == NULL) {

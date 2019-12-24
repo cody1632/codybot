@@ -11,12 +11,12 @@ machine to limit general system files accesses via the ^sh command.
 Run './codybot --help' to see all program options.
 
 There is no installation mechanism, you should use the source directory
-or copy the files where you want. The files 'ascii-art' 'stats' 'fortunes'
-and 'jokes' must be in the program's current working directory otherwise
-the program will not run.
+or copy the files where you want. The files 'data-ascii.txt', 'data-chars.txt',
+'data-fortunes.txt', 'data-jokes.txt' and 'stats' must be in the program's
+current working directory otherwise the program will not run.
 
-You should run 'chown root fortunes jokes Makefile' so some
-'^sh rm importantfiles' won't be able to execute... see
+You should run 'chown -R root data-* Makefile codybot recomp update src' so 
+some ',sh rm importantfiles' won't be able to execute... see
 https://github.com/cody1632/codybot/security/advisories
 
 You should register and identify with the IRC server's NickServer.
@@ -26,28 +26,28 @@ You can type '/msg NickServ help' in your favorite connected IRC client
 console when running the codybot program. Another console-only command you
 need to run is 'join #channel_name_here'.
 
-To see available commands, send '^help' in the channel where the bot is.
+To see available commands, send ',help' in the channel where the bot is.
 
-To trigger a fortune cookie, just type '^fortune' in a channel where the bot
+To trigger a fortune cookie, just type ',fortune' in a channel where the bot
 is present, like #codybot. The fortune cookie database file is 
 data-fortunes.txt. It's made of concatenation of the linux, computers,
 miscellaneous and wisdom files from /usr/share/games/fortunes using my
 system-provided fortune package. (see https://github.com/shlomif/fortune-mod)
 
-To get a random joke type '^joke'. This database is hand written using
+To get a random joke type ',joke'. This database is hand written using
 https://www.funnyshortjokes.com content and is far from containing all
 the sites' jokes! There's about 20 jokes as of 20190901.
 
-To get weather report from https://wttr.in type '^weather citynamehere'
+To get weather report from https://wttr.in type ',weather citynamehere'
 This should return something like "cancun: Partly cloudy 23C/73F"
 
 To run a shell command from the chat onto the host of codybot, type
-'^sh COMMAND ARGS' ie: '^sh ls /home/codybot'. You can disable this
+',sh COMMAND ARGS' ie: ',sh ls /home/codybot'. You can disable this
 command by touching sh_disable in the program's current directory
 as the root user or by using the sudo program.
 
 To run all shell commands in a locked chroot, touch './sh_lock' or
-type '^sh_lock' or '^sh_unlock'. You have to run:
+type ',sh_lock' or ',sh_unlock'. You have to run:
 chroot ./lunar /bin/bash
 su - dummy
 run.sh
@@ -56,5 +56,5 @@ lunar/home/dummy/run.fifo
 
 Speaking of the lunar directory... it is a 64bit system I use
 within a virtual machine (qemu-system-x86_64), those files may not
-execute on 32bit machines... all ^sh commands will be run within
+execute on 32bit machines... all ,sh commands will be run within
 the chroot setup previously.

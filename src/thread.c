@@ -198,8 +198,36 @@ strcmp(raw.command, "NICK")!=0) {
 			raw.text[5]==' ')
 			Calc(&raw);
 // cc
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3)==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3)==0) {
+			struct stat st2;
+			if (cc_disabled || stat("cc_disable", &st2) == 0) {
+				sprintf(buffer,
+					"%s: cc is temporarily disabled, try again later or ask esselfe to enable it", raw.nick);
+				Msg(buffer);
+				continue;
+			}
 			CC(&raw);
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_disable")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				cc_disabled = 1;
+				Msg("cc_disabled = 1");
+			}
+			else {
+				sprintf(buffer, "cc_disable can only be used by %s\n", nick_admin);
+				Msg(buffer);
+			}
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_enable")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				cc_disabled = 0;
+				Msg("cc_disabled = 0");
+			}
+			else {
+				sprintf(buffer, "cc_enable can only be used by %s\n", nick_admin);
+				Msg(buffer);
+			}
+		}
 // chars
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "chars", 5)==0)
 			Chars(&raw);
@@ -322,6 +350,26 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 			else {
 				sprintf(buffer, "sh_lock can only be used by %s\n", nick_admin);
+				Msg(buffer);
+			}
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_enable")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				sh_disabled = 0;
+				Msg("sh_disabled = 0");
+			}
+			else {
+				sprintf(buffer, "sh_enable can only be used by %s\n", nick_admin);
+				Msg(buffer);
+			}
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_disable")==0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				sh_disabled = 1;
+				Msg("sh_disabled = 1");
+			}
+			else {
+				sprintf(buffer, "sh_disable can only be used by %s\n", nick_admin);
 				Msg(buffer);
 			}
 		}

@@ -1,0 +1,28 @@
+# /etc/bashrc - global bashrc for non-interactive shells.
+
+# the scripts that call this script expect a nicely setup environment
+# for running scripts, not fancy prompts. So let's be restrictive
+# by default:
+
+# this is the minimum and given by init to start scripts (so a good start)
+EDITOR=vim
+LANG=en_CA.UTF-8
+PAPER=A4
+PATH="/abin:/opt/bin:/opt/sbin:/usr/local/bin:/usr/local/sbin"
+PATH="$PATH:/usr/bin:/usr/sbin:/bin:/sbin"
+TZ=America/Montreal
+export EDITOR LANG PAPER PATH TZ
+
+# these might not be present, so keep our path clean:
+#for DIR in /usr/local/bin /usr/X11/bin ; do
+#    [ -d $DIR ] && PATH="$PATH:$DIR"
+#done
+
+# bare necessities:
+umask   022
+
+alias ls='ls -A --color=auto'
+alias qw='exit'
+
+# finished
+#. ~/.bashrc

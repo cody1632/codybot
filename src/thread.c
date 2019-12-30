@@ -397,18 +397,18 @@ strcmp(raw.command, "NICK")!=0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
-				sprintf(buffer_cmd, "echo '%s' > lunar/home/dummy/run.fifo", raw.text);
+				sprintf(buffer_cmd, "echo '%s' > chroot/home/dummy/run.fifo", raw.text);
 				system(buffer_cmd);
 
-				// wait for lunar/home/dummy/run.sh to write in cmd.output
-				printf("++tail lunar/home/dummy/run.status++\n");
-				sprintf(buffer_cmd, "tail lunar/home/dummy/run.status");
+				// wait for chroot/home/dummy/run.sh to write in cmd.output
+				printf("++tail chroot/home/dummy/run.status++\n");
+				sprintf(buffer_cmd, "tail chroot/home/dummy/run.status");
 				system(buffer_cmd);
-				printf("++tail lunar/home/dummy/run.status++ done\n");
+				printf("++tail chroot/home/dummy/run.status++ done\n");
 
-				FILE *fr = fopen("lunar/home/dummy/cmd.output", "r");
+				FILE *fr = fopen("chroot/home/dummy/cmd.output", "r");
 				if (fr == NULL) {
-					sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot open lunar/home/dummy/cmd.output: %s",
+					sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot open chroot/home/dummy/cmd.output: %s",
 						strerror(errno));
 					Msg(buffer);
 					continue;
@@ -434,7 +434,7 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(output);
 
 				if (line_total >= 2) {
-					system("cat lunar/home/dummy/cmd.output |nc termbin.com 9999 >cmd.url");
+					system("cat chroot/home/dummy/cmd.output |nc termbin.com 9999 >cmd.url");
 					fr = fopen("cmd.url", "r");
 					if (fr == NULL) {
 						sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot open cmd.url: %s", strerror(errno));

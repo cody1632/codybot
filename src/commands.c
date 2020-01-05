@@ -128,21 +128,38 @@ void CC(struct raw_line *rawp) {
 	rawp->text[1] = ' ';
 	rawp->text[2] = ' ';
 
+	FILE *fr = fopen("prog-head.c", "r");
+	if (fr == NULL) {
+		Msg("codybot error: Cannot open prog-head.c");
+		return;
+	}
+
 	FILE *fp = fopen("prog.c", "w+");
 	if (fp == NULL) {
 		Msg("codybot error: Cannot open prog.c");
 		return;
 	}
 
-	fprintf(fp, "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n");
-	fprintf(fp, "#include <string.h>\n#include <errno.h>\n#include <sys/types.h>\n");
-	fprintf(fp, "#include <time.h>\n#include <sys/time.h>\n\n");
-	fprintf(fp, "int main(int argc, char **argv) {\n");
+	//fprintf(fp, "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n");
+	//fprintf(fp, "#include <string.h>\n#include <errno.h>\n#include <sys/types.h>\n");
+	//fprintf(fp, "#include <time.h>\n#include <sys/time.h>\n#include <math.h>\n\n");
+	//fprintf(fp, "int main(int argc, char **argv) {\n");
+	while (fgets(buffer, 1024, fr) != NULL)
+		fputs(buffer, fp);
 
 	fprintf(fp, "%s\n", rawp->text);
 
-	fprintf(fp, "\n}\n");
+	fclose(fr);
+	fr = fopen("prog-tail.c", "r");
+	if (fr == NULL) {
+		Msg("codybot error: Cannot open prog-head.c");
+		return;
+	}
+	//fprintf(fp, "\n}\n");
+	while (fgets(buffer, 1024, fr) != NULL)
+		fputs(buffer, fp);
 
+	fclose(fr);
 	fclose(fp);
 
 	ret = system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog 2>cmd.output");

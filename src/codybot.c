@@ -340,6 +340,11 @@ int main(int argc, char **argv) {
 	if (!server_ip)
 		server_ip = server_ip_freenode;
 
+	if (strcmp(server_ip, server_ip_blinkenshell)==0) {
+		sh_disabled = 1;
+		cc_disabled = 1;
+	}
+
 	raw.nick = (char *)malloc(1024);
 	raw.username = (char *)malloc(1024);
 	raw.host = (char *)malloc(1024);

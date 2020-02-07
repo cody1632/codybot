@@ -16,7 +16,8 @@ char *server_ip, *server_ip_blinkenshell = "194.14.45.5",
 // livingstone.freenode.net, NY, US
 //	*server_ip_freenode = "107.182.226.199";
 // cherryh.freenode.net, MTL, CA
-	*server_ip_freenode = "149.56.134.238";
+//	*server_ip_freenode = "149.56.134.238";
+	*server_ip_freenode = "204.225.96.251";
 SSL *pSSL;
 
 void ServerGetIP(char *hostname) {

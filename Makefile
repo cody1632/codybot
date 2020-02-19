@@ -1,6 +1,6 @@
 
 CFLAGS = -std=c11 -Wall -Werror -D_GNU_SOURCE
-LDFLAGS = -lpthread -lssl -lcrypto
+LDFLAGS = -lpthread -lssl -lcrypto -lmagic
 OBJDIR = obj
 OBJS = $(OBJDIR)/commands.o $(OBJDIR)/codybot.o $(OBJDIR)/server.o \
 $(OBJDIR)/raw.o $(OBJDIR)/thread.o

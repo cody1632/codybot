@@ -317,8 +317,6 @@ int main(int argc, char **argv) {
 		hostname = (char *)malloc(1024);
 		gethostname(hostname, 1023);
 	}
-	if (!local_port)
-		local_port = 16384;
 	if (!log_filename) {
 		log_filename = (char *)malloc(strlen("codybot.log")+1);
 		sprintf(log_filename, "codybot.log");

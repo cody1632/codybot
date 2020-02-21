@@ -58,7 +58,8 @@ void ServerConnect(void) {
 	struct sockaddr_in addr;
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(local_port);
+	if (local_port)
+		addr.sin_port = htons(local_port);
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		fprintf(stderr, "||codybot::ServerConnect() error: Cannot bind(): %s\n", strerror(errno));
 		close(socket_fd);

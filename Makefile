@@ -13,7 +13,7 @@ default: all
 all: prepare $(OBJS) $(PROGNAME)
 
 prepare:
-	@[[ -d $(OBJDIR) ]] || mkdir $(OBJDIR)
+	@[ -d $(OBJDIR) ] || mkdir $(OBJDIR) 2>/dev/null || true
 
 $(OBJDIR)/commands.o: src/commands.c
 	gcc -c $(CFLAGS) src/commands.c -o $(OBJDIR)/commands.o

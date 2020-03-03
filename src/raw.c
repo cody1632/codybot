@@ -34,7 +34,7 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 
 	char *c = line;
 	unsigned int cnt = 0, rec_nick = 1, rec_username = 0, rec_host = 0, rec_command = 0,
-		rec_channel = 0, rec_text = 0;
+		rec_channel = 0, rec_text = 0; // recording flags
 	
 	// messages to skip:
 // :livingstone.freenode.net 372 codybot :- Thank you for using freenode!
@@ -130,7 +130,6 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			if (debug)
 				printf("&&command: <%s>&&\n", rawp->command);
 		}
-// :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :!codybot_version
 		else if (rec_channel && *c == ' ') {
 			sprintf(rawp->channel, "%s", word);
 			memset(word, 0, 4096);

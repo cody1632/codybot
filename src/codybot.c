@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.22";
+const char *codybot_version_string = "0.2.23";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -56,7 +56,8 @@ char *hostname;
 void Log(char *text) {
 	FILE *fp = fopen(log_filename, "a+");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Log() error: Cannot open %s: %s\n", log_filename, strerror(errno));
+		fprintf(stderr, "##codybot::Log() eriror: Cannot open %s: %s\n",
+			log_filename, strerror(errno));
 		return;
 	}
 
@@ -70,7 +71,8 @@ void Log(char *text) {
 	if (str[strlen(str)] == '\n')
 		str[strlen(str)] = '\0';
 
-	sprintf(buffer_log, "%02d%02d%02d-%02d:%02d:%02d.%03ld ##%s##\n", tm0->tm_year+1900-2000, tm0->tm_mon+1,
+	sprintf(buffer_log, "%02d%02d%02d-%02d:%02d:%02d.%03ld ##%s##\n",
+		tm0->tm_year+1900-2000, tm0->tm_mon+1,
 		tm0->tm_mday, tm0->tm_hour, tm0->tm_min, tm0->tm_sec, tv0.tv_usec, str);
 	fputs(buffer_log, fp);
 
@@ -177,7 +179,7 @@ void ReadCommandLoop(void) {
 			sh_locked = 0;
 			Msg("sh_locked = 0");
 		}
-		else if (buffer_line[0]=='i' && buffer_line[1]=='d' && buffer_line[2]==' ') {
+		else if (strncmp(buffer_line, "id ", 3) == 0) {
 			char *cp;
 			cp = buffer_line+3;
 			char pass[1024];
@@ -200,11 +202,11 @@ void ReadCommandLoop(void) {
 			Log("privmsg nickserv :identify *********");
 			memset(buffer_cmd, 0, 4096);
 		}
-		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)=='\n') {
+		else if (strncmp(buffer_line, "timeout\n", 8) == 0) {
 			sprintf(buffer, "timeout = %d", cmd_timeout);
 			Msg(buffer);
 		}
-		else if (*cp=='t'&&*(cp+1)=='i'&&*(cp+2)=='m'&&*(cp+3)=='e'&&*(cp+4)=='o'&&*(cp+5)=='u'&&*(cp+6)=='t'&&*(cp+7)==' ') {
+		else if (strncmp(buffer_line, "timeout ", 8) == 0) {
 			char str[1024];
 			memset(str, 0, 1024);
 			unsigned int cnt = 0;
@@ -226,7 +228,7 @@ void ReadCommandLoop(void) {
 			sprintf(buffer, "timeout = %d\n", cmd_timeout);
 			Msg(buffer);
 		}
-		else if (*cp=='t'&&*(cp+1)=='r'&&*(cp+2)=='i'&&*(cp+3)=='g'&&*(cp+4)=='g'&&*(cp+5)=='e'&&*(cp+6)=='r'&&*(cp+7)==' ') {
+		else if (strncmp(buffer_line, "trigger ", 8) == 0) {
 			if (*(cp+8)!='\n')
 				trigger_char = *(cp+8);
 			sprintf(buffer, "trigger_char = %c", trigger_char);
@@ -362,8 +364,6 @@ int main(int argc, char **argv) {
 	struct stat st;
 	if(stat("sh_locked", &st)==0)
 		sh_locked = 1;
-	
-	printf("##sh_locked: %d\n", sh_locked);
 	
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {

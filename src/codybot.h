@@ -49,8 +49,6 @@ extern struct raw_line raw;
 
 // from codybot.c
 void Log(char *text);
-void Logr(char *text);
-void Logx(char *text);
 void Msg(char *text);
 void *ThreadRXFunc(void *argp);
 // from commands.c

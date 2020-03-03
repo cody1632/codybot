@@ -83,7 +83,7 @@ void *ThreadRunFunc(void *argp) {
 	fseek(fp, 0, SEEK_SET);
 
 	unsigned int lines_max = 4;
-	if (strcmp(raw.channel, "#codybot")==0)
+	if (strcmp(raw.channel, "#codybot") == 0)
 		lines_max = 10;
 	if (lines_total <= lines_max) {
 		char *result = (char *)malloc(4096);
@@ -161,11 +161,12 @@ void *ThreadRXFunc(void *argp) {
 
 		RawLineParse(&raw, buffer_rx);
 		RawGetTarget(&raw);
-if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN")!=0 &&
+
+if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN") != 0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);
 // help
-		if (raw.text[0]==trigger_char && strncmp(raw.text+1, "help", 4)==0) {
+		if (raw.text[0]==trigger_char && strncmp(raw.text+1, "help", 4) == 0) {
 			char c = trigger_char;
 			sprintf(buffer, "commands: %cabout %cascii %ccc %cchars %ccolorize %chelp %cfortune"
 				" %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n", c,c,c,c,c,c,c,c,c,c,c,c,c,c);
@@ -173,14 +174,14 @@ strcmp(raw.command, "NICK")!=0) {
 			continue;
 		}
 // ascii
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "ascii", 5)==0) {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "ascii", 5) == 0) {
 			if (strcmp(raw.channel, "#codybot")==0)
 				AsciiArt(&raw);
 			else
 				Msg("ascii: can only be run in #codybot (due to output > 4 lines)");
 		}
 // about
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "about", 5)==0) {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "about", 5) == 0) {
 			if (strcmp(nick, "codybot")==0)
 				Msg("codybot is an IRC bot written in C by esselfe, "
 					"sources @ https://github.com/cody1632/codybot");
@@ -191,14 +192,12 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 // calc
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
-			raw.text[5]=='\0')
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "calc") == 0)
 			Msg("calc  example: '^calc 10+20'");
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='a'&&raw.text[3]=='l'&&raw.text[4]=='c'&&
-			raw.text[5]==' ')
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "calc ", 5) == 0)
 			Calc(&raw);
 // cc
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3)==0) {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3) == 0) {
 			struct stat st2;
 			if (cc_disabled || stat("cc_disable", &st2) == 0) {
 				sprintf(buffer,
@@ -208,7 +207,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 			CC(&raw);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_disable")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_disable") == 0) {
 			if (strcmp(raw.nick, nick_admin)==0) {
 				cc_disabled = 1;
 				Msg("cc_disabled = 1");
@@ -218,7 +217,7 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_enable")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_enable") == 0) {
 			if (strcmp(raw.nick, nick_admin)==0) {
 				cc_disabled = 0;
 				Msg("cc_disabled = 0");
@@ -229,66 +228,62 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 // chars
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "chars", 5)==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "chars", 5) == 0)
 			Chars(&raw);
 // colorize
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorlist")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorlist") == 0) {
 			Msg("\003011\003022\003044\003055\003066\003077\003088\00309\0031010\0031111\0031212\0031313\0031414\0031515");
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorize")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorize") == 0) {
 			sprintf(buffer, "Usage: %ccolorize some text to process", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='c'&&raw.text[2]=='o'&&raw.text[3]=='l'&&raw.text[4]=='o'&&
-		  raw.text[5]=='r'&&raw.text[6]=='i'&&raw.text[7]=='z'&&raw.text[8]=='e'&&raw.text[9]==' ')
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "colorize ", 9) == 0)
 			Colorize(&raw);
 // fortune
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7)==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7) == 0)
 			Fortune(&raw);
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on")==0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on") == 0) {
+			if (strcmp(raw.nick, nick_admin) == 0) {
 				debug = 1;
 				Msg("debug = 1");
 			}
 			else
 				Msg("debug mode can only be changed by the admin");
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off")==0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off") == 0) {
+			if (strcmp(raw.nick, nick_admin) == 0) {
 				debug = 0;
 				Msg("debug = 0");
 			}
 			else
 				Msg("debug mode can only be changed by the admin");
 		}
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4)==0)
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4) == 0)
 			Joke(&raw);
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig")==0 &&
-			strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig") == 0 &&
+			strcmp(raw.nick, nick_admin) == 0) {
 			memset(buffer, 0, 4096);
 			memset(buffer, '#', 1024);
 			Msg(buffer);
 		}
 // rainbow
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "rainbow")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "rainbow") == 0) {
 			sprintf(buffer, "Usage: %crainbow some random text", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='r'&&raw.text[2]=='a'&&raw.text[3]=='i'&&raw.text[4]=='n'&&
-		  raw.text[5]=='b'&&raw.text[6]=='o'&&raw.text[7]=='w'&&raw.text[8]==' ')
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "rainbow ", 8) == 0)
 			Rainbow(&raw);
 // stats
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats")==0)
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats") == 0)
 			Stats(&raw);
 // timeout
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
-		  raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]=='\0') {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "timeout") == 0) {
 			sprintf(buffer, "timeout = %d", cmd_timeout);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='i'&&raw.text[3]=='m'&&raw.text[4]=='e'&&
-			raw.text[5]=='o'&&raw.text[6]=='u'&&raw.text[7]=='t'&&raw.text[8]==' ') {
-			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "timeout ", 8) == 0) {
+			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, nick_admin) == 0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
@@ -310,14 +305,19 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 // trigger
-		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&raw.text[3]=='i'&&raw.text[4]=='g'&&
-			raw.text[5]=='g'&&raw.text[6]=='e'&&raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
-			if (strcmp(raw.nick, nick_admin)==0)
-				trigger_char = raw.text[9];
-			sprintf(buffer, "trigger = %c", trigger_char);
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "trigger") == 0) {
+			sprintf(buffer, "trigger = '%c'", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "uptime")==0) {
+		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&
+			raw.text[3]=='i'&&raw.text[4]=='g'&&raw.text[5]=='g'&&raw.text[6]=='e'&&
+			raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
+			if (strcmp(raw.nick, nick_admin) == 0)
+				trigger_char = raw.text[9];
+			sprintf(buffer, "trigger = '%c'", trigger_char);
+			Msg(buffer);
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "uptime") == 0) {
 			gettimeofday(&tv0, NULL);
 			t0 = (time_t)tv0.tv_sec - tv_start.tv_sec;
 			tm0 = gmtime(&t0);
@@ -328,22 +328,21 @@ strcmp(raw.command, "NICK")!=0) {
 				sprintf(buffer, "uptime: %02d:%02d:%02d", tm0->tm_hour, tm0->tm_min, tm0->tm_sec);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version") == 0) {
 			sprintf(buffer, "codybot %s", codybot_version_string);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather") == 0) {
 			sprintf(buffer, "weather: missing city argument, example: '%cweather montreal'", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && raw.text[1]=='w' && raw.text[2]=='e' && raw.text[3]=='a' &&
-			raw.text[4]=='t' && raw.text[5]=='h' && raw.text[6]=='e' && raw.text[7]=='r' && raw.text[8]==' ')
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "weather ", 8) == 0)
 			Weather(&raw);
-		else if (strcmp(raw.text, "^sh")==0) {
+		else if (strcmp(raw.text, "^sh") == 0) {
 			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock")==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock") == 0) {
 			if (strcmp(raw.nick, nick_admin)==0) {
 				sh_locked = 1;
 				Msg("sh_locked = 1");
@@ -353,8 +352,8 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_enable")==0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_enable") == 0) {
+			if (strcmp(raw.nick, nick_admin) == 0) {
 				sh_disabled = 0;
 				Msg("sh_disabled = 0");
 			}
@@ -363,8 +362,8 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_disable")==0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_disable") == 0) {
+			if (strcmp(raw.nick, nick_admin) == 0) {
 				sh_disabled = 1;
 				Msg("sh_disabled = 1");
 			}
@@ -373,8 +372,8 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock")==0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock") == 0) {
+			if (strcmp(raw.nick, nick_admin) == 0) {
 				sh_locked = 0;
 				Msg("sh_locked = 0");
 			}
@@ -384,7 +383,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 // sh
-		else if (raw.text[0]==trigger_char && raw.text[1]=='s' && raw.text[2]=='h' && raw.text[3]==' ') {
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "sh ", 3) == 0) {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
 				sprintf(buffer,

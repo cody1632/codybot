@@ -72,10 +72,8 @@ void ServerConnect(void) {
 	
 	struct sockaddr_in host;
 	host.sin_addr.s_addr = inet_addr(server_ip);
-	printf("####inet_addr()\n");
 	host.sin_family = AF_INET;
 	host.sin_port = htons(server_port);
-	printf("####htons()\n");
 	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
 		fprintf(stderr, "||codybot::ServerConnect() error: Cannot connect(): %s\n", strerror(errno));
 		close(socket_fd);
@@ -137,11 +135,11 @@ void ServerConnect(void) {
 		}
 	}
 
-	if (use_ssl)
+/*	if (use_ssl)
 		SSL_write(pSSL, "PASS none\n", 10);
 	else
 		write(socket_fd, "PASS none\n", 10);
-
+*/
 	sprintf(buffer, "NICK %s\n", nick);
 	if (use_ssl)
 		SSL_write(pSSL, buffer, strlen(buffer));

@@ -7,7 +7,7 @@
 // Globals from codybot.c
 extern const char *codybot_version_string;
 extern int debug, socket_fd, ret, endmainloop, cc_disabled, sh_disabled, 
-	sh_locked, cmd_timeout, use_ssl;
+	sh_locked, wttr_disabled, cmd_timeout, use_ssl;
 extern unsigned long long fortune_total;
 extern struct timeval tv0, tv_start;
 extern struct tm *tm0;

@@ -128,6 +128,20 @@ void CC(struct raw_line *rawp) {
 	rawp->text[1] = ' ';
 	rawp->text[2] = ' ';
 
+	// check for the system() call and cancel if found
+	char *c = rawp->text;
+	while (1) {
+		if (*c == '\0' || *c == '\n')
+			break;
+		if (strlen(c) >= 7 && strncmp(c, "system", 6) == 0) {
+			Msg("won't run system() call...\n");
+			return;
+		}
+		++c;
+	}
+
+
+
 	FILE *fr = fopen("prog-head.c", "r");
 	if (fr == NULL) {
 		Msg("codybot error: Cannot open prog-head.c");

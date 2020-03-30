@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.23";
+const char *codybot_version_string = "0.2.24";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -39,7 +39,7 @@ void HelpShow(void) {
 }
 
 int debug, socket_fd, ret, endmainloop, cc_disabled, sh_disabled,
-	sh_locked, cmd_timeout = 10, use_ssl;
+	sh_locked, wttr_disabled, cmd_timeout = 10, use_ssl;
 unsigned long long fortune_total;
 struct timeval tv0, tv_start;
 struct tm *tm0;

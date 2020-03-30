@@ -197,6 +197,10 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "calc ", 5) == 0)
 			Calc(&raw);
 // cc
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc") ==0) {
+			sprintf(buffer, "example: ,cc printf(\"this\n\");\n");
+			Msg(buffer);
+		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3) == 0) {
 			struct stat st2;
 			if (cc_disabled || stat("cc_disable", &st2) == 0) {
@@ -336,8 +340,34 @@ strcmp(raw.command, "NICK")!=0) {
 			sprintf(buffer, "weather: missing city argument, example: '%cweather montreal'", trigger_char);
 			Msg(buffer);
 		}
-		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "weather ", 8) == 0)
-			Weather(&raw);
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "weather ", 8) == 0) {
+			if (wttr_disabled) {
+				sprintf(buffer, ",weather is currently disabled, try again later or ask %s to enable it", nick_admin);
+				Msg(buffer);
+			}
+			else
+				Weather(&raw);
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather_disable") == 0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				wttr_disabled = 1;
+				Msg("weather_disabled = 1");
+			}
+			else {
+				sprintf(buffer, "Only %s can use ,weather_disable", nick_admin);
+				Msg(buffer);
+			}
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather_enable") == 0) {
+			if (strcmp(raw.nick, nick_admin)==0) {
+				wttr_disabled = 0;
+				Msg("weather_disabled = 0");
+			}
+			else {
+				sprintf(buffer, "Only %s can use ,weather_enable", nick_admin);
+				Msg(buffer);
+			}
+		}
 		else if (strcmp(raw.text, "^sh") == 0) {
 			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'", trigger_char);
 			Msg(buffer);

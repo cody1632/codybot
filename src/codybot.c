@@ -89,7 +89,7 @@ void Log(char *text) {
 void Msg(char *text) {
 	unsigned int total_len = strlen(text);
 	if (total_len <= 400) {
-		sprintf(buffer_log, "privmsg %s :%s\n", target, text);
+		sprintf(buffer_log, "PRIVMSG %s :%s\n", target, text);
 		if (use_ssl)
 			SSL_write(pSSL, buffer_log, strlen(buffer_log));
 		else
@@ -101,7 +101,7 @@ void Msg(char *text) {
 		char str[400], *cp = text;
 		unsigned int cnt, cnt2 = 0;
 		memset(str, 0, 400);
-		sprintf(str, "privmsg %s :", target);
+		sprintf(str, "PRIVMSG %s :", target);
 		cnt = strlen(str);
 		while (1) {
 			str[cnt] = *(cp+cnt2);
@@ -127,7 +127,7 @@ void Msg(char *text) {
 					write(socket_fd, str, strlen(str));
 				Log(str);
 				memset(str, 0, 400);
-				sprintf(str, "privmsg %s :", target);
+				sprintf(str, "PRIVMSG %s :", target);
 				cnt = strlen(str);
 			}
 		}
@@ -194,12 +194,12 @@ void ReadCommandLoop(void) {
 			}
 			pass[cnt] = '\0';
 
-			sprintf(buffer_cmd, "privmsg nickserv :identify %s\n", pass);
+			sprintf(buffer_cmd, "PRIVMSG NickServ :identify %s\n", pass);
 			if (use_ssl)
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			else
 				write(socket_fd, buffer_cmd, strlen(buffer_cmd));
-			Log("privmsg nickserv :identify *********");
+			Log("PRIVMSG NickServ :identify *********");
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strncmp(buffer_line, "timeout\n", 8) == 0) {

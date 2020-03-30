@@ -79,6 +79,22 @@ void AsciiArt(struct raw_line *rawp) {
 }
 
 void Calc(struct raw_line *rawp) {
+	// check for "kill" found in ",calc `killall codybot`" which kills the bot
+    char *c = rawp->text;
+    while (1) {
+        if (*c == '\0' || *c == '\n')
+            break;
+		if (*c == '\\') {
+			Msg("No backslashes allowed, sorry");
+			return;
+		}
+        if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
+            Msg("calc: contains a blocked term...\n");
+            return;
+        }
+        ++c;
+    }
+
 	// remove '^calc' from the line
 	rawp->text[0] = ' ';
 	rawp->text[1] = ' ';
@@ -86,7 +102,15 @@ void Calc(struct raw_line *rawp) {
 	rawp->text[3] = ' ';
 	rawp->text[4] = ' ';
 
-	sprintf(buffer, "echo \"%s\" | bc -l &> cmd.output", rawp->text);
+	FILE *fi = fopen("cmd.input", "w+");
+	if (fi == NULL) {
+		sprintf(buffer, "codybot::calc() error: Cannot open cmd.input for writing");
+		return;
+	}
+	fputs(rawp->text, fi);
+	fclose(fi);
+
+	sprintf(buffer, "bc -l &> cmd.output < cmd.input");
 	system(buffer);
 
 	FILE *fp = fopen("cmd.output", "r");
@@ -133,8 +157,9 @@ void CC(struct raw_line *rawp) {
 	while (1) {
 		if (*c == '\0' || *c == '\n')
 			break;
-		if (strlen(c) >= 7 && strncmp(c, "system", 6) == 0) {
-			Msg("won't run system() call...\n");
+		if ((strlen(c) >= 7 && strncmp(c, "system", 6) == 0) ||
+			(strlen(c) >= 5 && strncmp(c, "exec", 4) == 0)) {
+			Msg("won't run system() nor exec() calls...\n");
 			return;
 		}
 		++c;
@@ -500,6 +525,19 @@ void Stats(struct raw_line *rawp) {
 }
 
 void Weather(struct raw_line *rawp) {
+	// check for "kill" found in ",weather `pkill${IFS}codybot`" which kills the bot
+    char *c = rawp->text;
+    while (1) {
+        if (*c == '\0' || *c == '\n')
+            break;
+        if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
+            Msg("weather: contains a blocked term...\n");
+            return;
+        }
+        ++c;
+    }
+
+
 	unsigned int cnt = 0;
 	char city[1024], *cp = rawp->text + strlen("^weather ");
 	memset(city, 0, 1024);

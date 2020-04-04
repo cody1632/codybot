@@ -110,8 +110,7 @@ void Calc(struct raw_line *rawp) {
 	fputs(rawp->text, fi);
 	fclose(fi);
 
-	sprintf(buffer, "bc -l &> cmd.output < cmd.input");
-	system(buffer);
+	system("bc -l &> cmd.output < cmd.input");
 
 	FILE *fp = fopen("cmd.output", "r");
 	if (fp == NULL) {

@@ -198,7 +198,7 @@ strcmp(raw.command, "NICK")!=0) {
 			Calc(&raw);
 // cc
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc") ==0) {
-			sprintf(buffer, "example: ,cc printf(\"this\n\");\n");
+			sprintf(buffer, "example: ,cc printf(\"this\\n\");");
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3) == 0) {

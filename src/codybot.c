@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.24";
+const char *codybot_version_string = "0.2.25";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -156,6 +156,10 @@ void ReadCommandLoop(void) {
 		else if (strcmp(buffer_line, "debug off\n")==0) {
 			debug = 0;
 			Msg("debug = 0");
+		}
+		else if (strcmp(buffer_line, "fortune\n")==0) {
+			sprintf(raw.channel, "%s", current_channel);
+			Fortune(&raw);
 		}
 		else if (strncmp(buffer_line, "msg", 3)==0) {
 			sprintf(buffer, "%s", buffer_line+4);

@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.25";
+const char *codybot_version_string = "0.2.26";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
 			server_ip = server_ip_blinkenshell;
 			break;
 		case 'f':
-			server_ip = server_ip_freenode;
+			ServerGetIP("chat.freenode.net");
 			break;
 		case 'H':
 			hostname = (char *)malloc(strlen(optarg)+1);
@@ -342,7 +342,7 @@ int main(int argc, char **argv) {
 		use_ssl = 1;
 	}
 	if (!server_ip)
-		server_ip = server_ip_freenode;
+		ServerGetIP("chat.freenode.net");
 
 	if (strcmp(server_ip, server_ip_blinkenshell)==0) {
 		sh_disabled = 1;

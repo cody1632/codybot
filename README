@@ -1,30 +1,32 @@
-20190824-20191018
-codybot is an IRC bot written in C providing users with fortune cookies,
-jokes, oneliner C compilation, shell access and weather per city.
+20190824-20200510
+codybot is an IRC bot written with the C programming language,
+providing users with fortune cookies, jokes, oneliner C compilation, 
+shell access and weather per city.
 
-The bot can connect to irc.freenode.net or any server using specified port
-or 6697 by default for a SSL connection.
+The bot can connect to chat.freenode.net or any specific server using
+a specified port or 6697 by default for a SSL connection.
 
 To compile the program, just run 'make' within the source directory
 and run with './codybot -n YourNick'. Personally I run the bot in a virtual
-machine to limit general system files accesses via the ^sh command. 
+machine to limit general system files accesses via the ,sh command. 
 Run './codybot --help' to see all program options.
 
 There is no installation mechanism, you should use the source directory
-or copy the files where you want. The files 'data-ascii.txt', 'data-chars.txt',
+or move the files where you want. The files 'data-ascii.txt', 'data-chars.txt',
 'data-fortunes.txt', 'data-jokes.txt' and 'stats' must be in the program's
 current working directory otherwise the program will not run.
 
-You should run 'chown -R root data-* Makefile codybot recomp update src' so 
-some ',sh rm importantfiles' won't be able to execute... see
+You should run 'chown -R root data-* Makefile codybot prog-* recomp update src'
+so some ',sh rm importantfiles' won't be able to execute... see
 https://github.com/cody1632/codybot/security/advisories
 
-You should register and identify with the IRC server's NickServer.
-You can type '/msg NickServ help' in your favorite connected IRC client
-(mIRC, irssi, weechat, hexchat, ...) Otherwise you can identify by typing
-'id yourpasswordhere' or 'privmsg NickServ :identify pass' in the
-console when running the codybot program. Another console-only command you
-need to run is 'join #channel_name_here'.
+You should register and identify your nick with the IRC server's NickServer
+(Not available on all IRC networks). You can type '/msg NickServ help'
+in your favorite connected IRC client (mIRC, irssi, weechat, hexchat, ...).
+Otherwise you can identify by typing 'id yourpasswordhere' or 
+'privmsg NickServ :identify pass' in the console when running the codybot
+program. Another console-only command you need to run is 
+'join #channel_name_here'.
 
 To see available commands, send ',help' in the channel where the bot is.
 
@@ -36,25 +38,31 @@ system-provided fortune package. (see https://github.com/shlomif/fortune-mod)
 
 To get a random joke type ',joke'. This database is hand written using
 https://www.funnyshortjokes.com content and is far from containing all
-the sites' jokes! There's about 20 jokes as of 20190901.
+the sites' jokes! There's 25 jokes as of 20200510.
 
 To get weather report from https://wttr.in type ',weather citynamehere'
-This should return something like "cancun: Partly cloudy 23C/73F"
+This should return something like "Montreal: Partly cloudy 23C/73F"
 
 To run a shell command from the chat onto the host of codybot, type
 ',sh COMMAND ARGS' ie: ',sh ls /home/codybot'. You can disable this
 command by touching sh_disable in the program's current directory
-as the root user or by using the sudo program.
+as the root user or by using the sudo program. You can also type
+'sh_enable/sh_disable' in the console and the same but with the 
+trigger char in the channel.
 
 To run all shell commands in a locked chroot, touch './sh_lock' or
-type ',sh_lock' or ',sh_unlock'. You have to run:
-chroot ./lunar /bin/bash
-su - dummy
-run.sh
+type ',sh_lock' or ',sh_unlock'. You have to run as root:
+    chroot chroot /bin/bash
+    su - dummy
+    run.sh
+You will have to create 2 fifo pipes since they can't be saved
+in the release archive:
+	mkfifo chroot/home/dummy/run.{fifo,status}
 You should ensure that the codybot user can write to
-lunar/home/dummy/run.fifo
+chroot/home/dummy/run.fifo. The files starting with
+"cmd." also need to be owned by the "dummy" user.
+Note that the dummy user should exist on both the host
+and in the chroot. The UID should match in /etc/passwd
+and chroot/etc/passwd
 
-Speaking of the lunar directory... it is a 64bit system I use
-within a virtual machine (qemu-system-x86_64), those files may not
-execute on 32bit machines... all ,sh commands will be run within
-the chroot setup previously.
+Enjoy!

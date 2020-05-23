@@ -12,7 +12,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.26";
+const char *codybot_version_string = "0.2.27";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -144,42 +144,42 @@ void ReadCommandLoop(void) {
 		cp = buffer_line;
 		if (buffer_line[0] == '\n')
 			continue;
-		else if (strcmp(buffer_line, "exit\n")==0 || strcmp(buffer_line, "quit\n")==0)
+		else if (strcmp(buffer_line, "exit\n") == 0 || strcmp(buffer_line, "quit\n") == 0)
 			endmainloop = 1;
-		else if (strncmp(buffer_line, "cursh", 5)==0) {
+		else if (strncmp(buffer_line, "cursh", 5) == 0) {
 			sprintf(current_channel, "%s", buffer_line+6);
 		}
-		else if (strcmp(buffer_line, "debug on\n")==0) {
+		else if (strcmp(buffer_line, "debug on\n") == 0) {
 			debug = 1;
 			Msg("debug = 1");
 		}
-		else if (strcmp(buffer_line, "debug off\n")==0) {
+		else if (strcmp(buffer_line, "debug off\n") == 0) {
 			debug = 0;
 			Msg("debug = 0");
 		}
-		else if (strcmp(buffer_line, "fortune\n")==0) {
+		else if (strcmp(buffer_line, "fortune\n") == 0) {
 			sprintf(raw.channel, "%s", current_channel);
 			Fortune(&raw);
 		}
-		else if (strncmp(buffer_line, "msg", 3)==0) {
+		else if (strncmp(buffer_line, "msg", 3) == 0) {
 			sprintf(buffer, "%s", buffer_line+4);
 			sprintf(raw.channel, "%s", current_channel);
 			target = raw.channel;
 			Msg(buffer);
 		}
-		else if (strcmp(buffer_line, "sh_disable\n")==0) {
+		else if (strcmp(buffer_line, "sh_disable\n") == 0) {
 			sh_disabled = 1;
 			Msg("sh_disabled = 1");
 		}
-		else if (strcmp(buffer_line, "sh_enable\n")==0) {
+		else if (strcmp(buffer_line, "sh_enable\n") == 0) {
 			sh_disabled = 0;
 			Msg("sh_disabled = 1");
 		}
-		else if (strcmp(buffer_line, "sh_lock\n")==0) {
+		else if (strcmp(buffer_line, "sh_lock\n") == 0) {
 			sh_locked = 1;
 			Msg("sh_locked = 1");
 		}
-		else if (strcmp(buffer_line, "sh_unlock\n")==0) {
+		else if (strcmp(buffer_line, "sh_unlock\n") == 0) {
 			sh_locked = 0;
 			Msg("sh_locked = 0");
 		}
@@ -344,7 +344,7 @@ int main(int argc, char **argv) {
 	if (!server_ip)
 		ServerGetIP("chat.freenode.net");
 
-	if (strcmp(server_ip, server_ip_blinkenshell)==0) {
+	if (strcmp(server_ip, server_ip_blinkenshell) == 0) {
 		sh_disabled = 1;
 		cc_disabled = 1;
 	}
@@ -366,7 +366,7 @@ int main(int argc, char **argv) {
 	memset(buffer, 0, 4096);
 
 	struct stat st;
-	if(stat("sh_locked", &st)==0)
+	if(stat("sh_locked", &st) == 0)
 		sh_locked = 1;
 	
 	FILE *fp = fopen("stats", "r");

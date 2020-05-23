@@ -107,11 +107,10 @@ void Calc(struct raw_line *rawp) {
 		sprintf(buffer, "codybot::calc() error: Cannot open cmd.input for writing");
 		return;
 	}
-	strcat(rawp->text, "\n");
-	fputs(rawp->text+6, fi);
+	fputs(rawp->text, fi);
 	fclose(fi);
 
-	system("cat cmd.input | bc -l &> cmd.output");
+	system("bc -l &> cmd.output < cmd.input");
 
 	FILE *fp = fopen("cmd.output", "r");
 	if (fp == NULL) {

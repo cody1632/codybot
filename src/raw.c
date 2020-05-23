@@ -11,7 +11,7 @@ char *target;
 // If sender sends to channel, set target to channel
 // If sender sends to PM/nick, set target to nick
 char *RawGetTarget(struct raw_line *rawp) {
-    if (strcmp(rawp->channel, nick)==0)
+    if (strcmp(rawp->channel, nick) == 0)
         target = rawp->nick;
     else
         target = rawp->channel;
@@ -134,7 +134,7 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			sprintf(rawp->channel, "%s", word);
 			memset(word, 0, 4096);
 			rec_channel = 0;
-			if (strcmp(rawp->command, "PRIVMSG")==0)
+			if (strcmp(rawp->command, "PRIVMSG") == 0)
 				rec_text = 1;
 			cnt = 0;
 			if (debug)

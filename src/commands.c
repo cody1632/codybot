@@ -267,7 +267,7 @@ void Chars(struct raw_line *rawp) {
 	while (1) {
 		str = fgets(chars_line, 4095, fp);
 		if (str == NULL) break;
-		sprintf(buffer, "%s: %s\n", raw.nick, chars_line);
+		sprintf(buffer, "%s\n", chars_line);
 		Msg(buffer);
 	}
 

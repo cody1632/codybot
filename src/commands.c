@@ -96,15 +96,13 @@ void Calc(struct raw_line *rawp) {
     }
 
 	// remove '^calc' from the line
-	rawp->text[0] = ' ';
-	rawp->text[1] = ' ';
-	rawp->text[2] = ' ';
-	rawp->text[3] = ' ';
-	rawp->text[4] = ' ';
+	rawp->text += 6;
+	strcat(rawp->text, "\n");
 
 	FILE *fi = fopen("cmd.input", "w+");
 	if (fi == NULL) {
 		sprintf(buffer, "codybot::calc() error: Cannot open cmd.input for writing");
+		Msg(buffer);
 		return;
 	}
 	fputs(rawp->text, fi);

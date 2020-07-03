@@ -50,7 +50,6 @@ extern struct raw_line raw;
 // from codybot.c
 void Log(char *text);
 void Msg(char *text);
-void *ThreadRXFunc(void *argp);
 // from commands.c
 void AsciiArt(struct raw_line *rawp);
 void Calc(struct raw_line *rawp);

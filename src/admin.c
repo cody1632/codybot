@@ -28,6 +28,34 @@ void AddAdmin(char *nick2) {
 	++rootAdminList.total_admins;
 }
 
+char *EnumerateAdmins(void) {
+	struct Admin *admin = rootAdminList.first_admin;
+	char *str = malloc(4096);
+	memset(str, 0, 4096);
+	
+	if (admin == NULL) {
+		sprintf(str, "(no admin in the list)");
+		return str;
+	}
+
+	while (1) {
+		strcat(str, admin->nick);
+		if (admin->next != NULL) {
+			if (admin->next->next == NULL)
+				strcat(str, " and ");
+			else
+				strcat(str, ", ");
+		}
+
+		if (admin->next == NULL)
+			break;
+		else
+			admin = admin->next;
+	}
+
+	return str;
+}
+
 int IsAdmin(char *nick2) {
 	struct Admin *admin = rootAdminList.first_admin;
 	if (admin == NULL)

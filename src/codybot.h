@@ -60,6 +60,7 @@ struct AdminList {
 extern struct AdminList rootAdminList;
 
 void AddAdmin(char *nick2);
+char *EnumerateAdmins(void);
 int IsAdmin(char *nick2);
 
 // from codybot.c

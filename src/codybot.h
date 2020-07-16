@@ -16,7 +16,7 @@ extern char *log_filename;
 extern char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 extern char trigger_char;
 extern char *current_channel;
-extern char *nick, *nick_admin;
+extern char *nick, *nick_admin, *nick_admin2;
 extern char *full_user_name;
 extern char *hostname;
 extern char *target;
@@ -50,6 +50,7 @@ extern struct raw_line raw;
 // from codybot.c
 void Log(char *text);
 void Msg(char *text);
+void *ThreadRXFunc(void *argp);
 // from commands.c
 void AsciiArt(struct raw_line *rawp);
 void Calc(struct raw_line *rawp);

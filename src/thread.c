@@ -212,7 +212,7 @@ strcmp(raw.command, "NICK")!=0) {
 			CC(&raw);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_disable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				cc_disabled = 1;
 				Msg("cc_disabled = 1");
 			}
@@ -222,7 +222,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_enable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				cc_disabled = 0;
 				Msg("cc_disabled = 0");
 			}
@@ -248,7 +248,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7) == 0)
 			Fortune(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on") == 0) {
-			if (strcmp(raw.nick, nick_admin) == 0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				debug = 1;
 				Msg("debug = 1");
 			}
@@ -256,7 +256,7 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg("debug mode can only be changed by the admin");
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off") == 0) {
-			if (strcmp(raw.nick, nick_admin) == 0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				debug = 0;
 				Msg("debug = 0");
 			}
@@ -266,7 +266,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4) == 0)
 			Joke(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig") == 0 &&
-			strcmp(raw.nick, nick_admin) == 0) {
+			(strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0)) {
 			memset(buffer, 0, 4096);
 			memset(buffer, '#', 1024);
 			Msg(buffer);
@@ -287,7 +287,8 @@ strcmp(raw.command, "NICK")!=0) {
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "timeout ", 8) == 0) {
-			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, nick_admin) == 0) {
+			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, nick_admin)==0 ||
+				strcmp(raw.nick, nick_admin2)==0) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
@@ -316,7 +317,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&
 			raw.text[3]=='i'&&raw.text[4]=='g'&&raw.text[5]=='g'&&raw.text[6]=='e'&&
 			raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
-			if (strcmp(raw.nick, nick_admin) == 0)
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0)
 				trigger_char = raw.text[9];
 			sprintf(buffer, "trigger = '%c'", trigger_char);
 			Msg(buffer);
@@ -349,7 +350,7 @@ strcmp(raw.command, "NICK")!=0) {
 				Weather(&raw);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather_disable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				wttr_disabled = 1;
 				Msg("weather_disabled = 1");
 			}
@@ -359,7 +360,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather_enable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				wttr_disabled = 0;
 				Msg("weather_disabled = 0");
 			}
@@ -373,7 +374,7 @@ strcmp(raw.command, "NICK")!=0) {
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				sh_locked = 1;
 				Msg("sh_locked = 1");
 			}
@@ -383,7 +384,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_enable") == 0) {
-			if (strcmp(raw.nick, nick_admin) == 0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				sh_disabled = 0;
 				Msg("sh_disabled = 0");
 			}
@@ -393,7 +394,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_disable") == 0) {
-			if (strcmp(raw.nick, nick_admin) == 0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				sh_disabled = 1;
 				Msg("sh_disabled = 1");
 			}
@@ -403,7 +404,7 @@ strcmp(raw.command, "NICK")!=0) {
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock") == 0) {
-			if (strcmp(raw.nick, nick_admin) == 0) {
+			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
 				sh_locked = 0;
 				Msg("sh_locked = 0");
 			}

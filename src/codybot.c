@@ -33,12 +33,9 @@ static const struct option long_options[] = {
 static const char *short_options = "hVdbfH:l:N:n:P:p:s:t:";
 
 void HelpShow(void) {
-	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | "
-			"-f/--freenode | -d/--debug }\n");
-	printf("               { -H/--hostname HOST | -l/--log FILENAME | "
-			"-N/--fullname NAME | -n/--nick NICK }\n");
-	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | "
-			"-s/--server ADDR | -t/--trigger CHAR }\n");
+	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode | -d/--debug }\n");
+	printf("               { -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME | -n/--nick NICK }\n");
+	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
 }
 
 int debug, socket_fd, ret, endmainloop, cc_disabled, sh_disabled,
@@ -52,7 +49,8 @@ char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 char trigger_char, trigger_char_default = ',';
 char *current_channel;
 char *nick, // nick used by the bot
-	*nick_admin = "esselfe"; // change this to your usual/normal nick for controlling the bot
+	*nick_admin = "esselfe", // change this to your usual/normal nick for controlling the bot
+	*nick_admin2 = "SpringSpocket";
 char *full_user_name;
 char *hostname;
 
@@ -369,12 +367,8 @@ int main(int argc, char **argv) {
 	memset(buffer, 0, 4096);
 
 	struct stat st;
-	if(stat("sh_locked", &st) == 0) {
-		if (debug)
-			printf("##sh_locked file found, locking shell\n");
-
+	if(stat("sh_locked", &st) == 0)
 		sh_locked = 1;
-	}
 	
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {
@@ -392,7 +386,6 @@ int main(int argc, char **argv) {
 	ServerConnect();
 	ThreadRXStart();
 	ReadCommandLoop();
-
 	ServerClose();
 
 	return 0;

@@ -1,1 +1,0 @@
-/home/dummy/run.sh

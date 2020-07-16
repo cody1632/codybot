@@ -50,6 +50,10 @@ as the root user or by using the sudo program. You can also type
 'sh_enable/sh_disable' in the console and the same but with the 
 trigger char in the channel.
 
+If you want to use the chroot mechanism, you have to download the
+minimal chroot archive and extract it in the source directory.
+The latest chroot is available @
+	https://hobby.esselfe.ca/codybot/chroot.tar.xz
 To run all shell commands in a locked chroot, touch './sh_lock' or
 type ',sh_lock' or ',sh_unlock'. You have to run as root:
     chroot chroot /bin/bash

@@ -1,4 +1,0 @@
-# this can be an annoyance!
-if shopt -q login_shell; then
-  /usr/bin/fortune 1>&2
-fi

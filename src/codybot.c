@@ -48,9 +48,7 @@ char *log_filename;
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 char trigger_char, trigger_char_default = ',';
 char *current_channel;
-char *nick, // nick used by the bot
-	*nick_admin = "esselfe", // change this to your usual/normal nick for controlling the bot
-	*nick_admin2 = "SpringSpocket";
+char *nick; // nick used by the bot
 char *full_user_name;
 char *hostname;
 
@@ -314,6 +312,10 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
+
+	// Change those to your desired nicks
+	AddAdmin("esselfe");
+	AddAdmin("SpringSprocket");
 
 	if (!full_user_name) {
 		char *name = getlogin();

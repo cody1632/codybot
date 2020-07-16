@@ -212,22 +212,22 @@ strcmp(raw.command, "NICK")!=0) {
 			CC(&raw);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_disable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				cc_disabled = 1;
 				Msg("cc_disabled = 1");
 			}
 			else {
-				sprintf(buffer, "cc_disable can only be used by %s\n", nick_admin);
+				sprintf(buffer, "cc_disable can only be used by an admin\n");
 				Msg(buffer);
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_enable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				cc_disabled = 0;
 				Msg("cc_disabled = 0");
 			}
 			else {
-				sprintf(buffer, "cc_enable can only be used by %s\n", nick_admin);
+				sprintf(buffer, "cc_enable can only be used by an admin\n");
 				Msg(buffer);
 			}
 		}
@@ -248,25 +248,25 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7) == 0)
 			Fortune(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				debug = 1;
 				Msg("debug = 1");
 			}
 			else
-				Msg("debug mode can only be changed by the admin");
+				Msg("debug mode can only be changed by an admin");
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug off") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				debug = 0;
 				Msg("debug = 0");
 			}
 			else
-				Msg("debug mode can only be changed by the admin");
+				Msg("debug mode can only be changed by an admin");
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4) == 0)
 			Joke(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig") == 0 &&
-			(strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0)) {
+			IsAdmin(raw.nick)) {
 			memset(buffer, 0, 4096);
 			memset(buffer, '#', 1024);
 			Msg(buffer);
@@ -287,8 +287,7 @@ strcmp(raw.command, "NICK")!=0) {
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "timeout ", 8) == 0) {
-			if (strcmp(raw.nick, "codybot")==0 || strcmp(raw.nick, nick_admin)==0 ||
-				strcmp(raw.nick, nick_admin2)==0) {
+			if (strcmp(raw.nick, "codybot")==0 || IsAdmin(raw.nick)) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
 				raw.text[2] = ' ';
@@ -305,7 +304,7 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 			else {
-				sprintf(buffer, "timeout can only be set by codybot and %s", nick_admin);
+				sprintf(buffer, "timeout can only be set by an admin");
 				Msg(buffer);
 			}
 		}
@@ -317,7 +316,7 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char&&raw.text[1]=='t'&&raw.text[2]=='r'&&
 			raw.text[3]=='i'&&raw.text[4]=='g'&&raw.text[5]=='g'&&raw.text[6]=='e'&&
 			raw.text[7]=='r'&&raw.text[8]==' '&&raw.text[9]!='\n') {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0)
+			if (IsAdmin(raw.nick))
 				trigger_char = raw.text[9];
 			sprintf(buffer, "trigger = '%c'", trigger_char);
 			Msg(buffer);
@@ -343,29 +342,29 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "weather ", 8) == 0) {
 			if (wttr_disabled) {
-				sprintf(buffer, ",weather is currently disabled, try again later or ask %s to enable it", nick_admin);
+				sprintf(buffer, ",weather is currently disabled, try again later or ask an admin to enable it");
 				Msg(buffer);
 			}
 			else
 				Weather(&raw);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather_disable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				wttr_disabled = 1;
 				Msg("weather_disabled = 1");
 			}
 			else {
-				sprintf(buffer, "Only %s can use ,weather_disable", nick_admin);
+				sprintf(buffer, "Only an admin can use ,weather_disable");
 				Msg(buffer);
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather_enable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				wttr_disabled = 0;
 				Msg("weather_disabled = 0");
 			}
 			else {
-				sprintf(buffer, "Only %s can use ,weather_enable", nick_admin);
+				sprintf(buffer, "Only an admin can use ,weather_enable");
 				Msg(buffer);
 			}
 		}
@@ -374,42 +373,42 @@ strcmp(raw.command, "NICK")!=0) {
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				sh_locked = 1;
 				Msg("sh_locked = 1");
 			}
 			else {
-				sprintf(buffer, "sh_lock can only be used by %s\n", nick_admin);
+				sprintf(buffer, "sh_lock can only be used by an admin\n");
 				Msg(buffer);
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_enable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				sh_disabled = 0;
 				Msg("sh_disabled = 0");
 			}
 			else {
-				sprintf(buffer, "sh_enable can only be used by %s\n", nick_admin);
+				sprintf(buffer, "sh_enable can only be used by an admin\n");
 				Msg(buffer);
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_disable") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				sh_disabled = 1;
 				Msg("sh_disabled = 1");
 			}
 			else {
-				sprintf(buffer, "sh_disable can only be used by %s\n", nick_admin);
+				sprintf(buffer, "sh_disable can only be used by an admin\n");
 				Msg(buffer);
 			}
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_unlock") == 0) {
-			if (strcmp(raw.nick, nick_admin)==0 || strcmp(raw.nick, nick_admin2)==0) {
+			if (IsAdmin(raw.nick)) {
 				sh_locked = 0;
 				Msg("sh_locked = 0");
 			}
 			else {
-				sprintf(buffer, "sh_unlock can only be used by %s\n", nick_admin);
+				sprintf(buffer, "sh_unlock can only be used by an admin\n");
 				Msg(buffer);
 			}
 		}
@@ -418,7 +417,7 @@ strcmp(raw.command, "NICK")!=0) {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
 				sprintf(buffer,
-					"%s: sh is temporarily disabled, try again later or ask esselfe to enable it", raw.nick);
+					"%s: sh is temporarily disabled, try again later or ask an admin to enable it", raw.nick);
 				Msg(buffer);
 				continue;
 			}

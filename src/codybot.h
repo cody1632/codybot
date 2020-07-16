@@ -16,7 +16,7 @@ extern char *log_filename;
 extern char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 extern char trigger_char;
 extern char *current_channel;
-extern char *nick, *nick_admin, *nick_admin2;
+extern char *nick;
 extern char *full_user_name;
 extern char *hostname;
 extern char *target;
@@ -47,10 +47,26 @@ struct raw_line {
 };
 extern struct raw_line raw;
 
+// from admin.c
+struct Admin {
+	struct Admin *prev, *next;
+	char *nick;
+};
+
+struct AdminList {
+	unsigned int total_admins;
+	struct Admin *first_admin, *last_admin;
+};
+extern struct AdminList rootAdminList;
+
+void AddAdmin(char *nick2);
+int IsAdmin(char *nick2);
+
 // from codybot.c
 void Log(char *text);
 void Msg(char *text);
 void *ThreadRXFunc(void *argp);
+
 // from commands.c
 void AsciiArt(struct raw_line *rawp);
 void Calc(struct raw_line *rawp);

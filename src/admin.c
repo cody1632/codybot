@@ -6,30 +6,30 @@
 
 #include "codybot.h"
 
-struct AdminList rootAdminList;
+struct AdminList admin_list;
 
-void AddAdmin(char *nick2) {
+void AddAdmin(char *newnick) {
 	struct Admin *admin = malloc(sizeof(struct Admin));
 	
-	if (rootAdminList.first_admin == NULL) {
-		rootAdminList.first_admin = admin;
+	if (admin_list.first_admin == NULL) {
+		admin_list.first_admin = admin;
 		admin->prev = NULL;
 	}
 	else {
-		admin->prev = rootAdminList.last_admin;
-		rootAdminList.last_admin->next = admin;
+		admin->prev = admin_list.last_admin;
+		admin_list.last_admin->next = admin;
 	}
 
 	admin->next = NULL;
-	admin->nick = malloc(strlen(nick2)+1);
-	sprintf(admin->nick, "%s", nick2);
+	admin->nick = malloc(strlen(newnick)+1);
+	sprintf(admin->nick, "%s", newnick);
 
-	rootAdminList.last_admin = admin;
-	++rootAdminList.total_admins;
+	admin_list.last_admin = admin;
+	++admin_list.total_admins;
 }
 
 char *EnumerateAdmins(void) {
-	struct Admin *admin = rootAdminList.first_admin;
+	struct Admin *admin = admin_list.first_admin;
 	char *str = malloc(4096);
 	memset(str, 0, 4096);
 	
@@ -56,13 +56,13 @@ char *EnumerateAdmins(void) {
 	return str;
 }
 
-int IsAdmin(char *nick2) {
-	struct Admin *admin = rootAdminList.first_admin;
+int IsAdmin(char *newnick) {
+	struct Admin *admin = admin_list.first_admin;
 	if (admin == NULL)
 		return 0;
 	
 	while (1) {
-		if (strcmp(nick2, admin->nick) == 0)
+		if (strcmp(newnick, admin->nick) == 0)
 			return 1;
 
 		if (admin->next == NULL)

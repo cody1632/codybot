@@ -57,11 +57,11 @@ struct AdminList {
 	unsigned int total_admins;
 	struct Admin *first_admin, *last_admin;
 };
-extern struct AdminList rootAdminList;
+extern struct AdminList admin_list;
 
-void AddAdmin(char *nick2);
+void AddAdmin(char *newnick);
 char *EnumerateAdmins(void);
-int IsAdmin(char *nick2);
+int IsAdmin(char *newnick);
 
 // from codybot.c
 void Log(char *text);

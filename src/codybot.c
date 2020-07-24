@@ -313,9 +313,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	// Change those to your desired nicks
-	AddAdmin("esselfe");
-	AddAdmin("SpringSprocket");
+	ParseAdminFile();
 
 	if (!full_user_name) {
 		char *name = getlogin();

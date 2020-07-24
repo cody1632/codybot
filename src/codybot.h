@@ -50,7 +50,7 @@ extern struct raw_line raw;
 // from admin.c
 struct Admin {
 	struct Admin *prev, *next;
-	char *nick;
+	char *nick, *hostmask;
 };
 
 struct AdminList {
@@ -59,9 +59,10 @@ struct AdminList {
 };
 extern struct AdminList admin_list;
 
-void AddAdmin(char *newnick);
+void AddAdmin(char *newnick, char *hostmask);
 char *EnumerateAdmins(void);
-int IsAdmin(char *newnick);
+int IsAdmin(char *newnick, char *hostmask);
+void ParseAdminFile(void);
 
 // from codybot.c
 void Log(char *text);

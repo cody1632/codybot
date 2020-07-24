@@ -168,7 +168,7 @@ strcmp(raw.command, "NICK")!=0) {
 // help
 		if (raw.text[0]==trigger_char && strncmp(raw.text+1, "help", 4) == 0) {
 			char c = trigger_char;
-			sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize"
+			sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 				"%chelp %cfortune %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n",
 				c,c,c,c,c,c,c,c,c,c,c,c,c,c,c);
 			Msg(buffer);

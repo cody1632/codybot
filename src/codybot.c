@@ -328,8 +328,6 @@ int main(int argc, char **argv) {
 		log_filename = (char *)malloc(strlen("codybot.log")+1);
 		sprintf(log_filename, "codybot.log");
 	}
-	if (!trigger_char)
-		trigger_char = trigger_char_default;
 	if (!current_channel) {
 		current_channel = malloc(1024);
 		sprintf(current_channel, "#codybot");
@@ -344,6 +342,12 @@ int main(int argc, char **argv) {
 	}
 	if (!server_ip)
 		ServerGetIP("chat.freenode.net");
+	if (!trigger_char) {
+		if (strcmp(server_ip, server_ip_blinkenshell) == 0)
+			trigger_char = '!';
+		else
+			trigger_char = trigger_char_default;
+	}
 
 	if (strcmp(server_ip, server_ip_blinkenshell) == 0) {
 		sh_disabled = 1;

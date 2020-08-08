@@ -1,6 +1,0 @@
-#!/bin/bash
-
-rsync -uv bsfc@BSFC-LT04:/home/bsfc/code/codybot/data-* . &&
-rsync -uv bsfc@BSFC-LT04:/home/bsfc/code/codybot/src/{*.c,*.h} src &&
-make
-

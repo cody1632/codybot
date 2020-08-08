@@ -1,4 +1,4 @@
-20190824-20200510
+20190824-20200808
 codybot is an IRC bot written with the C programming language,
 providing users with fortune cookies, jokes, oneliner C compilation, 
 shell access and weather per city.
@@ -7,7 +7,7 @@ The bot can connect to chat.freenode.net or any specific server using
 a specified port or 6697 by default for a SSL connection.
 
 To compile the program, just run 'make' within the source directory
-and run with './codybot -n YourNick'. Personally I run the bot in a virtual
+and run with './codybot -n YourBotNick'. Personally I run the bot in a virtual
 machine to limit general system files accesses via the ,sh command. 
 Run './codybot --help' to see all program options.
 
@@ -16,17 +16,21 @@ or move the files where you want. The files 'data-ascii.txt', 'data-chars.txt',
 'data-fortunes.txt', 'data-jokes.txt' and 'stats' must be in the program's
 current working directory otherwise the program will not run.
 
-You should run 'chown -R root data-* Makefile codybot prog-* recomp update src'
+You should run 'chown -R root data-* Makefile codybot prog-* src'
 so some ',sh rm importantfiles' won't be able to execute... see
 https://github.com/cody1632/codybot/security/advisories
+Instead of root you can also set the file owner to be the normal/dev host user.
 
-You should register and identify your nick with the IRC server's NickServer
+You should register and identify your bot nick with the IRC server's NickServer
 (Not available on all IRC networks). You can type '/msg NickServ help'
 in your favorite connected IRC client (mIRC, irssi, weechat, hexchat, ...).
-Otherwise you can identify by typing 'id yourpasswordhere' or 
-'privmsg NickServ :identify pass' in the console when running the codybot
+Otherwise you can identify to NickServ by typing 'id yourpasswordhere' or 
+'privmsg NickServ :identify pass' in the terminal running the codybot
 program. Another console-only command you need to run is 
-'join #channel_name_here'.
+'join #channel_name_here'. Note that on Freenode bots are not welcome or
+not permitted in popular/topic-dedicated channels. Please always ask the
+permission if you don't own/autocreate (by joining an empty & unregistered)
+channel.
 
 To see available commands, send ',help' in the channel where the bot is.
 
@@ -45,28 +49,26 @@ This should return something like "Montreal: Partly cloudy 23C/73F"
 
 To run a shell command from the chat onto the host of codybot, type
 ',sh COMMAND ARGS' ie: ',sh ls /home/codybot'. You can disable this
-command by touching sh_disable in the program's current directory
+command by running 'touch sh_disable' in the program's current directory
 as the root user or by using the sudo program. You can also type
-'sh_enable/sh_disable' in the console and the same but with the 
+'sh_enable/sh_disable' in the console and the same keywords but with the 
 trigger char in the channel.
 
 If you want to use the chroot mechanism, you have to download the
 minimal chroot archive and extract it in the source directory.
 The latest chroot is available @
-	https://hobby.esselfe.ca/codybot/chroot.tar.xz
+	https://hobby.esselfe.ca/codybot/codybot/chroot.tar.xz
 To run all shell commands in a locked chroot, touch './sh_lock' or
 type ',sh_lock' or ',sh_unlock'. You have to run as root:
     chroot chroot /bin/bash
     su - dummy
     run.sh
-You will have to create 2 fifo pipes since they can't be saved
-in the release archive:
-	mkfifo chroot/home/dummy/run.{fifo,status}
 You should ensure that the codybot user can write to
 chroot/home/dummy/run.fifo. The files starting with
 "cmd." also need to be owned by the "dummy" user.
 Note that the dummy user should exist on both the host
-and in the chroot. The UID should match in /etc/passwd
+and in the chroot for appropriate UID to correspond between the host
+and the chroot file persmissions. The UID should match in /etc/passwd
 and chroot/etc/passwd
 
 Enjoy!

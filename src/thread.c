@@ -269,6 +269,10 @@ strcmp(raw.command, "NICK")!=0) {
 			else
 				Msg("debug mode can only be changed by an admin");
 		}
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "die", 4) == 0) {
+			if (IsAdmin(raw.nick, raw.host))
+				exit(0);
+		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4) == 0)
 			Joke(&raw);
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig") == 0 &&

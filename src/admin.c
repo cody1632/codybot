@@ -75,8 +75,14 @@ int IsAdmin(char *newnick, char *hostmask) {
 			if (admin->hostmask != NULL) {
 				if (strcmp(hostmask, admin->hostmask) == 0)
 					return 1;
-				else
-					return 0;
+				else { // could catch the same nick in the list
+						// with different hostmask
+					if (admin->next == NULL)
+						break;
+					else
+						admin = admin->next;
+					continue;
+				}
 			}
 			else
 				return 1;

@@ -162,6 +162,12 @@ void *ThreadRXFunc(void *argp) {
 		RawLineParse(&raw, buffer_rx);
 		RawGetTarget(&raw);
 
+		if (strcmp(raw.channel, nick) == 0) {
+			sprintf(buffer, "privmsg %s :Cannot use private messages\n", raw.nick);
+			SSL_write(pSSL, buffer, strlen(buffer));
+			continue;
+		}
+
 if (raw.text != NULL && raw.nick != NULL && strcmp(raw.command, "JOIN") != 0 &&
 strcmp(raw.command, "NICK")!=0) {
 		SlapCheck(&raw);

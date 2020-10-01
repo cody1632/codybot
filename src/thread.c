@@ -213,6 +213,23 @@ strcmp(raw.command, "NICK")!=0) {
 			sprintf(buffer, "example: ,cc printf(\"this\\n\");");
 			Msg(buffer);
 		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc gcc") == 0) {
+			cc_compiler = CC_COMPILER_GCC;
+			Msg("Compiler is now gcc");
+			continue;
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc tcc") == 0) {
+			cc_compiler = CC_COMPILER_TCC;
+			Msg("Compiler is now tcc");
+			continue;
+		}
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "cc_compiler") == 0) {
+			if (cc_compiler == CC_COMPILER_GCC)
+				Msg("Compiler is gcc");
+			else if (cc_compiler == CC_COMPILER_TCC)
+				Msg("Compiler is tcc");
+			continue;
+		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3) == 0) {
 			struct stat st2;
 			if (cc_disabled || stat("cc_disable", &st2) == 0) {

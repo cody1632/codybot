@@ -164,8 +164,6 @@ void CC(struct raw_line *rawp) {
 		++c;
 	}
 
-
-
 	FILE *fr = fopen("prog-head.c", "r");
 	if (fr == NULL) {
 		Msg("codybot error: Cannot open prog-head.c");
@@ -199,10 +197,24 @@ void CC(struct raw_line *rawp) {
 	fclose(fr);
 	fclose(fp);
 
-	ret = system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog 2>cmd.output");
+	if (cc_compiler == CC_COMPILER_GCC)
+		ret = system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog 2>cmd.output");
+	else if (cc_compiler == CC_COMPILER_TCC)
+		ret = system("tcc -o prog prog.c 2>cmd.output");
+
 	if (ret == 0) {
 		sprintf(buffer, "timeout %ds ./prog &> cmd.output; echo $? > cmd.ret", cmd_timeout);
 		system(buffer);
+	}
+	else {
+		char chars_line[4096];
+	    char *str;
+	    while (1) {
+	        str = fgets(chars_line, 4095, fp);
+	        if (str == NULL) break;
+	        sprintf(buffer, "%s\n", chars_line);
+	        Msg(buffer);
+	    }
 	}
 
 	fp = fopen("cmd.ret", "r");

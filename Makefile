@@ -6,7 +6,7 @@ OBJS = $(OBJDIR)/admin.o $(OBJDIR)/commands.o $(OBJDIR)/codybot.o \
 $(OBJDIR)/server.o $(OBJDIR)/raw.o $(OBJDIR)/thread.o
 PROGNAME = codybot
 
-.PHONY: default all prepare clean
+.PHONY: tcc default all prepare clean
 
 default: all
 
@@ -38,4 +38,7 @@ $(PROGNAME): $(OBJS)
 
 clean:
 	@rm -rv $(OBJDIR) $(PROGNAME) $(PROGRUN) 2>/dev/null || true
+
+tcc:
+	tcc -lmagic -lssl -o $(PROGNAME) src/*.c
 

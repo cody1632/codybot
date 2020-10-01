@@ -12,12 +12,13 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "0.2.33";
+const char *codybot_version_string = "0.3.0";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
 	{"version", no_argument, NULL, 'V'},
 	{"blinkenshell", no_argument, NULL, 'b'},
+	{"compiler", required_argument, NULL, 'c'},
 	{"debug", no_argument, NULL, 'd'},
 	{"freenode", no_argument, NULL, 'f'},
 	{"hostname", required_argument, NULL, 'H'},
@@ -30,7 +31,7 @@ static const struct option long_options[] = {
 	{"trigger", required_argument, NULL, 't'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVdbfH:l:N:n:P:p:s:t:";
+static const char *short_options = "hVcdbfH:l:N:n:P:p:s:t:";
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode | -d/--debug }\n");
@@ -39,7 +40,7 @@ void HelpShow(void) {
 }
 
 int debug, socket_fd, ret, endmainloop, cc_disabled, sh_disabled,
-	sh_locked, wttr_disabled, cmd_timeout = 10, use_ssl;
+	sh_locked, wttr_disabled, cmd_timeout = 10, use_ssl, cc_compiler = CC_COMPILER_TCC;
 unsigned long long fortune_total;
 struct timeval tv0, tv_start;
 struct tm *tm0;
@@ -268,6 +269,16 @@ int main(int argc, char **argv) {
 		case 'V':
 			printf("codybot %s\n", codybot_version_string);
 			exit(0);
+		case 'c':
+			if (strcmp(optarg, "gcc") == 0)
+				cc_compiler = CC_COMPILER_GCC;
+			else if (strcmp(optarg, "tcc") == 0)
+				cc_compiler = CC_COMPILER_TCC;
+			else {
+				printf("codybot error: the compiler must be gcc or tcc\n");
+				exit(1);
+			}
+			break;
 		case 'd':
 			debug = 1;
 			break;

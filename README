@@ -57,7 +57,9 @@ trigger char in the channel.
 If you want to use the chroot mechanism, you have to download the
 minimal chroot archive and extract it in the source directory.
 The latest chroot is available @
-	https://hobby.esselfe.ca/codybot/codybot/chroot.tar.xz
+	https://esselfe.ca/codybot/codybot/chroot.tar.xz
+	or
+	https://esselfe.ca/codybot/codybot/chroot-aws.tar.xz
 To run all shell commands in a locked chroot, touch './sh_lock' or
 type ',sh_lock' or ',sh_unlock'. You have to run as root:
     chroot chroot /bin/bash
@@ -70,5 +72,28 @@ Note that the dummy user should exist on both the host
 and in the chroot for appropriate UID to correspond between the host
 and the chroot file persmissions. The UID should match in /etc/passwd
 and chroot/etc/passwd
+
+######## 201002
+New docker image available!
+########
+You can now run codybot more safely by using a docker container.
+Currently the image does just a little over 2GB, that's the downpart.
+Install docker, make sure the services are started (containerd+docker),
+and run those commands to fetch and start the image:
+	docker pull esselfe/lunar-codybot
+	docker run -it esselfe/lunar-codybot bash
+
+Once in the container, run:
+	exec su - codybot
+	cd codybot
+	./codybot -f -n NewNickHere -t '!'
+
+Personally I made a 3GB partition on my host just for the bot and
+it's users' usage, then mount it (on the host) to /mnt/codybot-data,
+then start the container this way instead:
+	docker run -it -v /mnt/codybot-data:/home/user/codybot/tmp esselfe/lunar-codybot bash
+To make /home/user/tmp the only possible location to write, run:
+	rm -rf /tmp
+	ln -sv /home/user/codybot/tmp /tmp
 
 Enjoy!

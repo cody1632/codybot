@@ -181,6 +181,14 @@ strcmp(raw.command, "NICK")!=0) {
 			continue;
 		}
 // admins
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "admins reload") == 0) {
+			DestroyAdminList();
+			ParseAdminFile();
+			char *str = EnumerateAdmins();
+			sprintf(buffer, "Admins: %s\n", str);
+			free(str);
+			Msg(buffer);
+		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "admins", 6) == 0) {
 			char *str = EnumerateAdmins();
 			sprintf(buffer, "Admins: %s\n", str);

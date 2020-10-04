@@ -37,6 +37,26 @@ void AddAdmin(char *newnick, char *hostmask) {
 	++admin_list.total_admins;
 }
 
+void DestroyAdminList(void) {
+	struct Admin *admin = admin_list.last_admin;
+	if (admin == NULL)
+		return;
+	
+	while (1) {
+		free(admin->hostmask);
+		free(admin->nick);
+
+		if (admin->prev == NULL) {
+			free(admin);
+			break;
+		}
+		else {
+			admin = admin->prev;
+			free(admin->next);
+		}
+	}
+}
+
 char *EnumerateAdmins(void) {
 	struct Admin *admin = admin_list.first_admin;
 	char *str = malloc(4096);

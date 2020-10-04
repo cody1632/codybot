@@ -147,7 +147,7 @@ void ReadCommandLoop(void) {
 			continue;
 		else if (strcmp(buffer_line, "exit\n") == 0 || strcmp(buffer_line, "quit\n") == 0)
 			endmainloop = 1;
-		else if (strncmp(buffer_line, "cursh\n") == 0)
+		else if (strcmp(buffer_line, "cursh\n") == 0)
 			printf("cursh = %s\n", current_channel);
 		else if (strncmp(buffer_line, "cursh ", 6) == 0) {
 			sprintf(current_channel, "%s", buffer_line+6);

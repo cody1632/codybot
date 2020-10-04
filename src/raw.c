@@ -150,7 +150,11 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			break;
 		}
 		else {
-			if (*c != ':')
+			if (rec_text && *c == ':' && strlen(word) == 0) {
+				++c;
+				continue;
+			}
+			else
 				word[cnt++] = *c;
 		}
 

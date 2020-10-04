@@ -27,24 +27,24 @@ void *ThreadRunFunc(void *argp) {
 	//char *cp = argp;
 	char *cp = text;
 	char cmd[4096];
-	sprintf(cmd, "timeout %ds bash -c \"", cmd_timeout);
+	sprintf(cmd, "timeout %ds bash -c '", cmd_timeout);
 	unsigned int cnt = strlen(cmd);
 	while (1) {
 		if (*cp == '\n' || *cp == '\0') {
 			cmd[cnt] = '\0';
 			break;
 		}
-		else if (*cp == '"') {
+/*		else if (*cp == '"') {
 			cmd[cnt++] = '\\';
 			cmd[cnt++] = '"';
 		}
-		else {
+*/		else {
 			cmd[cnt] = *cp;
 			++cnt;
 		}
 		++cp;
 	}
-	strcat(cmd, "\" &> cmd.output; echo $? >cmd.ret");
+	strcat(cmd, "' &> cmd.output; echo $? >cmd.ret");
 	Log(cmd);
 	system(cmd);
 
@@ -591,6 +591,7 @@ if (strncmp(c, "cat ", 4)==0) {
 			raw.text[1] = ' ';
 			raw.text[2] = ' ';
 			
+			// run the received !sh shell command
 			if (debug)
 				printf("codybot::ThreadRXFunc() starting thread for ::%s::\n", raw.text);
 			ThreadRunStart(raw.text);

@@ -56,20 +56,20 @@ char *hostname;
 void Log(char *text) {
 	FILE *fp = fopen(log_filename, "a+");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::Log() eriror: Cannot open %s: %s\n",
+		fprintf(stderr, "##codybot::Log() error: Cannot open %s: %s\n",
 			log_filename, strerror(errno));
 		return;
 	}
 
 	gettimeofday(&tv0, NULL);
 	t0 = (time_t)tv0.tv_sec;
-	tm0 = gmtime(&t0);
+	tm0 = localtime(&t0);
 	char *str = strdup(text);
 	// remove trailing newline
 	if (str[strlen(str)-1] == '\n')
 		str[strlen(str)-1] = '\0';
-	if (str[strlen(str)] == '\n')
-		str[strlen(str)] = '\0';
+//	if (str[strlen(str)] == '\n')
+//		str[strlen(str)] = '\0';
 
 	sprintf(buffer_log, "%02d%02d%02d-%02d:%02d:%02d.%03ld ##%s##\n",
 		tm0->tm_year+1900-2000, tm0->tm_mon+1,
@@ -135,6 +135,7 @@ void Msg(char *text) {
 	}
 }
 
+// Read and parse keyboard input from the console
 void ReadCommandLoop(void) {
 	char buffer_line[4096];
 	while (!endmainloop) {
@@ -146,9 +147,13 @@ void ReadCommandLoop(void) {
 			continue;
 		else if (strcmp(buffer_line, "exit\n") == 0 || strcmp(buffer_line, "quit\n") == 0)
 			endmainloop = 1;
-		else if (strncmp(buffer_line, "cursh", 5) == 0) {
+		else if (strncmp(buffer_line, "cursh\n") == 0)
+			printf("cursh = %s\n", current_channel);
+		else if (strncmp(buffer_line, "cursh ", 6) == 0) {
 			sprintf(current_channel, "%s", buffer_line+6);
 		}
+		else if (strcmp(buffer_line, "debug\n") == 0)
+			printf("debug = %d\n", debug);
 		else if (strcmp(buffer_line, "debug on\n") == 0) {
 			debug = 1;
 			Msg("debug = 1");
@@ -161,7 +166,7 @@ void ReadCommandLoop(void) {
 			sprintf(raw.channel, "%s", current_channel);
 			Fortune(&raw);
 		}
-		else if (strncmp(buffer_line, "msg", 3) == 0) {
+		else if (strncmp(buffer_line, "msg ", 4) == 0) {
 			sprintf(buffer, "%s", buffer_line+4);
 			sprintf(raw.channel, "%s", current_channel);
 			target = raw.channel;
@@ -232,6 +237,8 @@ void ReadCommandLoop(void) {
 			sprintf(buffer, "timeout = %d\n", cmd_timeout);
 			Msg(buffer);
 		}
+		else if (strcmp(buffer_line, "trigger\n") == 0)
+			printf("trigger = %c\n", trigger_char);
 		else if (strncmp(buffer_line, "trigger ", 8) == 0) {
 			if (*(cp+8)!='\n')
 				trigger_char = *(cp+8);
@@ -250,11 +257,12 @@ void ReadCommandLoop(void) {
 
 void SignalFunc(int signum) {
 	ServerClose();
-	close(socket_fd);
 }
 
 int main(int argc, char **argv) {
+	// initialize time for !uptime
 	gettimeofday(&tv_start, NULL);
+
 	signal(SIGINT, SignalFunc);
 
 	int c;
@@ -361,6 +369,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (strcmp(server_ip, server_ip_blinkenshell) == 0) {
+		// don't wanna replace blinken's shell service
 		sh_disabled = 1;
 		cc_disabled = 1;
 	}
@@ -387,7 +396,8 @@ int main(int argc, char **argv) {
 	
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {
-		fprintf(stderr, "##codybot::main() error: Cannot open stats file\n");
+		fprintf(stderr, "##codybot::main() error: Cannot open stats file: %s\n",
+			strerror(errno));
 	}
 	else {
 		char str[1024];
@@ -399,6 +409,7 @@ int main(int argc, char **argv) {
 		printf("##fortune_total: %llu\n", fortune_total);
 
 	ServerConnect();
+	// mainloop
 	ThreadRXStart();
 	ReadCommandLoop();
 	ServerClose();

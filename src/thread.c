@@ -182,7 +182,9 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 // admins
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "admins", 6) == 0) {
-			sprintf(buffer, "Admins: %s\n", EnumerateAdmins());
+			char *str = EnumerateAdmins();
+			sprintf(buffer, "Admins: %s\n", str);
+			free(str);
 			Msg(buffer);
 		}
 // ascii

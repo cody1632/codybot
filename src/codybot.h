@@ -63,6 +63,7 @@ struct AdminList {
 extern struct AdminList admin_list;
 
 void AddAdmin(char *newnick, char *hostmask);
+void DestroyAdminList(void);
 char *EnumerateAdmins(void);
 int IsAdmin(char *newnick, char *hostmask);
 void ParseAdminFile(void);
@@ -84,14 +85,17 @@ void Rainbow(struct raw_line *rawp);
 void SlapCheck(struct raw_line *rawp);
 void Stats(struct raw_line *rawp);
 void Weather(struct raw_line *rawp);
+
 // from raw.c
 char *RawGetTarget(struct raw_line *rawp);
 void RawLineClear(struct raw_line *rawp);
 void RawLineParse(struct raw_line *rawp, char *line);
+
 // from server.c
 void ServerGetIP(char *hostname);
 void ServerConnect(void);
 void ServerClose(void);
+
 // from thread.c
 void ThreadRunStart(char *command);
 void *ThreadRunFunc(void *argp);

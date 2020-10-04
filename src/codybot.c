@@ -40,7 +40,7 @@ void HelpShow(void) {
 }
 
 int debug, socket_fd, ret, endmainloop, cc_disabled, sh_disabled,
-	sh_locked, wttr_disabled, cmd_timeout = 10, use_ssl, cc_compiler = CC_COMPILER_TCC;
+	sh_locked, wttr_disabled, cmd_timeout = 10, use_ssl, cc_compiler = CC_COMPILER_GCC;
 unsigned long long fortune_total;
 struct timeval tv0, tv_start;
 struct tm *tm0;

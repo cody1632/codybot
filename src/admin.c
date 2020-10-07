@@ -55,6 +55,9 @@ void DestroyAdminList(void) {
 			free(admin->next);
 		}
 	}
+
+	admin_list.first_admin = NULL;
+	admin_list.last_admin = NULL;
 }
 
 char *EnumerateAdmins(void) {

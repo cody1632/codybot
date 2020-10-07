@@ -249,8 +249,13 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3) == 0) {
 			struct stat st2;
 			if (cc_disabled || stat("cc_disable", &st2) == 0) {
+			if (strcmp(server_ip, server_ip_blinkenshell) == 0)
 				sprintf(buffer,
-					"%s: cc is temporarily disabled, try again later or ask esselfe to enable it", raw.nick);
+"%s: cc is permanently disabled", raw.nick);
+			else
+				sprintf(buffer,
+"%s: cc is temporarily disabled, try again later or ask esselfe to enable it", raw.nick);
+
 				Msg(buffer);
 				continue;
 			}
@@ -465,8 +470,13 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "sh ", 3) == 0) {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
-				sprintf(buffer,
-					"%s: sh is temporarily disabled, try again later or ask an admin to enable it", raw.nick);
+				if (strcmp(server_ip, server_ip_blinkenshell) == 0)
+					sprintf(buffer,
+"%s: sh is permanently disabled", raw.nick);
+				else
+					sprintf(buffer,
+"%s: sh is temporarily disabled, try again later or ask an admin to enable it", raw.nick);
+
 				Msg(buffer);
 				continue;
 			}

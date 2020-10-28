@@ -1,7 +1,8 @@
-20190824-20200808
+20190824-20201028
 codybot is an IRC bot written with the C programming language,
 providing users with fortune cookies, jokes, oneliner C compilation, 
-shell access and weather per city.
+shell access, text colorization, ascii art, special characters and
+weather per city.
 
 The bot can connect to chat.freenode.net or any specific server using
 a specified port or 6697 by default for a SSL connection.
@@ -16,7 +17,7 @@ or move the files where you want. The files 'data-ascii.txt', 'data-chars.txt',
 'data-fortunes.txt', 'data-jokes.txt' and 'stats' must be in the program's
 current working directory otherwise the program will not run.
 
-You should run 'chown -R root data-* Makefile codybot prog-* src'
+You should run 'sudo chown -R root data-* Makefile codybot prog-* src'
 so some ',sh rm importantfiles' won't be able to execute... see
 https://github.com/cody1632/codybot/security/advisories
 Instead of root you can also set the file owner to be the normal/dev host user.
@@ -25,7 +26,7 @@ You should register and identify your bot nick with the IRC server's NickServer
 (Not available on all IRC networks). You can type '/msg NickServ help'
 in your favorite connected IRC client (mIRC, irssi, weechat, hexchat, ...).
 Otherwise you can identify to NickServ by typing 'id yourpasswordhere' or 
-'privmsg NickServ :identify pass' in the terminal running the codybot
+'privmsg NickServ :identify passhere' in the terminal running the codybot
 program. Another console-only command you need to run is 
 'join #channel_name_here'. Note that on Freenode bots are not welcome or
 not permitted in popular/topic-dedicated channels. Please always ask the
@@ -36,8 +37,7 @@ To see available commands, send ',help' in the channel where the bot is.
 
 To trigger a fortune cookie, just type ',fortune' in a channel where the bot
 is present, like #codybot. The fortune cookie database file is 
-data-fortunes.txt. It's made of concatenation of the linux, computers,
-miscellaneous and wisdom files from /usr/share/games/fortunes using my
+data-fortunes.txt. It's made of files in /usr/share/games/fortunes using my
 system-provided fortune package. (see https://github.com/shlomif/fortune-mod)
 
 To get a random joke type ',joke'. This database is hand written using
@@ -77,7 +77,7 @@ and chroot/etc/passwd
 New docker image available!
 ########
 You can now run codybot more safely by using a docker container.
-Currently the image does just a little over 2GB, that's the downpart.
+Currently the image is 245MB download, 785MB installed, that's the downpart.
 Install docker, make sure the services are started (containerd+docker),
 and run those commands to fetch and start the image:
 	docker pull esselfe/lunar-codybot
@@ -88,7 +88,7 @@ Once in the container, run:
 	cd codybot
 	./codybot -f -n NewNickHere -t '!'
 
-Personally I made a 3GB partition on my host just for the bot and
+Personally I made a 1GB partition on my host just for the bot and
 it's users' usage, then mount it (on the host) to /mnt/codybot-data,
 then start the container this way instead:
 	docker run -it -v /mnt/codybot-data:/home/user/codybot/tmp esselfe/lunar-codybot bash

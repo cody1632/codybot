@@ -209,12 +209,14 @@ void CC(struct raw_line *rawp) {
 	else {
 		char chars_line[4096];
 	    char *str;
+		fp = fopen("cmd.output", "r");
 	    while (1) {
 	        str = fgets(chars_line, 4095, fp);
 	        if (str == NULL) break;
 	        sprintf(buffer, "%s\n", chars_line);
 	        Msg(buffer);
 	    }
+		fclose(fp);
 	}
 
 	fp = fopen("cmd.ret", "r");

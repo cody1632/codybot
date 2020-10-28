@@ -256,7 +256,8 @@ void ReadCommandLoop(void) {
 }
 
 void SignalFunc(int signum) {
-	ServerClose();
+	if (signum == SIGINT)
+		ServerClose();
 }
 
 int main(int argc, char **argv) {
@@ -291,7 +292,7 @@ int main(int argc, char **argv) {
 			debug = 1;
 			break;
 		case 'b':
-			server_ip = server_ip_blinkenshell;
+			ServerGetIP("irc.blinkenshell.org");
 			break;
 		case 'f':
 			ServerGetIP("chat.freenode.net");

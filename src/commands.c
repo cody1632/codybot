@@ -557,7 +557,7 @@ int WeatherCheckUsage(void) {
 			return 1;
 		}
 		// if usage is complete and first item dates from over 10 minutes
-		else if (cnt == 9 && weather_usage[0] < (time(NULL) - (60*2))) {
+		else if (cnt == 9 && weather_usage[0] < (time(NULL) - (60*10))) {
 			WeatherDecayUsage();
 			weather_usage[cnt] = time(NULL);
 			return 1;

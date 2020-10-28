@@ -535,7 +535,44 @@ void Stats(struct raw_line *rawp) {
 	Msg(buffer);
 }
 
+// array containing time at which !weather have been run
+unsigned long weather_usage[10];
+
+// pop the first item
+void WeatherDecayUsage(void) {
+	int cnt;
+	for (cnt = 0; cnt < 9; cnt++)
+		weather_usage[cnt] = weather_usage[cnt+1];
+
+	weather_usage[cnt] = 0;
+}
+
+// return true if permitted, false if quota reached
+int WeatherCheckUsage(void) {
+	int cnt;
+	for (cnt = 0; cnt < 10; cnt++) {
+		// if there's available slot
+		if (weather_usage[cnt] == 0) {
+			weather_usage[cnt] = time(NULL);
+			return 1;
+		}
+		// if usage is complete and first item dates from over 10 minutes
+		else if (cnt == 9 && weather_usage[0] < (time(NULL) - (60*2))) {
+			WeatherDecayUsage();
+			weather_usage[cnt] = time(NULL);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 void Weather(struct raw_line *rawp) {
+	if (!WeatherCheckUsage()) {
+		Msg("Weather quota reached, maximum 10 times every 10 minutes.");
+		return;
+	}
+
 	// check for "kill" found in ",weather `pkill${IFS}codybot`" which kills the bot
     char *c = rawp->text;
     while (1) {

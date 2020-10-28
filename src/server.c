@@ -17,27 +17,27 @@ char *server_ip, *server_ip_blinkenshell = "194.14.45.5",
 SSL *pSSL;
 
 void ServerGetIP(char *hostname) {
-    struct hostent *he;
-    struct in_addr **addr_list;
-    int cnt = 0;
+	struct hostent *he;
+	struct in_addr **addr_list;
+	int cnt = 0;
 
-    he = gethostbyname(hostname);
-    if (he == NULL) {
-        fprintf(stderr, "##codybot::ServerGetIP() error: Cannot gethostbyname()\n");
-        exit(1);
-    }
+	he = gethostbyname(hostname);
+	if (he == NULL) {
+		fprintf(stderr, "##codybot::ServerGetIP() error: Cannot gethostbyname()\n");
+		exit(1);
+	}
 
-    addr_list = (struct in_addr **)he->h_addr_list;
+	addr_list = (struct in_addr **)he->h_addr_list;
 
-    char *tmpstr = inet_ntoa(*addr_list[0]);
-    server_ip = (char *)malloc(strlen(tmpstr)+1);
-    sprintf(server_ip, "%s", tmpstr);
+	char *tmpstr = inet_ntoa(*addr_list[0]);
+	server_ip = (char *)malloc(strlen(tmpstr)+1);
+	sprintf(server_ip, "%s", tmpstr);
 
-    if (debug) {
-        for (cnt = 0; addr_list[cnt] != NULL; cnt++) {
-            printf("%s\n", inet_ntoa(*addr_list[cnt]));
-        }
-    }
+	if (debug) {
+		for (cnt = 0; addr_list[cnt] != NULL; cnt++) {
+			printf("%s\n", inet_ntoa(*addr_list[cnt]));
+		}
+	}
 }
 
 void ServerConnect(void) {
@@ -155,8 +155,8 @@ void ServerConnect(void) {
 void ServerClose(void) {
 	if (use_ssl) {
 		SSL_shutdown(pSSL);
-    	SSL_free(pSSL);
+		SSL_free(pSSL);
 	}
-    close(socket_fd);
+	close(socket_fd);
 }
 

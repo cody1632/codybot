@@ -11,20 +11,20 @@ char *target;
 // If sender sends to channel, set target to channel
 // If sender sends to PM/nick, set target to nick
 char *RawGetTarget(struct raw_line *rawp) {
-    if (strcmp(rawp->channel, nick) == 0)
-        target = rawp->nick;
-    else
-        target = rawp->channel;
-    return target;
+	if (strcmp(rawp->channel, nick) == 0)
+		target = rawp->nick;
+	else
+		target = rawp->channel;
+	return target;
 }
 
 void RawLineClear(struct raw_line *rawp) {
 	memset(rawp->nick, 0, 1024);
-    memset(rawp->username, 0, 1024);
-    memset(rawp->host, 0, 1024);
-    memset(rawp->command, 0, 1024);
-    memset(rawp->channel, 0, 1024);
-    memset(rawp->text, 0, 4096);
+	memset(rawp->username, 0, 1024);
+	memset(rawp->host, 0, 1024);
+	memset(rawp->command, 0, 1024);
+	memset(rawp->channel, 0, 1024);
+	memset(rawp->text, 0, 4096);
 }
 
 // Type of message to be parsed:

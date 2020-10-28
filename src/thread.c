@@ -13,12 +13,12 @@
 
 void ThreadRunStart(char *command) {
 	pthread_t thr;
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_create(&thr, &attr, ThreadRunFunc, (void *)command);
-    pthread_detach(thr);
-    pthread_attr_destroy(&attr);
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_create(&thr, &attr, ThreadRunFunc, (void *)command);
+	pthread_detach(thr);
+	pthread_attr_destroy(&attr);
 }
 
 void *ThreadRunFunc(void *argp) {
@@ -120,12 +120,12 @@ void *ThreadRunFunc(void *argp) {
 void *ThreadRXFunc(void *argp);
 void ThreadRXStart(void) {
 	pthread_t thr;
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_create(&thr, &attr, ThreadRXFunc, NULL);
-    pthread_detach(thr);
-    pthread_attr_destroy(&attr);
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_create(&thr, &attr, ThreadRXFunc, NULL);
+	pthread_detach(thr);
+	pthread_attr_destroy(&attr);
 }
 
 void *ThreadRXFunc(void *argp) {
@@ -588,13 +588,13 @@ if (strncmp(c, "cat ", 4)==0) {
 	while (1) {
 		if (*c == ' ' || *c == '\n' || *c == '\0') {
 			magic_t mgc = magic_open (MAGIC_SYMLINK | MAGIC_PRESERVE_ATIME | MAGIC_MIME_TYPE);
-		    if (mgc == NULL) {
-		        Msg ("codybot error: magic_open() failed\n");
+			if (mgc == NULL) {
+				Msg ("codybot error: magic_open() failed\n");
 				break;
-		    }
-		    magic_load (mgc, NULL);
-	    	char *magic_str;
-	        magic_str = (char *)magic_file (mgc, filename);
+			}
+			magic_load (mgc, NULL);
+			char *magic_str;
+			magic_str = (char *)magic_file (mgc, filename);
 			if (strcmp(magic_str, "application/x-executable")==0)
 				dontrun = 1;
 			break;

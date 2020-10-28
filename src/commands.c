@@ -58,12 +58,12 @@ void AsciiArt(struct raw_line *rawp) {
 	memset(line, 0, 1024);
 	cnt = 0, c = ' ';
 	while (1) {
-        cprev = c;
-        c = fgetc(fp);
-        if (c == -1)
-            break;
-        else if (c == '%' && cprev == '\n')
-            break;
+		cprev = c;
+		c = fgetc(fp);
+		if (c == -1)
+			break;
+		else if (c == '%' && cprev == '\n')
+			break;
 		else if (c == '\n') {
 			Msg(line);
 			// throttled due to server notice of flooding
@@ -71,29 +71,29 @@ void AsciiArt(struct raw_line *rawp) {
 			memset(line, 0, 1024);
 			cnt = 0;
 		}
-        else
+		else
 			line[cnt++] = c;
-    }
+	}
 
 	fclose(fp);
 }
 
 void Calc(struct raw_line *rawp) {
 	// check for "kill" found in ",calc `killall codybot`" which kills the bot
-    char *c = rawp->text;
-    while (1) {
-        if (*c == '\0' || *c == '\n')
-            break;
+	char *c = rawp->text;
+	while (1) {
+		if (*c == '\0' || *c == '\n')
+			break;
 		if (*c == '\\') {
 			Msg("No backslashes allowed, sorry");
 			return;
 		}
-        if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
-            Msg("calc: contains a blocked term...\n");
-            return;
-        }
-        ++c;
-    }
+		if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
+			Msg("calc: contains a blocked term...\n");
+			return;
+		}
+		++c;
+	}
 
 	// remove '^calc' from the line
 	rawp->text += 6;
@@ -208,32 +208,32 @@ void CC(struct raw_line *rawp) {
 	}
 	else {
 		char chars_line[4096];
-	    char *str;
+		char *str;
 		fp = fopen("cmd.output", "r");
-	    while (1) {
-	        str = fgets(chars_line, 4095, fp);
-	        if (str == NULL) break;
-	        sprintf(buffer, "%s\n", chars_line);
-	        Msg(buffer);
-	    }
+		while (1) {
+			str = fgets(chars_line, 4095, fp);
+			if (str == NULL) break;
+			sprintf(buffer, "%s\n", chars_line);
+			Msg(buffer);
+		}
 		fclose(fp);
 	}
 
 	fp = fopen("cmd.ret", "r");
-    if (fp == NULL) {
-        sprintf(buffer, "codybot::CC() error: Cannot open cmd.ret: %s", strerror(errno));
-        Msg(buffer);
+	if (fp == NULL) {
+		sprintf(buffer, "codybot::CC() error: Cannot open cmd.ret: %s", strerror(errno));
+		Msg(buffer);
 		return;
-    }
-    fgets(buffer, 4096, fp);
-    fclose(fp);
+	}
+	fgets(buffer, 4096, fp);
+	fclose(fp);
 
-    ret = atoi(buffer);
-    if (ret == 124) {
-        sprintf(buffer_cmd, "cc: timed out");
-        Msg(buffer_cmd);
-        return;
-    }
+	ret = atoi(buffer);
+	if (ret == 124) {
+		sprintf(buffer_cmd, "cc: timed out");
+		Msg(buffer_cmd);
+		return;
+	}
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
@@ -430,27 +430,27 @@ void Joke(struct raw_line *rawp) {
 	memset(joke_line, 0, 4096);
 	cnt = 0, c = ' ';
 	while (1) {
-        cprev = c;
-        c = fgetc(fp);
-        if (c == -1)
-            break;
-        else if (c == '\t' && cprev == '\n')
-            break;
-        else if (c == '%' && cprev == '\n')
-            break;
-        else if (c == '\n' && cprev == '\n')
-            joke_line[cnt++] = ' ';
-        else if (c == '\n' && cprev != '\n')
-            joke_line[cnt++] = ' ';
-        else
-            joke_line[cnt++] = c;
-    }
+		cprev = c;
+		c = fgetc(fp);
+		if (c == -1)
+			break;
+		else if (c == '\t' && cprev == '\n')
+			break;
+		else if (c == '%' && cprev == '\n')
+			break;
+		else if (c == '\n' && cprev == '\n')
+			joke_line[cnt++] = ' ';
+		else if (c == '\n' && cprev != '\n')
+			joke_line[cnt++] = ' ';
+		else
+			joke_line[cnt++] = c;
+	}
 
 	RawGetTarget(rawp);
 	if (strlen(joke_line) > 0) {
-        sprintf(buffer, "joke: %s", joke_line);
+		sprintf(buffer, "joke: %s", joke_line);
 		Msg(buffer);
-    }
+	}
 	else {
 		Msg("codybot::Joke(): joke_line is empty!");
 	}
@@ -576,16 +576,16 @@ void Weather(struct raw_line *rawp) {
 	}
 
 	// check for "kill" found in ",weather `pkill${IFS}codybot`" which kills the bot
-    char *c = rawp->text;
-    while (1) {
-        if (*c == '\0' || *c == '\n')
-            break;
-        if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
-            Msg("weather: contains a blocked term...\n");
-            return;
-        }
-        ++c;
-    }
+	char *c = rawp->text;
+	while (1) {
+		if (*c == '\0' || *c == '\n')
+			break;
+		if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
+			Msg("weather: contains a blocked term...\n");
+			return;
+		}
+		++c;
+	}
 
 
 	unsigned int cnt = 0;
@@ -637,7 +637,7 @@ void Weather(struct raw_line *rawp) {
 	fclose(fp);
 	
 	// remove blanks at the start of the line
-	// ie "             Partly cloudy"
+	// ie "			 Partly cloudy"
 	cp = temp2;
 	cnt = 0;
 	while (1) {

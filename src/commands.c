@@ -612,7 +612,7 @@ void Weather(struct raw_line *rawp) {
 	memset(rawp->text, 0, strlen(rawp->text));
 
 	char filename[1024];
-	sprintf(filename, "tmp/codybot-weather-%s.txt", city);
+	sprintf(filename, "/tmp/codybot-weather-%s.txt", city);
 	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s?format=%%C:%%t:%%f:%%w:%%p -O %s", city, filename);
 	system(buffer);
 

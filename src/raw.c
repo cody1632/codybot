@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 
 #include "codybot.h"
@@ -29,6 +30,7 @@ void RawLineClear(struct raw_line *rawp) {
 
 // Type of message to be parsed:
 // :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^codybot_version
+int version_once;
 void RawLineParse(struct raw_line *rawp, char *line) {
 	RawLineClear(rawp);
 
@@ -58,8 +60,17 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 		return;
 	else if (*c==':' && *(c+1)=='f' && *(c+2)=='r' && *(c+3)=='e' && *(c+4)=='e' && *(c+5)=='n' &&
 		*(c+6)=='o' && *(c+7)=='d' && *(c+8)=='e' && *(c+9)=='-' && *(c+10)=='c' &&
-		*(c+11)=='o' && *(c+12)=='n')
+		*(c+11)=='o' && *(c+12)=='n' && !version_once) {
+		version_once = 1;
+		sprintf(buffer, "NOTICE freenode-connect :\x01VERSION codybot %s\x01",
+			codybot_version_string);
+		if (use_ssl)
+			SSL_write(pSSL, buffer, strlen(buffer));
+		else
+			write(socket_fd, buffer, strlen(buffer));
+		Log(buffer);
 		return;
+	}
 	else if (*c=='P' && *(c+1)=='I' && *(c+2)=='N' && *(c+3)=='G' && *(c+4)==' ')
 		return;
 	else if (*c=='E' && *(c+1)=='R' && *(c+2)=='R' && *(c+3)=='O' && *(c+4)=='R')

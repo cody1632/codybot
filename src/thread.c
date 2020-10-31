@@ -162,6 +162,19 @@ void *ThreadRXFunc(void *argp) {
 		RawLineParse(&raw, buffer_rx);
 		RawGetTarget(&raw);
 
+		// Respond to CTCP version requests
+		if (strcmp(raw.text, "\x01VERSION\x01") == 0) {// ||
+			//strcmp(raw.text, "VERSION") == 0) {
+			sprintf(buffer, "NOTICE %s :\x01VERSION codybot %s\x01\n", raw.nick,
+				codybot_version_string);
+			if (use_ssl)
+				SSL_write(pSSL, buffer, strlen(buffer));
+			else
+				write(socket_fd, buffer, strlen(buffer));
+			Log(buffer);
+			continue;
+		}
+
 		if (strcmp(raw.channel, nick) == 0) {
 			sprintf(buffer, "privmsg %s :Cannot use private messages\n", raw.nick);
 			SSL_write(pSSL, buffer, strlen(buffer));

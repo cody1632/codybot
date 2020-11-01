@@ -37,7 +37,7 @@ void AsciiArt(struct raw_line *rawp) {
 	unsigned long filesize = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	gettimeofday(&tv0, NULL);
-	srand((unsigned int)tv0.tv_usec);
+	srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
 	fseek(fp, rand()%(filesize-100), SEEK_CUR);
 
 	int c = 0, cprev, cnt = 0;
@@ -298,6 +298,9 @@ void Colorize(struct raw_line *rawp) {
 	char result[4096];
 	memset(result, 0, 4096);
 	while (1) {
+		usleep((rand()%1000)+1);
+		gettimeofday(&tv0, NULL);
+		srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
 		strcat(result, colors[(rand()%13)+2]);
 		strncat(result, cp++, 1);
 		if (*cp == '\0')
@@ -320,7 +323,7 @@ void Fortune(struct raw_line *rawp) {
 	unsigned long filesize = (unsigned long)ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	gettimeofday(&tv0, NULL);
-	srand((unsigned int)tv0.tv_usec);
+	srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
 	fseek(fp, rand()%(filesize-500), SEEK_CUR);
 
 	int c = 0, cprev, cnt = 0;
@@ -406,7 +409,7 @@ void Joke(struct raw_line *rawp) {
 	unsigned long filesize = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	gettimeofday(&tv0, NULL);
-	srand((unsigned int)tv0.tv_usec);
+	srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
 	unsigned int rnd = rand()%(filesize-100);
 	fseek(fp, rnd, SEEK_CUR);
 	if (debug)
@@ -513,7 +516,7 @@ void SlapCheck(struct raw_line *rawp) {
 	  *(c+28)==' '))) {
 		RawGetTarget(rawp);
 		gettimeofday(&tv0, NULL);
-		srand((unsigned int)tv0.tv_usec);
+		srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
 		sprintf(buffer, "%cACTION slaps %s with %s%c", 1, rawp->nick, slap_items[rand()%20], 1);
 		Msg(buffer);
 	}

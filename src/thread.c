@@ -164,12 +164,15 @@ void *ThreadRXFunc(void *argp) {
 
 		int CheckCTCPTime(void) {
 			t0 = time(NULL);
-			if (ctcp_prev_time <= t0-5) {
+			if (strcmp(raw.nick, ctcp_prev_nick) == 0 && ctcp_prev_time <= t0-5) {
 				ctcp_prev_time = t0;
 				return 0;
 			}
-			else
+			else {
+				ctcp_prev_time = t0;
+				sprintf(ctcp_prev_nick, "%s", raw.nick);
 				return 1;
+			}
 		}
 
 		// Respond to few CTCP requests

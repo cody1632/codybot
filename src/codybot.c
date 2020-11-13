@@ -45,6 +45,7 @@ unsigned long long fortune_total;
 struct timeval tv0, tv_start;
 struct tm *tm0;
 time_t t0, ctcp_prev_time;
+char ctcp_prev_nick[128];
 char *log_filename;
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
 char trigger_char, trigger_char_default = ',';
@@ -263,7 +264,9 @@ void SignalFunc(int signum) {
 int main(int argc, char **argv) {
 	// initialize time for !uptime
 	gettimeofday(&tv_start, NULL);
-	ctcp_prev_time = time(NULL)-5;
+
+	ctcp_prev_time = tv_start.tv_sec - 5;
+	sprintf(ctcp_prev_nick, "codybot");
 
 	signal(SIGINT, SignalFunc);
 

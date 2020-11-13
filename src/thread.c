@@ -162,9 +162,20 @@ void *ThreadRXFunc(void *argp) {
 		RawLineParse(&raw, buffer_rx);
 		RawGetTarget(&raw);
 
+		int CheckCTCPTime(void) {
+			t0 = time(NULL);
+			if (ctcp_prev_time <= t0-5) {
+				ctcp_prev_time = t0;
+				return 0;
+			}
+			else
+				return 1;
+		}
+
 		// Respond to few CTCP requests
-		if (strcmp(raw.text, "\x01VERSION\x01") == 0) {// ||
-			//strcmp(raw.text, "VERSION") == 0) {
+		if (strcmp(raw.text, "\x01VERSION\x01") == 0) {
+			if (CheckCTCPTime())
+				continue;
 			sprintf(buffer, "NOTICE %s :\x01VERSION codybot %s\x01\n", raw.nick,
 				codybot_version_string);
 			if (use_ssl)
@@ -175,6 +186,8 @@ void *ThreadRXFunc(void *argp) {
 			continue;
 		}
 		else if (strncmp(raw.text, "\x01PING ", 6) == 0) {
+			if (CheckCTCPTime())
+				continue;
 			sprintf(buffer, "NOTICE %s :%s\n", raw.nick, raw.text);
 			if (use_ssl)
 				SSL_write(pSSL, buffer, strlen(buffer));
@@ -184,6 +197,8 @@ void *ThreadRXFunc(void *argp) {
 			continue;
 		}
 		else if (strcmp(raw.text, "\x01TIME\x01") == 0) {
+			if (CheckCTCPTime())
+				continue;
 			t0 = time(NULL);
 			sprintf(buffer, "NOTICE %s :\x01TIME %s\x01\n", raw.nick, ctime(&t0));
 			if (use_ssl)

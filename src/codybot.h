@@ -27,9 +27,7 @@ extern char *target;
 
 // Globals from server.c
 extern unsigned int server_port, local_port;
-extern char *server_ip;
-extern char *server_ip_blinkenshell;
-extern char *server_ip_freenode;
+extern char *server_ip, *server_name;
 extern SSL *pSSL;
 
 // Globals from raw.c

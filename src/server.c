@@ -12,18 +12,18 @@
 #include "codybot.h"
 
 unsigned int server_port, local_port;
-char *server_ip, *server_ip_blinkenshell = "194.14.45.5",
-	*server_ip_freenode = "204.225.96.251";
+char *server_ip, *server_name;
 SSL *pSSL;
 
-void ServerGetIP(char *hostname) {
+void ServerGetIP(char *hostname2) {
 	struct hostent *he;
 	struct in_addr **addr_list;
 	int cnt = 0;
 
-	he = gethostbyname(hostname);
+	he = gethostbyname(hostname2);
 	if (he == NULL) {
-		fprintf(stderr, "##codybot::ServerGetIP() error: Cannot gethostbyname()\n");
+		fprintf(stderr, "##codybot::ServerGetIP() error: Cannot gethostbyname(%s)\n",
+			hostname2);
 		exit(1);
 	}
 
@@ -32,10 +32,13 @@ void ServerGetIP(char *hostname) {
 	char *tmpstr = inet_ntoa(*addr_list[0]);
 	server_ip = (char *)malloc(strlen(tmpstr)+1);
 	sprintf(server_ip, "%s", tmpstr);
+	server_name = malloc(strlen(hostname2)+1);
+	sprintf(server_name, "%s", hostname2);
 
 	if (debug) {
+		printf("||codybot::ServerGetIP(%s): other IPs:\n", hostname2);
 		for (cnt = 0; addr_list[cnt] != NULL; cnt++) {
-			printf("%s\n", inet_ntoa(*addr_list[cnt]));
+			printf("  %s\n", inet_ntoa(*addr_list[cnt]));
 		}
 	}
 }
@@ -43,7 +46,8 @@ void ServerGetIP(char *hostname) {
 void ServerConnect(void) {
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_fd < 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot socket(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot socket(): %s\n",
+			strerror(errno));
 		exit(1);
 	}
 	else {
@@ -57,28 +61,28 @@ void ServerConnect(void) {
 	if (local_port)
 		addr.sin_port = htons(local_port);
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot bind(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot bind(): %s\n",
+			strerror(errno));
 		close(socket_fd);
 		exit(1);
 	}
-	else {
+	else
 		if (debug)
 			printf("||bind() 0.0.0.0 successful\n");
-	}
 	
 	struct sockaddr_in host;
 	host.sin_addr.s_addr = inet_addr(server_ip);
 	host.sin_family = AF_INET;
 	host.sin_port = htons(server_port);
 	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot connect(): %s\n", strerror(errno));
+		fprintf(stderr, "||codybot::ServerConnect() error: Cannot connect(): %s\n",
+			strerror(errno));
 		close(socket_fd);
 		exit(1);
 	}
-	else {
+	else
 		if (debug)
 			printf("||connect() %s successful\n", server_ip);
-	}
 
 	if (use_ssl) {
 		SSL_load_error_strings();
@@ -124,13 +128,18 @@ void ServerConnect(void) {
 		SSL_connect(pSSL);
 		ret = SSL_accept(pSSL);
 		if (ret <= 0) {
-			fprintf(stderr, "||codybot::ServerConnect() error: SSL_accept() failed, ret: %d\n", ret);
+			fprintf(stderr, "||codybot::ServerConnect() error: "
+				"SSL_accept() failed, ret: %d\n", ret);
 			fprintf(stderr, "||SSL error number: %d\n", SSL_get_error(pSSL, 0));
 			close(socket_fd);
 			exit(1);
 		}
 	}
 
+	// The order of the initial IRC connection commands are from RFC1459
+	////////////////
+
+	// Don't expose password since this source code can be read by the bot
 /*	if (use_ssl)
 		SSL_write(pSSL, "PASS none\n", 10);
 	else
@@ -142,10 +151,8 @@ void ServerConnect(void) {
 	else
 		write(socket_fd, buffer, strlen(buffer));
 
-	if (server_ip == server_ip_freenode)
-		sprintf(buffer, "USER %s %s irc.freenode.net %s\n", nick, hostname, full_user_name);
-	else
-		sprintf(buffer, "USER %s %s irc.blinkenshell.org :%s\n", nick, hostname, full_user_name);
+	sprintf(buffer, "USER %s %s %s %s\n", nick, hostname,
+		server_name, full_user_name);
 	if (use_ssl)
 		SSL_write(pSSL, buffer, strlen(buffer));
 	else

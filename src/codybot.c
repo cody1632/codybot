@@ -48,7 +48,7 @@ time_t t0, ctcp_prev_time;
 char ctcp_prev_nick[128];
 char *log_filename;
 char *buffer, *buffer_rx, *buffer_cmd, *buffer_log;
-char trigger_char, trigger_char_default = ',';
+char trigger_char, trigger_char_default = '!';
 char *current_channel;
 char *nick; // nick used by the bot
 char *full_user_name;
@@ -366,15 +366,12 @@ int main(int argc, char **argv) {
 	}
 	if (!server_ip)
 		ServerGetIP("chat.freenode.net");
-	if (!trigger_char) {
-		if (strcmp(server_ip, server_ip_blinkenshell) == 0)
-			trigger_char = '!';
-		else
-			trigger_char = trigger_char_default;
-	}
+	if (!trigger_char)
+		trigger_char = trigger_char_default;
 
-	if (strcmp(server_ip, server_ip_blinkenshell) == 0) {
-		// don't wanna replace blinken's shell service
+	if (strcmp(server_name, "irc.blinkenshell.org") == 0) {
+		// Don't wanna replace blinken's shell service
+		// Note that those features are clearly refused by the owner
 		sh_disabled = 1;
 		cc_disabled = 1;
 	}
@@ -414,9 +411,11 @@ int main(int argc, char **argv) {
 		printf("##fortune_total: %llu\n", fortune_total);
 
 	ServerConnect();
-	// mainloop
+
+	// Mainloop
 	ThreadRXStart();
 	ReadCommandLoop();
+	
 	ServerClose();
 
 	return 0;

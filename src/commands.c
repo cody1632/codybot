@@ -9,27 +9,29 @@
 #include "codybot.h"
 
 char *colors[] = {
-	"\003", // default/restore
-	"\00301", //black
-//	"\00302", // blue --> too dark/unreadable
-	"\00303", // green
-	"\00304", // red
-	"\00305", // brown
-	"\00306", // purple
-	"\00307", // orange
-	"\00308", // yellow
-	"\00309", // light green
-	"\00310", // cyan
-	"\00311", // light cyan
-	"\00312", // light blue
-	"\00313", // pink
-	"\00314", // grey
+	"\003",    // default/restore
+	"\00301",  //black
+//	"\00302",  // blue --> too dark/unreadable (OS-specific)
+	"\00303",  // green
+	"\00304",  // red
+	"\00305",  // brown
+	"\00306",  // purple
+	"\00307",  // orange
+	"\00308",  // yellow
+	"\00309",  // light green
+	"\00310",  // cyan
+	"\00311",  // light cyan
+	"\00312",  // light blue
+	"\00313",  // pink
+	"\00314",  // grey
 	"\00315"}; // light grey
 
 void AsciiArt(struct raw_line *rawp) {
 	FILE *fp = fopen("data-ascii.txt", "r");
 	if (fp == NULL) {
-		Msg("codybot::AsciiArt() error: cannot open data-ascii.txt");
+		sprintf(buffer, "codybot::AsciiArt() error: cannot open data-ascii.txt: %s",
+			strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
@@ -48,7 +50,7 @@ void AsciiArt(struct raw_line *rawp) {
 			break;
 		}
 		if (cprev == '\n' && c == '%') {
-			//skip the newline
+			// Skip the newline
 			fgetc(fp);
 			break;
 		}
@@ -66,7 +68,7 @@ void AsciiArt(struct raw_line *rawp) {
 			break;
 		else if (c == '\n') {
 			Msg(line);
-			// throttled due to server notice of flooding
+			// Throttled due to server notice of flooding
 			sleep(2);
 			memset(line, 0, 1024);
 			cnt = 0;
@@ -79,42 +81,24 @@ void AsciiArt(struct raw_line *rawp) {
 }
 
 void Calc(struct raw_line *rawp) {
-	// check for "kill" found in ",calc `killall codybot`" which kills the bot
-	char *c = rawp->text;
-	while (1) {
-		if (*c == '\0' || *c == '\n')
-			break;
-		if (*c == '\\') {
-			Msg("No backslashes allowed, sorry");
-			return;
-		}
-		if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
-			Msg("calc: contains a blocked term...\n");
-			return;
-		}
-		++c;
-	}
-
-	// remove '^calc' from the line
-	rawp->text += 6;
 	strcat(rawp->text, "\n");
 
 	FILE *fi = fopen("cmd.input", "w+");
 	if (fi == NULL) {
-		sprintf(buffer, "codybot::calc() error: Cannot open cmd.input for writing");
+		sprintf(buffer, "codybot::calc() error: Cannot open cmd.input for writing: %s",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
-	fputs(rawp->text, fi);
+	fputs(rawp->text+6, fi);
 	fclose(fi);
-
-	rawp->text -= 6;
 
 	system("bc -l &> cmd.output < cmd.input");
 
 	FILE *fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -129,10 +113,11 @@ void Calc(struct raw_line *rawp) {
 		Msg(line);
 		++cnt;
 		if (cnt >= 4) {
-			system("cat cmd.output |nc termbin.com 9999 > cmd.url");
+			system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 			FILE *fu = fopen("cmd.url", "r");
 			if (fu == NULL) {
-				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n", strerror(errno));
+				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n",
+					strerror(errno));
 				Msg(buffer);
 				break;
 			}
@@ -166,13 +151,17 @@ void CC(struct raw_line *rawp) {
 
 	FILE *fr = fopen("prog-head.c", "r");
 	if (fr == NULL) {
-		Msg("codybot error: Cannot open prog-head.c");
+		sprintf(buffer, "codybot error: Cannot open prog-head.c: %s", 
+			strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
 	FILE *fp = fopen("prog.c", "w+");
 	if (fp == NULL) {
-		Msg("codybot error: Cannot open prog.c");
+		sprintf(buffer, "codybot error: Cannot open prog.c: %s",
+			strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
@@ -188,7 +177,9 @@ void CC(struct raw_line *rawp) {
 	fclose(fr);
 	fr = fopen("prog-tail.c", "r");
 	if (fr == NULL) {
-		Msg("codybot error: Cannot open prog-tail.c");
+		sprintf(buffer, "codybot error: Cannot open prog-tail.c: %s",
+			strerror(errno));
+		Msg(buffer);
 		return;
 	}
 	while (fgets(buffer, 1024, fr) != NULL)
@@ -198,12 +189,14 @@ void CC(struct raw_line *rawp) {
 	fclose(fp);
 
 	if (cc_compiler == CC_COMPILER_GCC)
-		ret = system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g prog.c -o prog 2>cmd.output");
+		ret = system("gcc -std=c11 -Wall -Werror -D_GNU_SOURCE -O2 -g "
+			"prog.c -o prog 2>cmd.output");
 	else if (cc_compiler == CC_COMPILER_TCC)
 		ret = system("tcc -lm -o prog prog.c 2>cmd.output");
 
 	if (ret == 0) {
-		sprintf(buffer, "timeout %ds ./prog &> cmd.output; echo $? > cmd.ret", cmd_timeout);
+		sprintf(buffer, "timeout %ds ./prog &> cmd.output; echo $? > cmd.ret",
+			cmd_timeout);
 		system(buffer);
 	}
 	else {
@@ -213,7 +206,7 @@ void CC(struct raw_line *rawp) {
 		while (1) {
 			str = fgets(chars_line, 4095, fp);
 			if (str == NULL) break;
-			sprintf(buffer, "%s\n", chars_line);
+			sprintf(buffer, "%s", chars_line);
 			Msg(buffer);
 		}
 		fclose(fp);
@@ -221,7 +214,8 @@ void CC(struct raw_line *rawp) {
 
 	fp = fopen("cmd.ret", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::CC() error: Cannot open cmd.ret: %s", strerror(errno));
+		sprintf(buffer, "codybot::CC() error: Cannot open cmd.ret: %s",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -237,7 +231,8 @@ void CC(struct raw_line *rawp) {
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n", strerror(errno));
+		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -255,7 +250,8 @@ void CC(struct raw_line *rawp) {
 			system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 			FILE *fu = fopen("cmd.url", "r");
 			if (fu == NULL) {
-				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n", strerror(errno));
+				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n",
+					strerror(errno));
 				Msg(buffer);
 				break;
 			}
@@ -272,7 +268,9 @@ void CC(struct raw_line *rawp) {
 void Chars(struct raw_line *rawp) {
 	FILE *fp = fopen("data-chars.txt", "r");
 	if (fp == NULL) {
-		Msg("codybot::Chars() error: Cannot open data-chars.txt: %s\n");
+		sprintf(buffer, "codybot::Chars() error: Cannot open data-chars.txt: %s",
+			strerror(errno));
+		Msg(buffer);
 		return;
 	}
 
@@ -281,7 +279,7 @@ void Chars(struct raw_line *rawp) {
 	while (1) {
 		str = fgets(chars_line, 4095, fp);
 		if (str == NULL) break;
-		sprintf(buffer, "%s\n", chars_line);
+		sprintf(buffer, "%s", chars_line);
 		Msg(buffer);
 	}
 
@@ -314,7 +312,8 @@ void Colorize(struct raw_line *rawp) {
 void Fortune(struct raw_line *rawp) {
 	FILE *fp = fopen("data-fortunes.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Fortune() error: Cannot open data-fortunes.txt: %s", strerror(errno));
+		sprintf(buffer, "##codybot::Fortune() error: Cannot open data-fortunes.txt: %s",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -337,7 +336,7 @@ void Fortune(struct raw_line *rawp) {
 			break;
 		}
 		if (cprev == '\n' && c == '%') {
-			//skip the newline
+			// Skip the newline
 			fgetc(fp);
 			c = ' ';
 			break;
@@ -375,7 +374,8 @@ void Fortune(struct raw_line *rawp) {
 
 		fp = fopen("stats", "r");
 		if (fp == NULL) {
-			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s", strerror(errno));
+			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s",
+				strerror(errno));
 			Msg(buffer);
 			return;
 		}
@@ -385,7 +385,8 @@ void Fortune(struct raw_line *rawp) {
 	
 		fp = fopen("stats", "w");
 		if (fp == NULL) {
-			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s", strerror(errno));
+			sprintf(buffer, "codybot::Fortune() error: Cannot open stats file: %s",
+				strerror(errno));
 			Msg(buffer);
 			return;
 		}
@@ -400,7 +401,8 @@ void Fortune(struct raw_line *rawp) {
 void Joke(struct raw_line *rawp) {
 	FILE *fp = fopen("data-jokes.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::Joke() error: cannot open data-jokes.txt: %s", strerror(errno));
+		sprintf(buffer, "codybot::Joke() error: cannot open data-jokes.txt: %s",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -423,7 +425,7 @@ void Joke(struct raw_line *rawp) {
 			break;
 		}
 		if (cprev == '\n' && c == '%') {
-			//skip the newline
+			// Skip the newline
 			fgetc(fp);
 			break;
 		}
@@ -517,7 +519,8 @@ void SlapCheck(struct raw_line *rawp) {
 		RawGetTarget(rawp);
 		gettimeofday(&tv0, NULL);
 		srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
-		sprintf(buffer, "%cACTION slaps %s with %s%c", 1, rawp->nick, slap_items[rand()%20], 1);
+		sprintf(buffer, "\001ACTION slaps %s with %s\x01", rawp->nick,
+			slap_items[rand()%20]);
 		Msg(buffer);
 	}
 }
@@ -525,7 +528,8 @@ void SlapCheck(struct raw_line *rawp) {
 void Stats(struct raw_line *rawp) {
 	FILE *fp = fopen("stats", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Stats() error: Cannot open stats file: %s", strerror(errno));
+		sprintf(buffer, "##codybot::Stats() error: Cannot open stats file: %s",
+			strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -540,10 +544,10 @@ void Stats(struct raw_line *rawp) {
 	Msg(buffer);
 }
 
-// array containing time at which !weather have been run
+// Array containing time at which !weather have been run
 unsigned long weather_usage[10];
 
-// pop the first item
+// Pop the first item
 void WeatherDecayUsage(void) {
 	int cnt;
 	for (cnt = 0; cnt < 9; cnt++)
@@ -552,16 +556,16 @@ void WeatherDecayUsage(void) {
 	weather_usage[cnt] = 0;
 }
 
-// return true if permitted, false if quota reached
+// Return true if permitted, false if quota reached
 int WeatherCheckUsage(void) {
 	int cnt;
 	for (cnt = 0; cnt < 10; cnt++) {
-		// if there's available slot
+		// If there's available slot
 		if (weather_usage[cnt] == 0) {
 			weather_usage[cnt] = time(NULL);
 			return 1;
 		}
-		// if usage is complete and first item dates from over 10 minutes
+		// If usage is complete and first item dates from over 10 minutes
 		else if (cnt == 9 && weather_usage[0] < (time(NULL) - (60*30))) {
 			WeatherDecayUsage();
 			weather_usage[cnt] = time(NULL);
@@ -578,24 +582,25 @@ void Weather(struct raw_line *rawp) {
 		return;
 	}
 
-	// check for "kill" found in ",weather `pkill${IFS}codybot`" which kills the bot
+	// Check for "kill" found in ",weather `pkill${IFS}codybot`" which kills the bot
 	char *c = rawp->text;
 	while (1) {
 		if (*c == '\0' || *c == '\n')
 			break;
 		if (strlen(c) >= 5 && strncmp(c, "kill", 4) == 0) {
-			Msg("weather: contains a blocked term...\n");
+			Msg("weather: contains a blocked term...");
 			return;
 		}
 		++c;
 	}
 
 
-	unsigned int cnt = 0;
-	char city[128], *cp = rawp->text + strlen("^weather ");
+	unsigned int cnt = 0, cnt_conv = 0;
+	char city[128], city_conv[128], *cp = rawp->text + strlen("^weather ");
 	memset(city, 0, 128);
+	memset(city_conv, 0, 128);
 	while (1) {
-		if (*cp == '\n' || *cp == '\0' || cp-rawp->text >= 128)
+		if (*cp == '\n' || *cp == '\0' || cp - rawp->text >= 128)
 			break;
 		else if (cnt == 0 && *cp == ' ') {
 			++cp;
@@ -605,18 +610,27 @@ void Weather(struct raw_line *rawp) {
 			++cp;
 			continue;
 		}
-		//else if (*cp == ' ')
-		//	break;
+		else if (*cp == ' ') {
+			city[cnt++] = ' ';
+			city_conv[cnt_conv++] = '%';
+			city_conv[cnt_conv++] = '2';
+			city_conv[cnt_conv++] = '0';
+			++cp;
+			continue;
+		}
 		
 		city[cnt] = *cp;
+		city_conv[cnt_conv] = *cp;
 		++cnt;
+		++cnt_conv;
 		++cp;
 	}
 	memset(rawp->text, 0, strlen(rawp->text));
 
 	char filename[1024];
-	sprintf(filename, "/tmp/codybot-weather-%s.txt", city);
-	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s?format=%%C:%%t:%%f:%%w:%%p -O %s", city, filename);
+	sprintf(filename, "/tmp/codybot-weather-%s.txt", city_conv);
+	sprintf(buffer, "wget -t 1 -T 24 https://wttr.in/%s?format=%%C:%%t:%%f:%%w:%%p "
+		"-O %s", city_conv, filename);
 	system(buffer);
 
 	/*temp2[strlen(temp2)-1] = ' ';
@@ -627,7 +641,8 @@ void Weather(struct raw_line *rawp) {
 
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot error: Cannot open %s: %s", filename, strerror(errno));
+		sprintf(buffer, "codybot error: Cannot open %s: %s",
+			filename, strerror(errno));
 		Msg(buffer);
 		return;
 	}
@@ -657,7 +672,7 @@ void Weather(struct raw_line *rawp) {
 			}
 			continue;
 		}
-		// the degree symbol doesn't display correctly, so replace
+		// The degree symbol doesn't display correctly, so replace
 		else if (str[cnt] == -62 && str[cnt+1] == -80) {
 			str2[cnt2] = '*';
 			cnt += 2;

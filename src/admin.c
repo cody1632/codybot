@@ -10,7 +10,7 @@ struct AdminList admin_list;
 
 void AddAdmin(char *newnick, char *host) {
 	if (debug)
-		printf("## AddAdmin(): \"%s\" \"%s\"\n", newnick, host);
+		printf("## AddAdmin(): '%s' '%s'\n", newnick, host);
 	
 	struct Admin *admin = malloc(sizeof(struct Admin));
 	
@@ -66,7 +66,7 @@ char *EnumerateAdmins(void) {
 	memset(str, 0, 4096);
 	
 	if (admin == NULL) {
-		sprintf(str, "(no admin in the list)");
+		sprintf(str, "(No admins in the list)");
 		return str;
 	}
 
@@ -101,7 +101,7 @@ int IsAdmin(char *newnick, char *host) {
 				if (strcmp(host, admin->host) == 0)
 					return 1;
 				else { // could catch the same nick in the list
-						// with different host
+				       // with different host
 					if (admin->next == NULL)
 						break;
 					else

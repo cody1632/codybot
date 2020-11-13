@@ -24,7 +24,6 @@ void ThreadRunStart(char *command) {
 void *ThreadRunFunc(void *argp) {
 	char *text = strdup(raw.text);
 	printf("&& Thread started ::%s::\n", text);
-	//char *cp = argp;
 	char *cp = text;
 	char cmd[4096];
 	sprintf(cmd, "timeout %ds bash -c '", cmd_timeout);
@@ -50,7 +49,8 @@ void *ThreadRunFunc(void *argp) {
 
 	FILE *fp = fopen("cmd.ret", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::ThreadRunFunc() error: Cannot open cmd.ret: %s", strerror(errno));
+		sprintf(buffer, "codybot::ThreadRunFunc() error: Cannot open cmd.ret: %s",
+			strerror(errno));
 		Msg(buffer);
 	}
 	fgets(buffer, 4096, fp);
@@ -65,7 +65,8 @@ void *ThreadRunFunc(void *argp) {
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::ThreadRunFunc() error: Cannot open cmd.output: %s", strerror(errno));
+		sprintf(buffer, "codybot::ThreadRunFunc() error: Cannot open cmd.output: %s",
+			strerror(errno));
 		Msg(buffer);
 		return NULL;
 	}
@@ -101,7 +102,8 @@ void *ThreadRunFunc(void *argp) {
 		system("cat cmd.output |nc termbin.com 9999 > cmd.url");
 		FILE *fp2 = fopen("cmd.url", "r");
 		if (fp2 == NULL)
-			fprintf(stderr, "##codybot::ThreadRXFunc() error: Cannot open cmd.url: %s\n", strerror(errno));
+			fprintf(stderr, "##codybot::ThreadRXFunc() error: Cannot open cmd.url: %s\n",
+				strerror(errno));
 		else {
 			char url[1024];
 			fgets(url, 1023, fp2);
@@ -153,22 +155,22 @@ void *ThreadRXFunc(void *argp) {
 		if (buffer_rx[0] != 'P' && buffer_rx[1] != 'I' && buffer_rx[2] != 'N' &&
 		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ')
 			Log(buffer_rx);
-		// respond to ping request from the server with a pong
+		// Respond to ping request from the server with a pong
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
-			if (server_ip == server_ip_blinkenshell) {
+			//if (server_ip == server_ip_blinkenshell) {
 				sprintf(buffer_cmd, "%s\n", buffer_rx);
 				buffer_cmd[1] = 'O';
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 				if (debug)
 					Log(buffer_cmd);
 				memset(buffer_cmd, 0, 4096);
-			}
-			else {
-				SSL_write(pSSL, "PONG\n", 5);
-				if (debug)
-					Log("PONG\n");
-			}
+			//}
+			//else {
+			//	SSL_write(pSSL, "PONG\n", 5);
+			//	if (debug)
+			//		Log("PONG\n");
+			//}
 			continue;
 		}
 
@@ -229,7 +231,7 @@ void *ThreadRXFunc(void *argp) {
 		}
 
 		if (strcmp(raw.channel, nick) == 0) {
-			sprintf(buffer, "privmsg %s :Cannot use private messages\n", raw.nick);
+			sprintf(buffer, "privmsg %s :Cannot use private messages", raw.nick);
 			SSL_write(pSSL, buffer, strlen(buffer));
 			continue;
 		}
@@ -240,15 +242,10 @@ strcmp(raw.command, "NICK")!=0) {
 // help
 		if (raw.text[0]==trigger_char && strncmp(raw.text+1, "help", 4) == 0) {
 			char c = trigger_char;
-			if (strcmp(server_ip, server_ip_blinkenshell) == 0)
-sprintf(buffer, "commands: %cabout %cadmins %cascii %cchars %ccolorize "
-"%chelp %cfortune %cjoke %crainbow %cstats %cuptime %cversion %cweather\n",
-	c,c,c,c,c,c,c,c,c,c,c,c,c);
-			else
-sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
-"%chelp %cfortune %cjoke %crainbow %csh %cstats %cuptime %cversion %cweather\n",
+			sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars "
+				"%ccolorize %chelp %cfortune %cjoke %crainbow %csh %cstats "
+				"%cuptime %cversion %cweather",
 	c,c,c,c,c,c,c,c,c,c,c,c,c,c,c);
-
 			Msg(buffer);
 			continue;
 		}
@@ -257,13 +254,13 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 			DestroyAdminList();
 			ParseAdminFile();
 			char *str = EnumerateAdmins();
-			sprintf(buffer, "Admins: %s\n", str);
+			sprintf(buffer, "Admins: %s", str);
 			free(str);
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "admins", 6) == 0) {
 			char *str = EnumerateAdmins();
-			sprintf(buffer, "Admins: %s\n", str);
+			sprintf(buffer, "Admins: %s", str);
 			free(str);
 			Msg(buffer);
 		}
@@ -315,12 +312,12 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "cc ", 3) == 0) {
 			struct stat st2;
 			if (cc_disabled || stat("cc_disable", &st2) == 0) {
-			if (strcmp(server_ip, server_ip_blinkenshell) == 0)
-				sprintf(buffer,
-"%s: cc is permanently disabled", raw.nick);
-			else
-				sprintf(buffer,
-"%s: cc is temporarily disabled, try again later or ask esselfe to enable it", raw.nick);
+			if (strcmp(server_name, "irc.blinkenshell.org") == 0)
+				sprintf(buffer, "%s: cc is permanently disabled", raw.nick);
+			else {
+				sprintf(buffer, "%s: cc is temporarily disabled, "
+					"try again later or ask esselfe to enable it", raw.nick);
+			}
 
 				Msg(buffer);
 				continue;
@@ -352,7 +349,8 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 			Chars(&raw);
 // colorize
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorlist") == 0) {
-			Msg("\003011\003022\003044\003055\003066\003077\003088\00309\0031010\0031111\0031212\0031313\0031414\0031515");
+			Msg("\003011 \003022 \003044 \003055 \003066 \003077 \003088"
+				" \00309 \0031010 \0031111 \0031212 \0031313 \0031414 \0031515");
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "colorize") == 0) {
 			sprintf(buffer, "Usage: %ccolorize some text to process", trigger_char);
@@ -446,10 +444,11 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 			t0 = (time_t)tv0.tv_sec - tv_start.tv_sec;
 			tm0 = gmtime(&t0);
 			if (tm0->tm_mday > 1)
-				sprintf(buffer, "uptime: %02d day%s %02d:%02d:%02d", tm0->tm_mday-1, (tm0->tm_mday>2)?"s":"",
-					tm0->tm_hour, tm0->tm_min, tm0->tm_sec);
+				sprintf(buffer, "uptime: %02d day%s %02d:%02d:%02d", tm0->tm_mday-1,
+					(tm0->tm_mday>2)?"s":"", tm0->tm_hour, tm0->tm_min, tm0->tm_sec);
 			else
-				sprintf(buffer, "uptime: %02d:%02d:%02d", tm0->tm_hour, tm0->tm_min, tm0->tm_sec);
+				sprintf(buffer, "uptime: %02d:%02d:%02d", tm0->tm_hour, tm0->tm_min,
+					tm0->tm_sec);
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version") == 0) {
@@ -457,12 +456,14 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather") == 0) {
-			sprintf(buffer, "weather: missing city argument, example: '%cweather montreal'", trigger_char);
+			sprintf(buffer, "weather: missing city argument, example: "
+				"'%cweather montreal'", trigger_char);
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "weather ", 8) == 0) {
 			if (wttr_disabled) {
-				sprintf(buffer, ",weather is currently disabled, try again later or ask an admin to enable it");
+				sprintf(buffer, ",weather is currently disabled, try again later or "
+					"ask an admin to enable it");
 				Msg(buffer);
 			}
 			else
@@ -489,7 +490,8 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 			}
 		}
 		else if (strcmp(raw.text, "^sh") == 0) {
-			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'", trigger_char);
+			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'",
+				trigger_char);
 			Msg(buffer);
 		}
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh_lock") == 0) {
@@ -536,17 +538,16 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "sh ", 3) == 0) {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
-				if (strcmp(server_ip, server_ip_blinkenshell) == 0)
-					sprintf(buffer,
-"%s: sh is permanently disabled", raw.nick);
+				if (strcmp(server_name, "irc.blinkenshell.org") == 0)
+					sprintf(buffer, "%s: sh is permanently disabled", raw.nick);
 				else
-					sprintf(buffer,
-"%s: sh is temporarily disabled, try again later or ask an admin to enable it", raw.nick);
+					sprintf(buffer, "%s: sh is temporarily disabled, "
+						"try again later or ask an admin to enable it", raw.nick);
 
 				Msg(buffer);
 				continue;
 			}
-			// rem touch $srcdir/sh_lock to have ^sh commands run in a chroot
+			// Remmember, touch $srcdir/sh_lock to have !sh commands run in a chroot
 			else if(sh_locked || (stat("sh_lock", &st) == 0)) {
 				raw.text[0] = ' ';
 				raw.text[1] = ' ';
@@ -554,7 +555,7 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 				sprintf(buffer_cmd, "echo '%s' > chroot/home/dummy/run.fifo", raw.text);
 				system(buffer_cmd);
 
-				// wait for chroot/home/dummy/run.sh to write in cmd.output
+				// Wait for chroot/home/dummy/run.sh to write in cmd.output
 				printf("++tail chroot/home/dummy/run.status++\n");
 				sprintf(buffer_cmd, "tail chroot/home/dummy/run.status");
 				system(buffer_cmd);
@@ -562,13 +563,13 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 
 				FILE *fr = fopen("chroot/home/dummy/cmd.output", "r");
 				if (fr == NULL) {
-					sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot open chroot/home/dummy/cmd.output: %s",
-						strerror(errno));
+					sprintf(buffer, "codybot::ThreadRXFunc() error: Cannot "
+						"open chroot/home/dummy/cmd.output: %s", strerror(errno));
 					Msg(buffer);
 					continue;
 				}
 
-				// count lines total
+				// Count lines total
 				int c;
 				unsigned int line_total = 0;
 				while (1) {
@@ -605,7 +606,7 @@ sprintf(buffer, "commands: %cabout %cadmins %cascii %ccc %cchars %ccolorize "
 			}
 
 			char *cp = raw.text + 4;
-// check for the kill command
+// Check for the kill command
 unsigned int dontrun = 0;
 while (1) {
 	if (*cp == '\n' || *cp == '\0')
@@ -627,9 +628,9 @@ while (1) {
 }
 
 if (!dontrun) {
-// check if running the cat program with an executable
+// Check if running the cat program with an executable
 char *c = raw.text + 4;
-// ignore whitespaces
+// Ignore whitespaces
 while (1) {
 	if (*c == ' ') {
 		++c;
@@ -683,9 +684,10 @@ if (strncmp(c, "cat ", 4)==0) {
 			raw.text[1] = ' ';
 			raw.text[2] = ' ';
 			
-			// run the received !sh shell command
+			// Run the received !sh shell command
 			if (debug)
-				printf("codybot::ThreadRXFunc() starting thread for ::%s::\n", raw.text);
+				printf("codybot::ThreadRXFunc() starting thread for ::%s::\n",
+					raw.text);
 			ThreadRunStart(raw.text);
 
 //			RawLineClear(&raw);

@@ -34,7 +34,7 @@ $(OBJDIR)/thread.o: src/thread.c
 	gcc -c $(CFLAGS) src/thread.c -o $(OBJDIR)/thread.o
 
 $(PROGNAME): $(OBJS)
-	gcc $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(PROGNAME)
+	gcc $(CFLAGS) $(OBJS) -o $(PROGNAME) $(LDFLAGS)
 
 clean:
 	@rm -rv $(OBJDIR) $(PROGNAME) $(PROGRUN) 2>/dev/null || true

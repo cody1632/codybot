@@ -8,9 +8,9 @@
 
 struct AdminList admin_list;
 
-void AddAdmin(char *newnick, char *hostmask) {
+void AddAdmin(char *newnick, char *host) {
 	if (debug)
-		printf("## AddAdmin(): \"%s\" \"%s\"\n", newnick, hostmask);
+		printf("## AddAdmin(): \"%s\" \"%s\"\n", newnick, host);
 	
 	struct Admin *admin = malloc(sizeof(struct Admin));
 	
@@ -26,11 +26,11 @@ void AddAdmin(char *newnick, char *hostmask) {
 	admin->next = NULL;
 	admin->nick = malloc(strlen(newnick)+1);
 	sprintf(admin->nick, "%s", newnick);
-	if (hostmask == NULL)
-		admin->hostmask = NULL;
+	if (host == NULL)
+		admin->host = NULL;
 	else {
-		admin->hostmask = malloc(strlen(hostmask)+1);
-		sprintf(admin->hostmask, "%s", hostmask);
+		admin->host = malloc(strlen(host)+1);
+		sprintf(admin->host, "%s", host);
 	}
 
 	admin_list.last_admin = admin;
@@ -43,7 +43,7 @@ void DestroyAdminList(void) {
 		return;
 	
 	while (1) {
-		free(admin->hostmask);
+		free(admin->host);
 		free(admin->nick);
 
 		if (admin->prev == NULL) {
@@ -73,7 +73,7 @@ char *EnumerateAdmins(void) {
 	while (1) {
 		strcat(str, admin->nick);
 		strcat(str, "@");
-		strcat(str, admin->hostmask);
+		strcat(str, admin->host);
 		if (admin->next != NULL) {
 			if (admin->next->next == NULL)
 				strcat(str, " and ");
@@ -90,18 +90,18 @@ char *EnumerateAdmins(void) {
 	return str;
 }
 
-int IsAdmin(char *newnick, char *hostmask) {
+int IsAdmin(char *newnick, char *host) {
 	struct Admin *admin = admin_list.first_admin;
 	if (admin == NULL)
 		return 0;
 	
 	while (1) {
 		if (strcmp(newnick, admin->nick) == 0) {
-			if (admin->hostmask != NULL) {
-				if (strcmp(hostmask, admin->hostmask) == 0)
+			if (admin->host != NULL) {
+				if (strcmp(host, admin->host) == 0)
 					return 1;
 				else { // could catch the same nick in the list
-						// with different hostmask
+						// with different host
 					if (admin->next == NULL)
 						break;
 					else
@@ -131,11 +131,11 @@ void ParseAdminFile(void) {
 		return;
 	}
 
-	char newnick[1024], hostmask[1024];
+	char newnick[1024], host[1024];
 	memset(newnick, 0, 1024);
-	memset(hostmask, 0, 1024);
+	memset(host, 0, 1024);
 	char c;
-	unsigned int recording_nick = 1, recording_hostmask = 0,
+	unsigned int recording_nick = 1, recording_host = 0,
 		in_comment = 0, cnt = 0;
 	while (1) {
 		c = fgetc(fp);
@@ -143,8 +143,8 @@ void ParseAdminFile(void) {
 			if (!in_comment) {
 				if (recording_nick && strlen(newnick))
 					AddAdmin(newnick, NULL);
-				else if (recording_hostmask && strlen(hostmask))
-					AddAdmin(newnick, hostmask);
+				else if (recording_host && strlen(host))
+					AddAdmin(newnick, host);
 			}
 			break;
 		}
@@ -154,16 +154,16 @@ void ParseAdminFile(void) {
 				if (strlen(newnick))
 					AddAdmin(newnick, NULL);
 			}
-			else if (recording_hostmask) {
-				recording_hostmask = 0;
+			else if (recording_host) {
+				recording_host = 0;
 				recording_nick = 1;
-				if (strlen(hostmask))
-					AddAdmin(newnick, hostmask);
+				if (strlen(host))
+					AddAdmin(newnick, host);
 				else
 					AddAdmin(newnick, NULL);
 			}
 			memset(newnick, 0, 1024);
-			memset(hostmask, 0, 1024);
+			memset(host, 0, 1024);
 			cnt = 0;
 			continue;
 		}
@@ -176,17 +176,17 @@ void ParseAdminFile(void) {
 				memset(newnick, 0, 1024);
 				cnt = 0;
 			}
-			else if (recording_hostmask) {
+			else if (recording_host) {
 				if (strlen(newnick)) {
-					if (strlen(hostmask))
-						AddAdmin(newnick, hostmask);
+					if (strlen(host))
+						AddAdmin(newnick, host);
 					else
 						AddAdmin(newnick, NULL);
 				}
 				memset(newnick, 0, 1024);
-				memset(hostmask, 0, 1024);
+				memset(host, 0, 1024);
 				cnt = 0;
-				recording_hostmask = 0;
+				recording_host = 0;
 				recording_nick = 1;
 			}
 			continue;
@@ -195,18 +195,18 @@ void ParseAdminFile(void) {
 			if (recording_nick) {
 				if (strlen(newnick)) {
 					recording_nick = 0;
-					recording_hostmask = 1;
+					recording_host = 1;
 					cnt = 0;
 				}
 				continue;
 			}
-			else if (recording_hostmask) {
-				if (strlen(hostmask)) {
-					AddAdmin(newnick, hostmask);
+			else if (recording_host) {
+				if (strlen(host)) {
+					AddAdmin(newnick, host);
 					memset(newnick, 0, 1024);
-					memset(hostmask, 0, 1024);
+					memset(host, 0, 1024);
 					cnt = 0;
-					recording_hostmask = 0;
+					recording_host = 0;
 					recording_nick = 1;
 					continue;
 				}
@@ -219,8 +219,8 @@ void ParseAdminFile(void) {
 			continue;
 		else if (recording_nick)
 			newnick[cnt] = c;
-		else if (recording_hostmask)
-			hostmask[cnt] = c;
+		else if (recording_host)
+			host[cnt] = c;
 
 		++cnt;
 	}

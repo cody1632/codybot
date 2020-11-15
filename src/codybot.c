@@ -256,6 +256,36 @@ void ReadCommandLoop(void) {
 	}
 }
 
+static void CheckLoginuid(void) {
+    FILE *fp = fopen("/proc/self/loginuid", "r");
+    if (fp == NULL) {
+        printf("codybot::CheckLoginuid() error: Cannot open /proc/self/loginuid: %s\n",
+            strerror(errno));
+        return;
+    }
+
+    char line[128];
+    fgets(line, 128, fp);
+    int uid = atoi(line);
+	fclose(fp);
+    fp = fopen("/proc/self/loginuid", "w");
+    if (fp == NULL) {
+        printf("codybot::CheckLoginuid() error: Cannot open /proc/self/loginuid: %s\n",
+            strerror(errno));
+        return;
+    }
+    if (strcmp(line, "4294967295") == 0 && uid == -1) {
+		uid = getuid();
+        printf("/proc/self/loginuid is 4294967295/-1, setting to %d\n", uid);
+        fprintf(fp, "%d", uid);
+    }
+
+    fclose(fp);
+
+    if (debug)
+        system("echo \"loginuid: $(cat /proc/self/loginuid)\"");
+}
+
 void SignalFunc(int signum) {
 	if (signum == SIGINT)
 		ServerClose();
@@ -337,6 +367,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	CheckLoginuid();
 	ParseAdminFile();
 
 	if (!full_user_name) {

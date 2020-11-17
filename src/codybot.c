@@ -17,10 +17,8 @@ const char *codybot_version_string = "0.3.5";
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
 	{"version", no_argument, NULL, 'V'},
-	{"blinkenshell", no_argument, NULL, 'b'},
 	{"compiler", required_argument, NULL, 'c'},
 	{"debug", no_argument, NULL, 'd'},
-	{"freenode", no_argument, NULL, 'f'},
 	{"hostname", required_argument, NULL, 'H'},
 	{"log", required_argument, NULL, 'l'},
 	{"fullname", required_argument, NULL, 'N'},
@@ -31,10 +29,10 @@ static const struct option long_options[] = {
 	{"trigger", required_argument, NULL, 't'},
 	{NULL, 0, NULL, 0}
 };
-static const char *short_options = "hVcdbfH:l:N:n:P:p:s:t:";
+static const char *short_options = "hVcdH:l:N:n:P:p:s:t:";
 
 void HelpShow(void) {
-	printf("Usage: codybot { -h/--help | -V/--version | -b/--blinkenshell | -f/--freenode | -d/--debug }\n");
+	printf("Usage: codybot { -h/--help | -V/--version | -d/--debug }\n");
 	printf("               { -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME | -n/--nick NICK }\n");
 	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
 }
@@ -324,12 +322,6 @@ int main(int argc, char **argv) {
 			break;
 		case 'd':
 			debug = 1;
-			break;
-		case 'b':
-			ServerGetIP("irc.blinkenshell.org");
-			break;
-		case 'f':
-			ServerGetIP("chat.freenode.net");
 			break;
 		case 'H':
 			hostname = (char *)malloc(strlen(optarg)+1);

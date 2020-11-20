@@ -20,7 +20,7 @@ There is no installation mechanism, you should use the source directory or move 
 
 Before running for the first time, you should also run  
     sudo chown -R root data-* Makefile codybot prog-* src
-so something like `,sh rm importantfiles` won't be able to do any damage; see https://github.com/cody1632/codybot/security/advisories.
+so something like `!sh rm importantfiles` won't be able to do any damage; see https://github.com/cody1632/codybot/security/advisories.
 (Instead of root you can also set the file owner to be any normal user _other than_ the codybot user.)
 
 ## Identifying

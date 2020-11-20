@@ -334,8 +334,10 @@ strcmp(raw.command, "NICK")!=0) {
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "colorize ", 9) == 0)
 			Colorize(&raw);
 // dict
-		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "dict") == 0)
-			Msg("Missing argument, e.g. '!dict wordhere'");
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "dict") == 0) {
+			sprintf(buffer, "Missing argument, e.g. '%cdict wordhere'", trigger_char);
+			Msg(buffer);
+		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "dict ", 5) == 0)
 			Dict(&raw);
 // fortune

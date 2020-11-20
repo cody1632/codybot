@@ -60,6 +60,8 @@ void MsgRaw(char *text) {
 	else
 		write(socket_fd, text, strlen(text));
 	
-	Log(text);
+	// Don't log PONGs
+	if (strncmp(text, "PONG :", 6) != 0)
+		Log(text);
 }
 

@@ -159,18 +159,10 @@ void *ThreadRXFunc(void *argp) {
 		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
 			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
 			//if (server_ip == server_ip_blinkenshell) {
-				sprintf(buffer_cmd, "%s\n", buffer_rx);
-				buffer_cmd[1] = 'O';
-				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
-				if (debug)
-					Log(buffer_cmd);
-				memset(buffer_cmd, 0, 4096);
-			//}
-			//else {
-			//	SSL_write(pSSL, "PONG\n", 5);
-			//	if (debug)
-			//		Log("PONG\n");
-			//}
+			sprintf(buffer_cmd, "%s\n", buffer_rx);
+			buffer_cmd[1] = 'O';
+			MsgRaw(buffer_cmd);
+			memset(buffer_cmd, 0, 4096);
 			continue;
 		}
 
@@ -184,11 +176,7 @@ void *ThreadRXFunc(void *argp) {
 
 			sprintf(buffer, "NOTICE %s :\001CLIENTINFO CLIENTINFO PING TIME VERSION\x01\n",
 				raw.nick);
-			if (use_ssl)
-				SSL_write(pSSL, buffer, strlen(buffer));
-			else
-				write(socket_fd, buffer, strlen(buffer));
-			Log(buffer);
+			MsgRaw(buffer);
 			continue;
 		}
 		else if (strncmp(raw.text, "\x01PING ", 6) == 0) {
@@ -196,11 +184,7 @@ void *ThreadRXFunc(void *argp) {
 				continue;
 
 			sprintf(buffer, "NOTICE %s :%s\n", raw.nick, raw.text);
-			if (use_ssl)
-				SSL_write(pSSL, buffer, strlen(buffer));
-			else
-				write(socket_fd, buffer, strlen(buffer));
-			Log(buffer);
+			MsgRaw(buffer);
 			continue;
 		}
 		else if (strcmp(raw.text, "\x01TIME\x01") == 0) {
@@ -209,11 +193,7 @@ void *ThreadRXFunc(void *argp) {
 			
 			t0 = time(NULL);
 			sprintf(buffer, "NOTICE %s :\x01TIME %s\x01\n", raw.nick, ctime(&t0));
-			if (use_ssl)
-				SSL_write(pSSL, buffer, strlen(buffer));
-			else
-				write(socket_fd, buffer, strlen(buffer));
-			Log(buffer);
+			MsgRaw(buffer);
 			continue;
 		}
 		else if (strcmp(raw.text, "\x01VERSION\x01") == 0) {
@@ -222,17 +202,13 @@ void *ThreadRXFunc(void *argp) {
 			
 			sprintf(buffer, "NOTICE %s :\x01VERSION codybot %s\x01\n", raw.nick,
 				codybot_version_string);
-			if (use_ssl)
-				SSL_write(pSSL, buffer, strlen(buffer));
-			else
-				write(socket_fd, buffer, strlen(buffer));
-			Log(buffer);
+			MsgRaw(buffer);
 			continue;
 		}
 
 		if (strcmp(raw.channel, nick) == 0) {
-			sprintf(buffer, "privmsg %s :Cannot use private messages", raw.nick);
-			SSL_write(pSSL, buffer, strlen(buffer));
+			sprintf(buffer, "PRIVMSG %s :Cannot use private messages", raw.nick);
+			MsgRaw(buffer);
 			continue;
 		}
 

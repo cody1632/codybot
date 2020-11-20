@@ -115,13 +115,8 @@ void ConsoleReadInput(void) {
 			sprintf(buffer, "trigger_char = %c", trigger_char);
 			Msg(buffer);
 		}
-		else {
-			if (use_ssl)
-				SSL_write(pSSL, buffer_line, strlen(buffer_line));
-			else
-				write(socket_fd, buffer_line, strlen(buffer_line));
-			memset(buffer_line, 0, 4096);
-		}
+		else
+			MsgRaw(buffer_line);
 	}
 }
 

@@ -54,3 +54,12 @@ void Msg(char *text) {
 	}
 }
 
+void MsgRaw(char *text) {
+	if (use_ssl)
+		SSL_write(pSSL, text, strlen(text));
+	else
+		write(socket_fd, text, strlen(text));
+	
+	Log(text);
+}
+

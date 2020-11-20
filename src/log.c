@@ -29,6 +29,7 @@ void Log(char *text) {
 		tm0->tm_mday, tm0->tm_hour, tm0->tm_min, tm0->tm_sec, tv0.tv_usec, str);
 	fputs(buffer_log, fp);
 
+	// Show message in console with colors
 	sprintf(buffer_log, "\e[00;36m%02d%02d%02d-%02d:%02d:%02d.%03ld ##\e[00m%s\e[00;36m##\e[00m\n", 
 		tm0->tm_year+1900-2000, tm0->tm_mon+1,
 		tm0->tm_mday, tm0->tm_hour, tm0->tm_min, tm0->tm_sec, tv0.tv_usec, str);

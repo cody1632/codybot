@@ -89,6 +89,7 @@ void Log(char *text);
 
 // from msg.c
 void Msg(char *text);
+void MsgRaw(char *text);
 
 // from raw.c
 char *RawGetTarget(struct raw_line *rawp);

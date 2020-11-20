@@ -146,17 +146,11 @@ void ServerConnect(void) {
 		write(socket_fd, "PASS none\n", 10);
 */
 	sprintf(buffer, "NICK %s\n", nick);
-	if (use_ssl)
-		SSL_write(pSSL, buffer, strlen(buffer));
-	else
-		write(socket_fd, buffer, strlen(buffer));
+	MsgRaw(buffer);
 
 	sprintf(buffer, "USER %s %s %s %s\n", nick, hostname,
 		server_name, full_user_name);
-	if (use_ssl)
-		SSL_write(pSSL, buffer, strlen(buffer));
-	else
-		write(socket_fd, buffer, strlen(buffer));
+	MsgRaw(buffer);
 }
 
 void ServerClose(void) {

@@ -24,6 +24,7 @@ extern char *nick;
 extern char *full_user_name;
 extern char *hostname;
 extern char *target;
+extern char *colors[];
 
 // Globals from server.c
 extern unsigned int server_port, local_port;
@@ -67,12 +68,7 @@ char *EnumerateAdmins(void);
 int IsAdmin(char *newnick, char *host);
 void ParseAdminFile(void);
 
-// from codybot.c
-void Log(char *text);
-void Msg(char *text);
-void *ThreadRXFunc(void *argp);
-
-// from commands.c
+// from cmd-*.c
 void AsciiArt(struct raw_line *rawp);
 void Calc(struct raw_line *rawp);
 void CC(struct raw_line *rawp);
@@ -84,6 +80,15 @@ void Rainbow(struct raw_line *rawp);
 void SlapCheck(struct raw_line *rawp);
 void Stats(struct raw_line *rawp);
 void Weather(struct raw_line *rawp);
+
+// from console.c
+void ConsoleReadInput(void);
+
+// from log.c
+void Log(char *text);
+
+// from msg.c
+void Msg(char *text);
 
 // from raw.c
 char *RawGetTarget(struct raw_line *rawp);

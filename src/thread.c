@@ -333,6 +333,9 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "colorize ", 9) == 0)
 			Colorize(&raw);
+// dict
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "dict ", 5) == 0)
+			Dict(&raw);
 // fortune
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7) == 0)
 			Fortune(&raw);

@@ -6,7 +6,8 @@
 
 `codybot` is an IRC bot written with the C programming language, providing users
 with fortune cookies, jokes, oneliner C compilation, shell access, text colorization,
-ascii art, special characters and weather per city.  
+ascii art, special characters and weather per city. It was inspired by candide on
+Freenode, a great bot written in Perl (see https://github.com/pragma-/pbot/).
 
 The bot can connect to `chat.freenode.net:6697` or any specified server and port;
 it defaults to port 6697 with SSL.

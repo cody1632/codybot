@@ -13,6 +13,10 @@ it defaults to port 6697 with SSL.
 
 ## Compile and Run
 
+In order to compile the source code into an executable, some dependencies are
+required to be installed. On RPM-based systems, install `glibc-devel binutils
+gcc make file-devel libopenssl-devel`.
+
 To compile the program, just run `make` within the source directory, and run with `./codybot -n `_`YourBotNick`_.
 
 (Personally I run the bot in a virtual machine to limit general filesystem access

@@ -20,7 +20,7 @@ void Dict(struct raw_line *rawp) {
 		word[cnt] = *cp;
 	}
 
-	sprintf(buffer_cmd, "curl https://dict.org/d:%s:wn -o dict.output", word);
+	sprintf(buffer_cmd, "curl dict.org/d:%s:wn -o dict.output", word);
 	Log(buffer_cmd);
 	system(buffer_cmd);
 

@@ -82,12 +82,10 @@ void Dict(struct raw_line *rawp) {
 		}
 
 		bytes_read = getline(&line, &size, fp);
-		if (bytes_read == -1) {
-			fclose(fp);
-			return;
-		}
-
-		Msg(line);
+		if (bytes_read > -1)
+			Msg(line);
+		
+		fclose(fp);
 	}
 }
 

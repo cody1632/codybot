@@ -61,9 +61,11 @@ or
 
 To run all shell commands in a locked chroot, create a file called `sh_lock` or
 type `!sh_lock` or `!sh_unlock`. You have to run as root:  
+
     chroot chroot /bin/bash  
     su - dummy  
     run.sh  
+
 You must ensure that the codybot user can write to
 `/home/dummy/run.fifo` inside the chroot. The files starting with
 `cmd.` also need to be owned by the `dummy` user.

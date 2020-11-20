@@ -41,8 +41,6 @@ In the following examples, "send _`!command`_" means send the command prefix and
 "type _command_" means sent _command_ to stdin of the running codybot process (usually by typing it into the terminal).
 This differentiation may also be implied by the presence or absense of a leading prefix.
 
-In the following descriptions `#codebot` is used as an example; you can actually use any appropriate channel.
-
 To see available commands, send `!help`.
 
 To trigger a fortune cookie, send `!fortune`. The fortune cookie database file is `data-fortunes.txt`. It's made of files in `/usr/share/games/fortunes` using the system-provided fortune package. (see https://github.com/shlomif/fortune-mod)

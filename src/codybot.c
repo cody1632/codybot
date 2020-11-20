@@ -7,8 +7,6 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 
 #include "codybot.h"
 

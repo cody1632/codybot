@@ -6,7 +6,6 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <openssl/ssl.h>
 #include <magic.h>
 
 #include "codybot.h"

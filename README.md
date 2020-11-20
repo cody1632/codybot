@@ -17,7 +17,7 @@ it defaults to port 6697 with SSL.
 In order to compile the source code into an executable, some dependencies are
 required to be installed. On RPM-based systems, install `glibc-devel binutils
 gcc make file-devel libopenssl-devel`. On DEB-based systems install `libc6-dev
-binutils gcc make libmagic-dev libssl-dev`.
+binutils gcc make libmagic-dev libssl-dev`. On Arch install `make gcc`. 
 
 To compile the program, just run `make` within the source directory, and run with `./codybot -n `_`YourBotNick`_.
 

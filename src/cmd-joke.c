@@ -20,8 +20,10 @@ void Joke(struct raw_line *rawp) {
 	srand((unsigned int)tv0.tv_usec/((rand()%10)+1));
 	unsigned int rnd = rand()%(filesize-100);
 	fseek(fp, rnd, SEEK_CUR);
-	if (debug)
-		printf("##filesize: %lu\n##rnd: %u\n", filesize, rnd);
+	if (debug) {
+		sprintf(buffer, "##filesize: %lu\n##rnd: %u", filesize, rnd);
+		Log(buffer);
+	}
 
 	int c = 0, cprev, cnt = 0;
 	while (1) {

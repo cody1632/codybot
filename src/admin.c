@@ -9,8 +9,10 @@
 struct AdminList admin_list;
 
 void AddAdmin(char *newnick, char *host) {
-	if (debug)
-		printf("## AddAdmin(): '%s' '%s'\n", newnick, host);
+	if (debug) {
+		sprintf(buffer, "AddAdmin(): '%s' '%s'", newnick, host);
+		Log(buffer);
+	}
 	
 	struct Admin *admin = malloc(sizeof(struct Admin));
 	
@@ -127,7 +129,7 @@ void ParseAdminFile(void) {
 	if (fp == NULL) {
 		sprintf(buffer, "codybot::ParseAdminFile() error: Cannot open admins.txt: %s",
 			strerror(errno));
-		Msg(buffer);
+		Log(buffer);
 		return;
 	}
 

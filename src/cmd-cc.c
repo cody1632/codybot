@@ -17,7 +17,7 @@ void CC(struct raw_line *rawp) {
 			break;
 		if ((strlen(c) >= 7 && strncmp(c, "system", 6) == 0) ||
 			(strlen(c) >= 5 && strncmp(c, "exec", 4) == 0)) {
-			Msg("won't run system() nor exec() calls...\n");
+			Msg("won't run system() nor exec() calls...");
 			return;
 		}
 		++c;
@@ -105,7 +105,7 @@ void CC(struct raw_line *rawp) {
 
 	fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n",
+		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;
@@ -124,7 +124,7 @@ void CC(struct raw_line *rawp) {
 			system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 			FILE *fu = fopen("cmd.url", "r");
 			if (fu == NULL) {
-				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n",
+				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s",
 					strerror(errno));
 				Msg(buffer);
 				break;

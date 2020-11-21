@@ -77,7 +77,7 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 		return;
 
 	if (debug)
-		printf("\n\e[01;32m##RawLineParse() started\e[00m\n");
+		Log("##RawLineParse() started");
 	
 	while (1) {
 		if (*c == '\0')
@@ -97,8 +97,10 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 		if (*c == ':' && cnt_total == 0) {
 			memset(word, 0, 4096);
 			++c;
-			if (debug)
-				printf("&&raw: <<%s>>&&\n", line);
+			if (debug) {
+				sprintf(buffer, "  raw: <<%s>>", line);
+				Log(buffer);
+			}
 			continue;
 		}
 		else if (rec_nick && *c == '!') {
@@ -107,8 +109,10 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			rec_nick = 0;
 			rec_username = 1;
 			cnt = 0;
-			if (debug)
-				printf("&&nick: <%s>&&\n", rawp->nick);
+			if (debug) {
+				sprintf(buffer, "  nick: <%s>", rawp->nick);
+				Log(buffer);
+			}
 		}
 		else if (rec_username && cnt == 0 && *c == '~') {
 			++c;
@@ -120,8 +124,10 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			rec_username = 0;
 			rec_host = 1;
 			cnt = 0;
-			if (debug)
-				printf("&&username: <%s>&&\n", rawp->username);
+			if (debug) {
+				sprintf(buffer, "  username: <%s>", rawp->username);
+				Log(buffer);
+			}
 		}
 		else if (rec_host && *c == ' ') {
 			sprintf(rawp->host, "%s", word);
@@ -129,8 +135,10 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			rec_host = 0;
 			rec_command = 1;
 			cnt = 0;
-			if (debug)
-				printf("&&host: <%s>&&\n", rawp->host);
+			if (debug) {
+				sprintf(buffer, "  host: <%s>", rawp->host);
+				Log(buffer);
+			}
 		}
 		else if (rec_command && *c == ' ') {
 			sprintf(rawp->command, "%s", word);
@@ -138,8 +146,10 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			rec_command = 0;
 			rec_channel = 1;
 			cnt = 0;
-			if (debug)
-				printf("&&command: <%s>&&\n", rawp->command);
+			if (debug) {
+				sprintf(buffer, "  command: <%s>", rawp->command);
+				Log(buffer);
+			}
 		}
 		else if (rec_channel && *c == ' ') {
 			sprintf(rawp->channel, "%s", word);
@@ -148,16 +158,20 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 			if (strcmp(rawp->command, "PRIVMSG") == 0)
 				rec_text = 1;
 			cnt = 0;
-			if (debug)
-				printf("&&channel: <%s>&&\n", rawp->channel);
+			if (debug) {
+				sprintf(buffer, "  channel: <%s>", rawp->channel);
+				Log(buffer);
+			}
 		}
 		else if (rec_text && *c == '\0') {
 			sprintf(rawp->text, "%s", word);
 			memset(word, 0, 4096);
 			rec_text = 0;
 			cnt = 0;
-			if (debug)
-				printf("&&text: <%s>&&\n", rawp->text);
+			if (debug) {
+				sprintf(buffer, "  text: <%s>", rawp->text);
+				Log(buffer);
+			}
 			break;
 		}
 		else {
@@ -176,6 +190,6 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 	}
 
 	if (debug)
-		printf("\e[01;32m##RawLineParse() ended\e[00m\n\n");
+		Log("##RawLineParse() ended\n");
 }
 

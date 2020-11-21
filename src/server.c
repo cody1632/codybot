@@ -22,8 +22,9 @@ void ServerGetIP(char *hostname2) {
 
 	he = gethostbyname(hostname2);
 	if (he == NULL) {
-		fprintf(stderr, "##codybot::ServerGetIP() error: Cannot gethostbyname(%s)\n",
+		sprintf(buffer, "||codybot::ServerGetIP() error: Cannot gethostbyname(%s)",
 			hostname2);
+		Log(buffer);
 		exit(1);
 	}
 
@@ -36,9 +37,11 @@ void ServerGetIP(char *hostname2) {
 	sprintf(server_name, "%s", hostname2);
 
 	if (debug) {
-		printf("||codybot::ServerGetIP(%s): other IPs:\n", hostname2);
+		sprintf(buffer, "||codybot::ServerGetIP(%s): other IPs:", hostname2);
+		Log(buffer);
 		for (cnt = 0; addr_list[cnt] != NULL; cnt++) {
-			printf("  %s\n", inet_ntoa(*addr_list[cnt]));
+			sprintf(buffer, "  %s", inet_ntoa(*addr_list[cnt]));
+			Log(buffer);
 		}
 	}
 }
@@ -46,13 +49,16 @@ void ServerGetIP(char *hostname2) {
 void ServerConnect(void) {
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_fd < 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot socket(): %s\n",
+		sprintf(buffer, "||codybot::ServerConnect() error: Cannot socket(): %s",
 			strerror(errno));
+		Log(buffer);
 		exit(1);
 	}
 	else {
-		if (debug)
-			printf("||socket_fd: %d\n", socket_fd);
+		if (debug) {
+			sprintf(buffer, "||socket_fd: %d", socket_fd);
+			Log(buffer);
+		}
 	}
 	
 	struct sockaddr_in addr;
@@ -61,28 +67,33 @@ void ServerConnect(void) {
 	if (local_port)
 		addr.sin_port = htons(local_port);
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot bind(): %s\n",
+		sprintf(buffer, "||codybot::ServerConnect() error: Cannot bind(): %s",
 			strerror(errno));
+		Log(buffer);
 		close(socket_fd);
 		exit(1);
 	}
 	else
 		if (debug)
-			printf("||bind() 0.0.0.0 successful\n");
+			Log("||bind() 0.0.0.0 successful");
 	
 	struct sockaddr_in host;
 	host.sin_addr.s_addr = inet_addr(server_ip);
 	host.sin_family = AF_INET;
 	host.sin_port = htons(server_port);
 	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
-		fprintf(stderr, "||codybot::ServerConnect() error: Cannot connect(): %s\n",
+		sprintf(buffer, "||codybot::ServerConnect() error: Cannot connect(): %s",
 			strerror(errno));
+		Log(buffer);
 		close(socket_fd);
 		exit(1);
 	}
-	else
-		if (debug)
-			printf("||connect() %s successful\n", server_ip);
+	else {
+		if (debug) {
+			sprintf(buffer, "||connect() %s successful", server_ip);
+			Log(buffer);
+		}
+	}
 
 	if (use_ssl) {
 		SSL_load_error_strings();
@@ -92,25 +103,15 @@ void ServerConnect(void) {
 		const SSL_METHOD *method = TLS_method();
 		SSL_CTX *ctx = SSL_CTX_new(method);
 		if (!ctx) {
-			fprintf(stderr, "||codybot::ServerConnect() error: Cannot create SSL context\n");
+			Log("||codybot::ServerConnect() error: Cannot create SSL context");
 			close(socket_fd);
 			exit(1);
 		}
-		long opt_ctx;
-		if (debug) {
-			opt_ctx = SSL_CTX_get_options(ctx);
-			printf("||opt_ctx: %ld\n", opt_ctx);
-			SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
-			opt_ctx = SSL_CTX_get_options(ctx);
-			printf("||opt_ctx: %ld\n", opt_ctx);
-			SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
-		}
-		else
-			SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
+		SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
 	
 		pSSL = SSL_new(ctx);
-		long opt_ssl;
-		if (debug) {
+		//long opt_ssl;
+		/* if (debug) {
 			opt_ssl = SSL_get_options(pSSL);
 			printf("||opt_ssl: %ld\n", opt_ssl);
 			SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
@@ -120,7 +121,7 @@ void ServerConnect(void) {
 			opt_ssl = SSL_get_options(pSSL);
 			printf("||opt_ssl: %ld\n", opt_ssl);
 		}
-		else
+		else */
 			SSL_set_options(pSSL, SSL_OP_NO_COMPRESSION);
 	
 		BIO *bio = BIO_new_socket(socket_fd, BIO_CLOSE);
@@ -128,9 +129,11 @@ void ServerConnect(void) {
 		SSL_connect(pSSL);
 		ret = SSL_accept(pSSL);
 		if (ret <= 0) {
-			fprintf(stderr, "||codybot::ServerConnect() error: "
-				"SSL_accept() failed, ret: %d\n", ret);
-			fprintf(stderr, "||SSL error number: %d\n", SSL_get_error(pSSL, 0));
+			sprintf(buffer, "||codybot::ServerConnect() error: "
+				"SSL_accept() failed, ret: %d", ret);
+			Log(buffer);
+			sprintf(buffer, "||SSL error number: %d", SSL_get_error(pSSL, 0));
+			Log(buffer);
 			close(socket_fd);
 			exit(1);
 		}

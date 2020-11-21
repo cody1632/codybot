@@ -22,7 +22,7 @@ void Calc(struct raw_line *rawp) {
 
 	FILE *fp = fopen("cmd.output", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s\n",
+		sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.output: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;
@@ -41,7 +41,7 @@ void Calc(struct raw_line *rawp) {
 			system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 			FILE *fu = fopen("cmd.url", "r");
 			if (fu == NULL) {
-				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s\n",
+				sprintf(buffer, "##codybot::Calc() error: Cannot open cmd.url: %s",
 					strerror(errno));
 				Msg(buffer);
 				break;

@@ -57,7 +57,7 @@ void Weather(struct raw_line *rawp) {
 
 
 	unsigned int cnt = 0, cnt_conv = 0;
-	char city[128], city_conv[128], *cp = rawp->text + strlen("^weather ");
+	char city[128], city_conv[128], *cp = rawp->text + strlen("!weather ");
 	memset(city, 0, 128);
 	memset(city_conv, 0, 128);
 	while (1) {

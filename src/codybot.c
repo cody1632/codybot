@@ -70,8 +70,10 @@ char *colors[] = {
 static void CheckLoginuid(void) {
 	FILE *fp = fopen("/proc/self/loginuid", "r");
 	if (fp == NULL) {
-		printf("codybot::CheckLoginuid() error: Cannot open /proc/self/loginuid: %s\n",
+		sprintf(buffer, "codybot::CheckLoginuid() error: "
+			"Cannot open /proc/self/loginuid: %s",
 			strerror(errno));
+		Log(buffer);
 		return;
 	}
 
@@ -81,13 +83,16 @@ static void CheckLoginuid(void) {
 	fclose(fp);
 	fp = fopen("/proc/self/loginuid", "w");
 	if (fp == NULL) {
-		printf("codybot::CheckLoginuid() error: Cannot open /proc/self/loginuid: %s\n",
+		sprintf(buffer, "codybot::CheckLoginuid() error: "
+			"Cannot open /proc/self/loginuid: %s",
 			strerror(errno));
+		Log(buffer);
 		return;
 	}
 	if (strcmp(line, "4294967295") == 0 && uid == -1) {
 		uid = getuid();
-		printf("/proc/self/loginuid is 4294967295/-1, setting to %d\n", uid);
+		sprintf(buffer, "/proc/self/loginuid is 4294967295/-1, setting to %d", uid);
+		Log(buffer);
 		fprintf(fp, "%d", uid);
 	}
 
@@ -172,6 +177,20 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	buffer_rx = (char *)malloc(4096);
+	memset(buffer_rx, 0, 4096);
+	buffer_cmd = (char *)malloc(4096);
+	memset(buffer_cmd, 0, 4096);
+	buffer_log = (char *)malloc(4096);
+	memset(buffer_log, 0, 4096);
+	buffer = (char *)malloc(4096);
+	memset(buffer, 0, 4096);
+
+	if (!log_filename) {
+		log_filename = (char *)malloc(strlen("codybot.log")+1);
+		sprintf(log_filename, "codybot.log");
+	}
+
 	CheckLoginuid();
 	ParseAdminFile();
 
@@ -183,10 +202,6 @@ int main(int argc, char **argv) {
 	if (!hostname) {
 		hostname = (char *)malloc(1024);
 		gethostname(hostname, 1023);
-	}
-	if (!log_filename) {
-		log_filename = (char *)malloc(strlen("codybot.log")+1);
-		sprintf(log_filename, "codybot.log");
 	}
 	if (!current_channel) {
 		current_channel = malloc(1024);
@@ -218,15 +233,6 @@ int main(int argc, char **argv) {
 	raw.command = (char *)malloc(1024);
 	raw.channel = (char *)malloc(1024);
 	raw.text = (char *)malloc(4096);
-
-	buffer_rx = (char *)malloc(4096);
-	memset(buffer_rx, 0, 4096);
-	buffer_cmd = (char *)malloc(4096);
-	memset(buffer_cmd, 0, 4096);
-	buffer_log = (char *)malloc(4096);
-	memset(buffer_log, 0, 4096);
-	buffer = (char *)malloc(4096);
-	memset(buffer, 0, 4096);
 
 	struct stat st;
 	if(stat("sh_locked", &st) == 0)

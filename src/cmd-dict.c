@@ -26,14 +26,14 @@ void Dict(struct raw_line *rawp) {
 
 	FILE *fp = fopen("dict.output", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Dict() error: Cannot open dict.output: %s\n",
+		sprintf(buffer, "##codybot::Dict() error: Cannot open dict.output: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;
 	}
 	FILE *fw = fopen("cmd.output", "w");
 	if (fw == NULL) {
-		sprintf(buffer, "##codybot::Dict() error: Cannot open cmd.output: %s\n",
+		sprintf(buffer, "##codybot::Dict() error: Cannot open cmd.output: %s",
 			strerror(errno));
 		Msg(buffer);
 		fclose(fp);
@@ -75,7 +75,7 @@ void Dict(struct raw_line *rawp) {
 		system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 		fp = fopen("cmd.url", "r");
 		if (fp == NULL) {
-			sprintf(buffer, "##codybot::Dict() error: Cannot open cmd.url: %s\n",
+			sprintf(buffer, "##codybot::Dict() error: Cannot open cmd.url: %s",
 				strerror(errno));
 			Msg(buffer);
 			return;

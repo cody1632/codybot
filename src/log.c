@@ -21,8 +21,6 @@ void Log(char *text) {
 	// remove trailing newline
 	if (str[strlen(str)-1] == '\n')
 		str[strlen(str)-1] = '\0';
-//	if (str[strlen(str)] == '\n')
-//		str[strlen(str)] = '\0';
 
 	sprintf(buffer_log, "%02d%02d%02d-%02d:%02d:%02d.%03ld ##%s##\n",
 		tm0->tm_year+1900-2000, tm0->tm_mon+1,

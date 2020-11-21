@@ -41,12 +41,12 @@ extern SSL *pSSL;
 // :codybot MODE codybot :+Zi
 // :livingstone.freenode.net 372 codybot :- Thank you for using freenode!
 struct raw_line {
-    char *nick;
-    char *username;
-    char *host;
-    char *command;
-    char *channel;
-    char *text;
+	char *nick;
+	char *username;
+	char *host;
+	char *command;
+	char *channel;
+	char *text;
 };
 extern struct raw_line raw;
 

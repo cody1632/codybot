@@ -60,7 +60,7 @@ The bot responds to commands on its stdin (usually the terminal you run it from)
 and in any channels it's joined. Commands in channels are only recognized if they
 start with the command prefix, which defaults to exclamation point (`!`).
 Do not include it when typing to its stdin. Some commands can only be used from stdin,
-they are `exit`, `quit`, `cursh`, `msg` and `id`.
+they are `exit`, `quit`, `curch`, `msg` and `id`.
 
 In the following examples, "send _`!command`_" means send the command prefix and
 _command_ as a message to a channel that the bot has joined. "type _command_" means

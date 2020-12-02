@@ -123,6 +123,10 @@ void Weather(struct raw_line *rawp) {
 			str2[cnt2+2] = '\0';
 			break;
 		}
+		else if (str[cnt] == '+') {
+			++cnt;
+			continue;
+		}
 		else if (str[cnt] == ':') {
 			str2[cnt2] = ' ';
 			++cnt;

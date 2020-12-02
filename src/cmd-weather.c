@@ -118,8 +118,9 @@ void Weather(struct raw_line *rawp) {
 	int cnt2 = 0, step = 0;
 	while (1) {
 		if (str[cnt] == '\0') {
-			str2[cnt2] = '\n';
-			str2[cnt2+1] = '\0';
+			str2[cnt2] = 'm';
+			str2[cnt2+1] = '\n';
+			str2[cnt2+2] = '\0';
 			break;
 		}
 		else if (str[cnt] == ':') {

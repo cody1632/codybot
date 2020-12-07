@@ -82,7 +82,21 @@ something like "_Montreal: Partly cloudy +2*C feels like -2*C 15km/h 0.0mm_"
 To run a shell command from the chat onto the host of codybot, type `!sh `_`command and args`_
 e.g. `!sh ls /home/codybot`. You can disable this by creating a file called `sh_disable`
 (as always, in the program's current directory). You can also type `sh_enable` or `sh_disable`
-in the console, or `!sh_enable` or `!sh_disable` in the channel.
+in the console, or `!sh_enable` or `!sh_disable` in the channel (requires to be in the admins list).  
+
+The other commands are:  
+`!about` to retrieve the author and source code link.  
+`!admins` to show current administrator of the bot who can run special commands like `!admins reload`.  
+`!ascii` to show an ascii art image.  
+`!cc printf("This is awesome!\n");` to compile C one-liners.  
+`!chars` to show special UTF-8 characters.  
+`!colorize SomeTextHere` to put random IRC color codes between each characters of the given text.  
+`!rainbow SomeText` (same but with ordered rainbow colors).  
+`!dict TermHere` to retrieve the definition of a given term from dict.org.  
+`!foldoc AnyComputerTerm` to retrieve the definition of a given term from the foldoc computer-related database.  
+`!stats` to show how many fortunes have been given.  
+`!uptime` to get for how long the bot have been running.  
+`!version` to show current bot's version.  
 
 ## Running in a chroot
 

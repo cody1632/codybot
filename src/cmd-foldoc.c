@@ -64,7 +64,7 @@ void Foldoc(struct raw_line *rawp) {
 			if (strlen(line+3) > 0) {
 				++line_cnt;
 
-				if (line_cnt <= 4)
+				if (line_cnt <= 10)
 					Msg(line+3);
 
 				fputs(line+3, fw);
@@ -74,7 +74,7 @@ void Foldoc(struct raw_line *rawp) {
 	fclose(fp);
 	fclose(fw);
 
-	if (line_cnt >= 5) {
+	if (line_cnt > 10) {
 		system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 		fp = fopen("cmd.url", "r");
 		if (fp == NULL) {

@@ -63,7 +63,7 @@ void Dict(struct raw_line *rawp) {
 		else
 			++line_cnt;
 
-		if (line_cnt <= 4)
+		if (line_cnt <= 10)
 			Msg(line+4);
 
 		fputs(line+4, fw);
@@ -71,7 +71,7 @@ void Dict(struct raw_line *rawp) {
 	fclose(fp);
 	fclose(fw);
 
-	if (line_cnt >= 5) {
+	if (line_cnt > 10) {
 		system("cat cmd.output | nc termbin.com 9999 > cmd.url");
 		fp = fopen("cmd.url", "r");
 		if (fp == NULL) {

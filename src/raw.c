@@ -30,8 +30,13 @@ void RawLineClear(struct raw_line *rawp) {
 
 // Type of message to be parsed:
 // :esselfe!~bsfc@unaffiliated/esselfe PRIVMSG #codybot :^codybot_version
+// Return 0 if no more processing needs to be made and 1 if the raw struct will
+// be populated
 int version_once;
-void RawLineParse(struct raw_line *rawp, char *line) {
+int RawLineParse(struct raw_line *rawp, char *line) {
+	if (debug)
+		Log("##RawLineParse() started");
+	
 	RawLineClear(rawp);
 
 	char *c = line;
@@ -39,28 +44,14 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 		rec_channel = 0, rec_text = 0; // recording flags
 	
 	// messages to skip:
+// :freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode.
+// :NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.
+// :PING :livingstone.freenode.net
+// ERROR :Closing Link: mtrlpq69-157-190-235.bell.ca (Quit: codybot)
 // :livingstone.freenode.net 372 codybot :- Thank you for using freenode!
 // :codybot MODE codybot :+Zi
 // :ChanServ!ChanServ@services. MODE #codybot +o esselfe
-// :NickServ!NickServ@services. NOTICE codybot :Invalid password for codybot.
-// :freenode-connect!frigg@freenode/utility-bot/frigg NOTICE codybot :Welcome to freenode.
-// :PING :livingstone.freenode.net
-// ERROR :Closing Link: mtrlpq69-157-190-235.bell.ca (Quit: codybot)
-	if (*c==':' && *(c+1)=='l' && *(c+2)=='i' && *(c+3)=='v' && *(c+4)=='i' && *(c+5)=='n' &&
-		*(c+6)=='g' && *(c+7)=='s' && *(c+8)=='t' && *(c+9)=='o' && *(c+10)=='n' &&
-		*(c+11)=='e' && *(c+12)=='.')
-		return;
-	else if (*(c+8)==' ' && *(c+9)=='M' && *(c+10)=='O' && *(c+11)=='D' && *(c+12)=='E')
-		return;
-	else if (*(c+1)=='C' && *(c+2)=='h' && *(c+3)=='a' && *(c+4)=='n' && *(c+5)=='S' &&
-		*(c+6)=='e' && *(c+7)=='r' && *(c+8)=='v' && *(c+9)=='!')
-		return;
-	else if (*(c+1)=='N' && *(c+2)=='i' && *(c+3)=='c' && *(c+4)=='k' && *(c+5)=='S' &&
-		*(c+6)=='e' && *(c+7)=='r' && *(c+8)=='v' && *(c+9)=='!')
-		return;
-	else if (*c==':' && *(c+1)=='f' && *(c+2)=='r' && *(c+3)=='e' && *(c+4)=='e' && *(c+5)=='n' &&
-		*(c+6)=='o' && *(c+7)=='d' && *(c+8)=='e' && *(c+9)=='-' && *(c+10)=='c' &&
-		*(c+11)=='o' && *(c+12)=='n' && !version_once) {
+	if (strncmp(line, ":freenode-connect", 17) == 0 && !version_once) {
 		version_once = 1;
 		sprintf(buffer, "NOTICE freenode-connect :\x01VERSION codybot %s\x01",
 			codybot_version_string);
@@ -69,16 +60,31 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 		else
 			write(socket_fd, buffer, strlen(buffer));
 		Log(buffer);
-		return;
+		return 0;
 	}
-	else if (*c=='P' && *(c+1)=='I' && *(c+2)=='N' && *(c+3)=='G' && *(c+4)==' ')
-		return;
-	else if (*c=='E' && *(c+1)=='R' && *(c+2)=='R' && *(c+3)=='O' && *(c+4)=='R')
-		return;
+	else if (strncmp(line, "NickServ!", 9) == 0 || strncmp(line, "ChanServ!", 9) == 0)
+		return 0;
+	else if (strncmp(line, "PING :", 6) == 0)
+		return 0;
+	else if (strncmp(line, "ERROR :", 7) == 0)
+		return 0;
 
-	if (debug)
-		Log("##RawLineParse() started");
-	
+	// Check the theorical raw.command field for raw lines to skip
+	while (1) {
+		if (*c == '\0')
+			break;
+		else if (*c == ' ') { // process at the first space encountered,
+			++c;
+			if ((*c >= '0' && *c <= '9') || strncmp(c, "MODE ", 5) == 0 ||
+				strncmp(c, "NOTICE ", 7) == 0)
+				return 0;
+			else
+				break;
+		}
+		++c;
+	}
+
+	// Remove newline
 	while (1) {
 		if (*c == '\0')
 			break;
@@ -191,5 +197,7 @@ void RawLineParse(struct raw_line *rawp, char *line) {
 
 	if (debug)
 		Log("##RawLineParse() ended\n");
+	
+	return 1;
 }
 

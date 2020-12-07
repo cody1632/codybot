@@ -104,7 +104,7 @@ void MsgRaw(char *text);
 // from raw.c
 char *RawGetTarget(struct raw_line *rawp);
 void RawLineClear(struct raw_line *rawp);
-void RawLineParse(struct raw_line *rawp, char *line);
+int RawLineParse(struct raw_line *rawp, char *line);
 
 // from server.c
 void ServerGetIP(char *hostname);

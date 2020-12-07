@@ -151,21 +151,20 @@ void *ThreadRXFunc(void *argp) {
 			break;
 		}
 		buffer_rx[strlen(buffer_rx)-2] = '\0';
-		if (buffer_rx[0] != 'P' && buffer_rx[1] != 'I' && buffer_rx[2] != 'N' &&
-		  buffer_rx[3] != 'G' && buffer_rx[4] != ' ')
-			Log(buffer_rx);
 		// Respond to ping request from the server with a pong
-		if (buffer_rx[0] == 'P' && buffer_rx[1] == 'I' && buffer_rx[2] == 'N' &&
-			buffer_rx[3] == 'G' && buffer_rx[4] == ' ' && buffer_rx[5] == ':') {
-			//if (server_ip == server_ip_blinkenshell) {
+		if (strncmp(buffer_rx, "PING :", 6) == 0) {
 			sprintf(buffer_cmd, "%s\n", buffer_rx);
 			buffer_cmd[1] = 'O';
 			MsgRaw(buffer_cmd);
 			memset(buffer_cmd, 0, 4096);
 			continue;
 		}
+		else
+			Log(buffer_rx);
 
-		RawLineParse(&raw, buffer_rx);
+
+		if (!RawLineParse(&raw, buffer_rx))
+			continue;
 		RawGetTarget(&raw);
 
 		// Respond to few CTCP requests

@@ -80,6 +80,7 @@ void CC(struct raw_line *rawp);
 void Chars(struct raw_line *rawp);
 void Colorize(struct raw_line *rawp);
 void Dict(struct raw_line *rawp);
+void Foldoc(struct raw_line *rawp);
 void Fortune(struct raw_line *rawp);
 void Joke(struct raw_line *rawp);
 void Rainbow(struct raw_line *rawp);

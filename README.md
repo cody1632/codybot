@@ -150,4 +150,10 @@ To make `/home/user/tmp` the only possible location to write, run _inside_ the c
     rm -rf /tmp
     ln -sv /home/user/codybot/tmp /tmp
 
+----
+Wiki @ https://github.com/esselfe/codybot/wiki
+(Currently under construction)  
+Development status @ https://github.com/esselfe/codybot/projects/1
+----
+
 Enjoy!

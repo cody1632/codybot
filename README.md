@@ -155,7 +155,7 @@ To make `/home/user/tmp` the only possible location to write, run _inside_ the c
 ### Links:  
 - Wiki (Currently under construction): https://github.com/esselfe/codybot/wiki  
 - Development status: https://github.com/esselfe/codybot/projects/1  
-- Code last changes: https://github.com/codybot/commits
+- Code last changes: https://github.com/esselfe/codybot/commits
 - Blinkenshell project:  
   - https://blinkenshell.org/wiki/Projects/codybot  
   - https://codybot.u.blinkenshell.org/  

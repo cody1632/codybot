@@ -103,9 +103,9 @@ The other commands are:
 If you want to use the chroot mechanism, you have to download the minimal chroot archive
 and extract it into the source directory. The latest chroot is available at  
 
-* https://esselfe.ca/chroot.tar.xz  
+* https://esselfe.ca/codybot/chroot.tar.xz  
 or  
-* https://esselfe.ca/chroot-aws.tar.xz  
+* https://esselfe.ca/codybot/chroot-aws.tar.xz  
 
 To run all shell commands in a locked chroot, create a file called `sh_lock` or
 type `!sh_lock` or `!sh_unlock`. You have to run as root:  
@@ -160,7 +160,7 @@ To make `/home/user/tmp` the only possible location to write, run _inside_ the c
   - https://blinkenshell.org/wiki/Projects/codybot  
   - https://codybot.u.blinkenshell.org/  
 - Main releases: https://github.com/esselfe/codybot/releases  
-- Archives: https://esselfe.ca/code/codybot/  
+- Archives: https://esselfe.ca/codybot/  
 
 ----
 

@@ -10,6 +10,7 @@
 
 #include "codybot.h"
 
+// Execute a shell command as a new thread.
 void ThreadRunStart(char *command) {
 	pthread_t thr;
 	pthread_attr_t attr;
@@ -118,6 +119,7 @@ void *ThreadRunFunc(void *argp) {
 	return NULL;
 }
 
+// Thread for reading raw data from the server.
 void *ThreadRXFunc(void *argp);
 void ThreadRXStart(void) {
 	pthread_t thr;
@@ -349,6 +351,7 @@ strcmp(raw.command, "NICK")!=0) {
 // fortune
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "fortune", 7) == 0)
 			Fortune(&raw);
+// debug
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "debug on") == 0) {
 			if (IsAdmin(raw.nick, raw.host)) {
 				debug = 1;
@@ -365,12 +368,15 @@ strcmp(raw.command, "NICK")!=0) {
 			else
 				Msg("debug mode can only be changed by an admin");
 		}
+// die
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "die", 4) == 0) {
 			if (IsAdmin(raw.nick, raw.host))
 				exit(0);
 		}
+// joke
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "joke", 4) == 0)
 			Joke(&raw);
+// msgbig
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "msgbig") == 0 &&
 			IsAdmin(raw.nick, raw.host)) {
 			memset(buffer, 0, 4096);
@@ -427,6 +433,7 @@ strcmp(raw.command, "NICK")!=0) {
 			sprintf(buffer, "trigger = '%c'", trigger_char);
 			Msg(buffer);
 		}
+// uptime
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "uptime") == 0) {
 			gettimeofday(&tv0, NULL);
 			t0 = (time_t)tv0.tv_sec - tv_start.tv_sec;
@@ -439,10 +446,12 @@ strcmp(raw.command, "NICK")!=0) {
 					tm0->tm_sec);
 			Msg(buffer);
 		}
+// version
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "version") == 0) {
 			sprintf(buffer, "codybot %s", codybot_version_string);
 			Msg(buffer);
 		}
+// weather
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "weather") == 0) {
 			sprintf(buffer, "weather: missing city argument, example: "
 				"'%cweather montreal'", trigger_char);
@@ -477,7 +486,8 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
-		else if (strcmp(raw.text, "^sh") == 0) {
+// sh
+		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "sh") == 0) {
 			sprintf(buffer, "sh: missing argument, example: '%csh ls -ld /tmp'",
 				trigger_char);
 			Msg(buffer);
@@ -522,7 +532,6 @@ strcmp(raw.command, "NICK")!=0) {
 				Msg(buffer);
 			}
 		}
-// sh
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "sh ", 3) == 0) {
 			struct stat st;
 			if (sh_disabled || stat("sh_disable", &st) == 0) {
@@ -677,8 +686,6 @@ if (strncmp(c, "cat ", 4)==0) {
 				printf("codybot::ThreadRXFunc() starting thread for ::%s::\n",
 					raw.text);
 			ThreadRunStart(raw.text);
-
-//			RawLineClear(&raw);
 		}
 
 		usleep(10000);

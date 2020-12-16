@@ -13,6 +13,7 @@ void ConsoleReadInput(void) {
 		fgets(buffer_line, 4095, stdin);
 		char *cp;
 		cp = buffer_line;
+		// Ignore empty lines.
 		if (buffer_line[0] == '\n')
 			continue;
 		else if (strcmp(buffer_line, "exit\n") == 0 || strcmp(buffer_line, "quit\n") == 0)
@@ -130,6 +131,7 @@ void ConsoleReadInput(void) {
 			sprintf(buffer, "trigger = %c", trigger_char);
 			Msg(buffer);
 		}
+		// Otherwise send the input line directly to the server.
 		else
 			MsgRaw(buffer_line);
 	}

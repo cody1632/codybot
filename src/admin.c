@@ -6,8 +6,10 @@
 
 #include "codybot.h"
 
+// There's only 1 admin list. See codybot.h for declaration.
 struct AdminList admin_list;
 
+// host can be NULL
 void AddAdmin(char *newnick, char *host) {
 	if (debug) {
 		sprintf(buffer, "AddAdmin(): '%s' '%s'", newnick, host);
@@ -62,6 +64,7 @@ void DestroyAdminList(void) {
 	admin_list.last_admin = NULL;
 }
 
+// Returns a comma-separated list of admins.
 char *EnumerateAdmins(void) {
 	struct Admin *admin = admin_list.first_admin;
 	char *str = malloc(4096);
@@ -92,6 +95,7 @@ char *EnumerateAdmins(void) {
 	return str;
 }
 
+// Returns 1 if found in the list, 0 otherwise.
 int IsAdmin(char *newnick, char *host) {
 	struct Admin *admin = admin_list.first_admin;
 	if (admin == NULL)
@@ -124,6 +128,7 @@ int IsAdmin(char *newnick, char *host) {
 	return 0;
 }
 
+// Populate the admin list.
 void ParseAdminFile(void) {
 	FILE *fp = fopen("admins.txt", "r");
 	if (fp == NULL) {

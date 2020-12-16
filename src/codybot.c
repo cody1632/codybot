@@ -122,13 +122,13 @@ int main(int argc, char **argv) {
 		if (c == -1)
 			break;
 		switch (c) {
-		case 'h':
+		case 'h': // --help
 			HelpShow();
 			exit(0);
-		case 'V':
+		case 'V': // --version
 			printf("codybot %s\n", codybot_version_string);
 			exit(0);
-		case 'c':
+		case 'c': // --compiler
 			if (strcmp(optarg, "gcc") == 0)
 				cc_compiler = CC_COMPILER_GCC;
 			else if (strcmp(optarg, "tcc") == 0)
@@ -138,37 +138,37 @@ int main(int argc, char **argv) {
 				exit(1);
 			}
 			break;
-		case 'd':
+		case 'd': // --debug
 			debug = 1;
 			break;
-		case 'H':
+		case 'H': // --hostname
 			hostname = (char *)malloc(strlen(optarg)+1);
 			sprintf(hostname, optarg);
 			break;
-		case 'l':
+		case 'l': // --log
 			log_filename = (char *)malloc(strlen(optarg)+1);
 			sprintf(log_filename, "%s", optarg);
 			break;
-		case 'N':
+		case 'N': // --fullname
 			full_user_name = (char *)malloc(strlen(optarg)+1);
 			sprintf(full_user_name, optarg);
 			break;
-		case 'n':
+		case 'n': // --nick
 			nick = (char *)malloc(strlen(optarg)+1);
 			sprintf(nick, "%s", optarg);
 			break;
-		case 'P':
+		case 'P': // --localport
 			local_port = atoi(optarg);
 			break;
-		case 'p':
+		case 'p': // --port
 			server_port = atoi(optarg);
 			if (server_port == 6697)
 				use_ssl = 1;
 			break;
-		case 's':
+		case 's': // --server
 			ServerGetIP(optarg);
 			break;
-		case 't':
+		case 't': // --trigger
 			trigger_char = *optarg;
 			break;
 		default:
@@ -177,6 +177,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	// Initialize buffers.
 	buffer_rx = (char *)malloc(4096);
 	memset(buffer_rx, 0, 4096);
 	buffer_cmd = (char *)malloc(4096);

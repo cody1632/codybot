@@ -15,6 +15,7 @@ unsigned int server_port, local_port;
 char *server_ip, *server_name;
 SSL *pSSL;
 
+// Retrieve an IP from a domain name.
 void ServerGetIP(char *hostname2) {
 	struct hostent *he;
 	struct in_addr **addr_list;

@@ -5,6 +5,7 @@
 
 #include "codybot.h"
 
+// Send 'text' to 'target' channel or user.
 void Msg(char *text) {
 	unsigned int total_len = strlen(text);
 	if (total_len <= 400) {
@@ -54,6 +55,7 @@ void Msg(char *text) {
 	}
 }
 
+// Send raw data to server directly.
 void MsgRaw(char *text) {
 	if (use_ssl)
 		SSL_write(pSSL, text, strlen(text));

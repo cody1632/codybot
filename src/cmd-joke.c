@@ -5,9 +5,9 @@
 #include "codybot.h"
 
 void Joke(struct raw_line *rawp) {
-	FILE *fp = fopen("data-jokes.txt", "r");
+	FILE *fp = fopen("data/jokes.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::Joke() error: cannot open data-jokes.txt: %s",
+		sprintf(buffer, "codybot::Joke() error: cannot open data/jokes.txt: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;

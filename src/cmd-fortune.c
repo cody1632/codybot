@@ -7,9 +7,9 @@
 #include "codybot.h"
 
 void Fortune(struct raw_line *rawp) {
-	FILE *fp = fopen("data-fortunes.txt", "r");
+	FILE *fp = fopen("data/fortunes.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "##codybot::Fortune() error: Cannot open data-fortunes.txt: %s",
+		sprintf(buffer, "##codybot::Fortune() error: Cannot open data/fortunes.txt: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;

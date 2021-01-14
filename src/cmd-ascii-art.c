@@ -7,9 +7,9 @@
 #include "codybot.h"
 
 void AsciiArt(struct raw_line *rawp) {
-	FILE *fp = fopen("data-ascii.txt", "r");
+	FILE *fp = fopen("data/ascii.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::AsciiArt() error: cannot open data-ascii.txt: %s",
+		sprintf(buffer, "codybot::AsciiArt() error: cannot open data/ascii.txt: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;

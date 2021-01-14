@@ -7,9 +7,9 @@
 void Chars(struct raw_line *rawp) {
 	Msg("https://esselfe.ca/chars.html");
 
-	FILE *fp = fopen("data-chars.txt", "r");
+	FILE *fp = fopen("data/chars.txt", "r");
 	if (fp == NULL) {
-		sprintf(buffer, "codybot::Chars() error: Cannot open data-chars.txt: %s",
+		sprintf(buffer, "codybot::Chars() error: Cannot open data/chars.txt: %s",
 			strerror(errno));
 		Msg(buffer);
 		return;

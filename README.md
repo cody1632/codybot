@@ -1,6 +1,6 @@
 # Codybot
 
-20190824-20201211
+20190824-20210114
 
 ## Overview
 
@@ -19,7 +19,8 @@ required to be installed. On RPM-based systems, install `glibc-devel binutils
 gcc make file-devel libopenssl-devel`. On DEB-based systems install `libc6-dev
 binutils gcc make libmagic-dev libssl-dev`. On Arch install `make gcc`. 
 
-To compile the program, just run `make` within the source directory, and run with `./codybot -n `_`YourBotNick`_.
+To compile the program, just run `make` within the source directory, and run with  
+`./codybot -n `_`YourBotNick`_
 
 (Personally I run the bot in a virtual machine to limit general filesystem access
 via the `!sh` command; see the "chroot" and "docker" sections below.)
@@ -34,11 +35,10 @@ also be in the current working directory.
 
 Before running for the first time, you should also run  
 
-    sudo chown -R root data-* Makefile codybot prog-* src
+    scripts/initial-setup
 
 so something like `!sh rm importantfiles` won't be able to do any damage;
-see https://github.com/cody1632/codybot/security/advisories.
-(Instead of root you can also set the file owner to be any normal user _other than_ the codybot user.)
+see https://github.com/esselfe/codybot/security/advisories.
 
 ## Identifying
 
@@ -160,7 +160,9 @@ To make `/home/user/tmp` the only possible location to write, run _inside_ the c
   - https://blinkenshell.org/wiki/Projects/codybot  
   - https://codybot.u.blinkenshell.org/  
 - Main releases: https://github.com/esselfe/codybot/releases  
-- Archives: https://esselfe.ca/codybot/  
+- Archives:
+  - https://esselfe.ca/codybot/  
+  - https://hobby.esselfe.ca/code/codybot/  
 
 ----
 

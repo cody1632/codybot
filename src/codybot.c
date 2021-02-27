@@ -196,7 +196,8 @@ int main(int argc, char **argv) {
 	ParseAdminFile();
 
 	if (!full_user_name) {
-		char *name = getlogin();
+		//char *name = getlogin();
+		char *name = "codybot-op";
 		full_user_name = (char *)malloc(strlen(name)+1);
 		sprintf(full_user_name, name);
 	}

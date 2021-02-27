@@ -123,7 +123,7 @@ and in the chroot.
 
 ## Running in Docker
 
-Update 201002 - new docker image available!
+Update 210227 - new docker image available!
 
 You can now run codybot more safely by using a docker container.
 
@@ -136,9 +136,15 @@ and run those commands to fetch and start the image:
 
 Once in the container, run:
 
-    exec su - codybot
-    cd codybot
-    ./codybot -f -n $NewNickHere -t '#'
+	exec su -
+	tmux
+	su - user
+	cd codybot
+	scripts/logd.sh &
+	<ctrl+b><c>
+	su - codybot
+	cd codybot
+    ./codybot -l log.fifo -n NewNickHere -t '#'
 
 Personally I made a 1GB partition on my host just for the bot and
 its users' usage, then mount it (on the host) to `/mnt/codybot-data`,

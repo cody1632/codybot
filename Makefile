@@ -7,8 +7,9 @@ $(OBJDIR)/cmd-calc.o $(OBJDIR)/cmd-cc.o $(OBJDIR)/cmd-chars.o \
 $(OBJDIR)/cmd-colorize.o $(OBJDIR)/cmd-dict.o $(OBJDIR)/cmd-foldoc.o \
 $(OBJDIR)/cmd-fortune.o $(OBJDIR)/cmd-joke.o $(OBJDIR)/cmd-rainbow.o \
 $(OBJDIR)/cmd-slap.o $(OBJDIR)/cmd-stats.o $(OBJDIR)/cmd-weather.o \
-$(OBJDIR)/codybot.o $(OBJDIR)/console.o $(OBJDIR)/log.o $(OBJDIR)/msg.o \
-$(OBJDIR)/server.o $(OBJDIR)/raw.o $(OBJDIR)/thread.o
+$(OBJDIR)/codybot.o $(OBJDIR)/console.o \
+$(OBJDIR)/log.o $(OBJDIR)/msg.o $(OBJDIR)/server.o $(OBJDIR)/raw.o \
+$(OBJDIR)/thread.o
 PROGNAME = codybot
 
 .PHONY: tcc default all prepare clean

@@ -31,8 +31,8 @@ static const char *short_options = "hVcdH:l:N:n:P:p:s:t:";
 
 void HelpShow(void) {
 	printf("Usage: codybot { -h/--help | -V/--version | -d/--debug }\n");
-	printf("               { -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME | -n/--nick NICK }\n");
-	printf("               { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
+	printf("			   { -H/--hostname HOST | -l/--log FILENAME | -N/--fullname NAME | -n/--nick NICK }\n");
+	printf("			   { -P/--localport PORTNUM | -p/--port PORTNUM | -s/--server ADDR | -t/--trigger CHAR }\n");
 }
 
 int debug, socket_fd, ret, endmainloop, cc_disabled, sh_disabled,
@@ -50,7 +50,7 @@ char *nick; // nick used by the bot
 char *full_user_name;
 char *hostname;
 char *colors[] = {
-	"\003",    // default/restore
+	"\003",	// default/restore
 	"\00301",  //black
 //	"\00302",  // blue --> too dark/unreadable (OS-specific)
 	"\00303",  // green

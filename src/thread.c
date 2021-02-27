@@ -390,6 +390,11 @@ strcmp(raw.command, "NICK")!=0) {
 		}
 		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "rainbow ", 8) == 0)
 			Rainbow(&raw);
+// rawmsg
+		else if (raw.text[0]==trigger_char && strncmp(raw.text+1, "rawmsg ", 7) == 0) {
+			printf("!!Sending raw message to server!!\n::%s::\n", raw.text+8);
+			RawMsg(&raw);
+		}
 // stats
 		else if (raw.text[0]==trigger_char && strcmp(raw.text+1, "stats") == 0)
 			Stats(&raw);

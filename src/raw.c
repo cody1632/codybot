@@ -201,3 +201,21 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 	return 1;
 }
 
+void RawMsg(struct raw_line *rawp) {
+	if (!IsAdmin(rawp->nick, rawp->host)) {
+		Msg("Only an admin can run this command.");
+		return;
+	}
+
+	Log(rawp->text+8);
+
+	// Took me a while to realize the message would be ignored without this,
+	// which was previously stripped in RawLineParse(), so add it back here.
+	rawp->text[strlen(rawp->text)] = '\n';
+
+	if (use_ssl)
+		SSL_write(pSSL, rawp->text+8, strlen(rawp->text+8));
+	else
+		write(socket_fd, rawp->text+8, strlen(rawp->text+8));
+}
+

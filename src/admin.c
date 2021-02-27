@@ -107,7 +107,7 @@ int IsAdmin(char *newnick, char *host) {
 				if (strcmp(host, admin->host) == 0)
 					return 1;
 				else { // could catch the same nick in the list
-				       // with different host
+					   // with different host
 					if (admin->next == NULL)
 						break;
 					else

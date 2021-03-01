@@ -35,7 +35,7 @@ void RawLineClear(struct raw_line *rawp) {
 int version_once;
 int RawLineParse(struct raw_line *rawp, char *line) {
 	if (debug)
-		Log("##RawLineParse() started");
+		Log(LOCAL, "##RawLineParse() started");
 	
 	RawLineClear(rawp);
 
@@ -59,7 +59,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			SSL_write(pSSL, buffer, strlen(buffer));
 		else
 			write(socket_fd, buffer, strlen(buffer));
-		Log(buffer);
+		Log(OUT, buffer);
 		return 0;
 	}
 	else if (strncmp(line, "NickServ!", 9) == 0 || strncmp(line, "ChanServ!", 9) == 0)
@@ -105,7 +105,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			++c;
 			if (debug) {
 				sprintf(buffer, "  raw: <<%s>>", line);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 			continue;
 		}
@@ -117,7 +117,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			cnt = 0;
 			if (debug) {
 				sprintf(buffer, "  nick: <%s>", rawp->nick);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 		}
 		else if (rec_username && cnt == 0 && *c == '~') {
@@ -132,7 +132,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			cnt = 0;
 			if (debug) {
 				sprintf(buffer, "  username: <%s>", rawp->username);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 		}
 		else if (rec_host && *c == ' ') {
@@ -143,7 +143,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			cnt = 0;
 			if (debug) {
 				sprintf(buffer, "  host: <%s>", rawp->host);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 		}
 		else if (rec_command && *c == ' ') {
@@ -154,7 +154,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			cnt = 0;
 			if (debug) {
 				sprintf(buffer, "  command: <%s>", rawp->command);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 		}
 		else if (rec_channel && *c == ' ') {
@@ -166,7 +166,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			cnt = 0;
 			if (debug) {
 				sprintf(buffer, "  channel: <%s>", rawp->channel);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 		}
 		else if (rec_text && *c == '\0') {
@@ -176,7 +176,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 			cnt = 0;
 			if (debug) {
 				sprintf(buffer, "  text: <%s>", rawp->text);
-				Log(buffer);
+				Log(LOCAL, buffer);
 			}
 			break;
 		}
@@ -196,7 +196,7 @@ int RawLineParse(struct raw_line *rawp, char *line) {
 	}
 
 	if (debug)
-		Log("##RawLineParse() ended\n");
+		Log(LOCAL, "##RawLineParse() ended\n");
 	
 	return 1;
 }
@@ -207,7 +207,7 @@ void RawMsg(struct raw_line *rawp) {
 		return;
 	}
 
-	Log(rawp->text+8);
+	Log(OUT, rawp->text+8);
 
 	// Took me a while to realize the message would be ignored without this,
 	// which was previously stripped in RawLineParse(), so add it back here.

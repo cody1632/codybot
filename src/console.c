@@ -20,7 +20,7 @@ void ConsoleReadInput(void) {
 			endmainloop = 1;
 		else if (strcmp(buffer_line, "curch\n") == 0) {
 			sprintf(buffer, "curch = %s", current_channel);
-			Log(buffer);
+			Log(LOCAL, buffer);
 		}
 		else if (strncmp(buffer_line, "curch ", 6) == 0) {
 			sprintf(current_channel, "%s", buffer_line+6);
@@ -90,7 +90,7 @@ void ConsoleReadInput(void) {
 				SSL_write(pSSL, buffer_cmd, strlen(buffer_cmd));
 			else
 				write(socket_fd, buffer_cmd, strlen(buffer_cmd));
-			Log("PRIVMSG NickServ :identify *********");
+			Log(OUT, "PRIVMSG NickServ :identify *********");
 			memset(buffer_cmd, 0, 4096);
 		}
 		else if (strncmp(buffer_line, "timeout\n", 8) == 0) {

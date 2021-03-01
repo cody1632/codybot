@@ -44,7 +44,7 @@ void *ThreadRunFunc(void *argp) {
 		++cp;
 	}
 	strcat(cmd, "' &> cmd.output; echo $? >cmd.ret");
-	Log(cmd);
+	Log(LOCAL, cmd);
 	system(cmd);
 
 	FILE *fp = fopen("cmd.ret", "r");
@@ -162,7 +162,7 @@ void *ThreadRXFunc(void *argp) {
 			continue;
 		}
 		else
-			Log(buffer_rx);
+			Log(IN, buffer_rx);
 
 
 		if (!RawLineParse(&raw, buffer_rx))

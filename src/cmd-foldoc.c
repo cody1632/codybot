@@ -21,7 +21,7 @@ void Foldoc(struct raw_line *rawp) {
 	}
 
 	sprintf(buffer_cmd, "curl dict.org/d:%s:foldoc -o dict.output", word);
-	Log(buffer_cmd);
+	Log(LOCAL, buffer_cmd);
 	system(buffer_cmd);
 
 	FILE *fp = fopen("dict.output", "r");

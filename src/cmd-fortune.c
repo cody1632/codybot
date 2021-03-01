@@ -42,7 +42,7 @@ void Fortune(struct raw_line *rawp) {
 
 	if (debug) {
 		sprintf(buffer, "&&&&fortune pos: %ld&&&&", ftell(fp));
-		Log(buffer);
+		Log(LOCAL, buffer);
 	}
 
 	while (1) {

@@ -31,6 +31,11 @@ extern char *target; // this one should be worked upon a little bit :P
                      // used to differentiate channel-wide vs private messages
 extern char *colors[]; // IRC color codes used in '!colorize/!rainbow'
 
+// Log() directions
+#define LOCAL 0
+#define IN 1
+#define OUT 2
+
 // Globals from server.c
 extern unsigned int server_port, local_port;
 extern char *server_ip, *server_name;
@@ -95,7 +100,7 @@ void ConsoleReadInput(void);
 void Dict(struct raw_line *rawp);
 
 // from log.c
-void Log(char *text);
+void Log(unsigned int direction, char *text);
 
 // from msg.c
 void Msg(char *text);

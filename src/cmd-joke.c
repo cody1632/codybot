@@ -22,7 +22,7 @@ void Joke(struct raw_line *rawp) {
 	fseek(fp, rnd, SEEK_CUR);
 	if (debug) {
 		sprintf(buffer, "##filesize: %lu\n##rnd: %u", filesize, rnd);
-		Log(buffer);
+		Log(LOCAL, buffer);
 	}
 
 	int c = 0, cprev, cnt = 0;

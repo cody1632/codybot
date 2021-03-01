@@ -25,7 +25,7 @@ void ServerGetIP(char *hostname2) {
 	if (he == NULL) {
 		sprintf(buffer, "||codybot::ServerGetIP() error: Cannot gethostbyname(%s)",
 			hostname2);
-		Log(buffer);
+		Log(LOCAL, buffer);
 		exit(1);
 	}
 
@@ -39,10 +39,10 @@ void ServerGetIP(char *hostname2) {
 
 	if (debug) {
 		sprintf(buffer, "||codybot::ServerGetIP(%s): other IPs:", hostname2);
-		Log(buffer);
+		Log(LOCAL, buffer);
 		for (cnt = 0; addr_list[cnt] != NULL; cnt++) {
 			sprintf(buffer, "  %s", inet_ntoa(*addr_list[cnt]));
-			Log(buffer);
+			Log(LOCAL, buffer);
 		}
 	}
 }
@@ -52,13 +52,13 @@ void ServerConnect(void) {
 	if (socket_fd < 0) {
 		sprintf(buffer, "||codybot::ServerConnect() error: Cannot socket(): %s",
 			strerror(errno));
-		Log(buffer);
+		Log(LOCAL, buffer);
 		exit(1);
 	}
 	else {
 		if (debug) {
 			sprintf(buffer, "||socket_fd: %d", socket_fd);
-			Log(buffer);
+			Log(LOCAL, buffer);
 		}
 	}
 	
@@ -70,13 +70,13 @@ void ServerConnect(void) {
 	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		sprintf(buffer, "||codybot::ServerConnect() error: Cannot bind(): %s",
 			strerror(errno));
-		Log(buffer);
+		Log(LOCAL, buffer);
 		close(socket_fd);
 		exit(1);
 	}
 	else
 		if (debug)
-			Log("||bind() 0.0.0.0 successful");
+			Log(LOCAL, "||bind() 0.0.0.0 successful");
 	
 	struct sockaddr_in host;
 	host.sin_addr.s_addr = inet_addr(server_ip);
@@ -85,14 +85,14 @@ void ServerConnect(void) {
 	if (connect(socket_fd, (struct sockaddr *)&host, sizeof(host)) < 0) {
 		sprintf(buffer, "||codybot::ServerConnect() error: Cannot connect(): %s",
 			strerror(errno));
-		Log(buffer);
+		Log(LOCAL, buffer);
 		close(socket_fd);
 		exit(1);
 	}
 	else {
 		if (debug) {
 			sprintf(buffer, "||connect() %s successful", server_ip);
-			Log(buffer);
+			Log(LOCAL, buffer);
 		}
 	}
 
@@ -104,7 +104,7 @@ void ServerConnect(void) {
 		const SSL_METHOD *method = TLS_method();
 		SSL_CTX *ctx = SSL_CTX_new(method);
 		if (!ctx) {
-			Log("||codybot::ServerConnect() error: Cannot create SSL context");
+			Log(LOCAL, "||codybot::ServerConnect() error: Cannot create SSL context");
 			close(socket_fd);
 			exit(1);
 		}
@@ -132,9 +132,9 @@ void ServerConnect(void) {
 		if (ret <= 0) {
 			sprintf(buffer, "||codybot::ServerConnect() error: "
 				"SSL_accept() failed, ret: %d", ret);
-			Log(buffer);
+			Log(LOCAL, buffer);
 			sprintf(buffer, "||SSL error number: %d", SSL_get_error(pSSL, 0));
-			Log(buffer);
+			Log(LOCAL, buffer);
 			close(socket_fd);
 			exit(1);
 		}

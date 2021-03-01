@@ -14,7 +14,7 @@ void Msg(char *text) {
 			SSL_write(pSSL, buffer_log, strlen(buffer_log));
 		else
 			write(socket_fd, buffer_log, strlen(buffer_log));
-		Log(buffer_log);
+		Log(OUT, buffer_log);
 		memset(buffer_log, 0, 4096);
 	}
 	else if (total_len > 400) {
@@ -34,7 +34,7 @@ void Msg(char *text) {
 					SSL_write(pSSL, str, strlen(str));
 				else
 					write(socket_fd, str, strlen(str));
-				Log(str);
+				Log(OUT, str);
 				memset(str, 0, 400);
 				break;
 			}
@@ -45,7 +45,7 @@ void Msg(char *text) {
 					SSL_write(pSSL, str, strlen(str));
 				else
 					write(socket_fd, str, strlen(str));
-				Log(str);
+				Log(OUT, str);
 				memset(str, 0, 400);
 				sprintf(str, "PRIVMSG %s :", target);
 				cnt = strlen(str);
@@ -64,6 +64,6 @@ void MsgRaw(char *text) {
 	
 	// Don't log PONGs
 	if (strncmp(text, "PONG :", 6) != 0)
-		Log(text);
+		Log(OUT, text);
 }
 

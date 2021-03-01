@@ -73,7 +73,7 @@ static void CheckLoginuid(void) {
 		sprintf(buffer, "codybot::CheckLoginuid() error: "
 			"Cannot open /proc/self/loginuid: %s",
 			strerror(errno));
-		Log(buffer);
+		Log(LOCAL, buffer);
 		return;
 	}
 
@@ -86,13 +86,13 @@ static void CheckLoginuid(void) {
 		sprintf(buffer, "codybot::CheckLoginuid() error: "
 			"Cannot open /proc/self/loginuid: %s",
 			strerror(errno));
-		Log(buffer);
+		Log(LOCAL, buffer);
 		return;
 	}
 	if (strcmp(line, "4294967295") == 0 && uid == -1) {
 		uid = getuid();
 		sprintf(buffer, "/proc/self/loginuid is 4294967295/-1, setting to %d", uid);
-		Log(buffer);
+		Log(LOCAL, buffer);
 		fprintf(fp, "%d", uid);
 	}
 

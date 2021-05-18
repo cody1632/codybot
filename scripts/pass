@@ -1,0 +1,10 @@
+#!/bin/bash
+
+MODE=$(stat --printf="%a" .passwd)
+
+if [ $MODE -eq 600 ]; then
+	chmod -v g+r .passwd
+elif [ $MODE -eq 640 ]; then
+	chmod -v g-r .passwd
+fi
+

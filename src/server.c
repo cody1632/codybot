@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <openssl/ssl.h>
@@ -149,6 +150,21 @@ void ServerConnect(void) {
 	else
 		write(socket_fd, "PASS none\n", 10);
 */
+	struct stat st;
+	if (stat(".passwd", &st) == 0) {
+		FILE *fp = fopen(".passwd", "r");
+		if (fp != NULL) {
+			char pass[128];
+			sprintf(pass, "PASS ");
+			fread(pass+5, 1, 127-5, fp);
+			pass[strlen(pass)] = '\n';
+			if (use_ssl)
+				SSL_write(pSSL, pass, strlen(pass));
+			memset(pass, 0, 128);
+			fclose(fp);
+		}
+	}
+
 	sprintf(buffer, "NICK %s\n", nick);
 	MsgRaw(buffer);
 

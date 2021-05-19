@@ -1,6 +1,17 @@
 #!/bin/bash
 
+# If you want to authenticate to the NickServ service automatically,
+# put your registered password in a file named .passwd in the root
+# of the source tree. Then run this script before launching the program,
+# and another time before joining a channel. This script will toggle
+# the read permission for the codybot group, so make sure to run 
+# 'chgrp codybot .passwd'. Obviously the owner of that file should be
+# another user than the one running the program.
+
 MODE=$(stat --printf="%a" .passwd)
+
+# Just another check
+chmod o-r .passwd
 
 if [ $MODE -eq 600 ]; then
 	chmod -v g+r .passwd

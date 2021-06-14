@@ -10,7 +10,7 @@
 
 #include "codybot.h"
 
-const char *codybot_version_string = "1.0.7";
+const char *codybot_version_string = "1.0.8";
 
 static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
 		use_ssl = 1;
 	}
 	if (!server_ip)
-		ServerGetIP("chat.freenode.net");
+		ServerGetIP("irc.libera.chat");
 	if (!trigger_char)
 		trigger_char = trigger_char_default;
 

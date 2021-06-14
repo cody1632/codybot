@@ -9,7 +9,7 @@ with fortune cookies, jokes, oneliner C compilation, shell access, text coloriza
 ascii art, special characters and weather per city. It was inspired by candide on
 Freenode, a great bot written in Perl (see https://github.com/pragma-/pbot/).
 
-The bot can connect to `chat.freenode.net:6697` or any specified server and port;
+The bot can connect to `irc.libera.chat:6697` or any specified server and port;
 it defaults to port 6697 with SSL.
 
 ## Compile and Run
@@ -49,7 +49,7 @@ Otherwise you can identify to NickServ by typing `id `_`yourpasswordhere`_ or
 `privmsg NickServ :identify `_`passhere`_ in the terminal running the codybot program.
 
 Another console-only command you need to run is `join `_`#channel_name_here`_.
-Note that bots are usually unwelcome on Freenode, especially in popular channels,
+Note that bots are usually unwelcome on IRC networks, especially in popular channels,
 and uninvited bots are not permitted, so always get permission if you don't own
 the channel. (If you created a channel by joining an empty one, you now own it,
 so you can give yourself permission to run codybot.)
@@ -123,16 +123,18 @@ and in the chroot.
 
 ## Running in Docker
 
-Update 210227 - new docker image available!
+Update 210228 - new docker image available!
 
-You can now run codybot more safely by using a docker container.
+You can now run codybot more safely by using a small or full docker container.
 
-Currently the image is 245MB download, 785MB installed, that's the downpart.
+Currently the "small" image is 245MB download, 785MB installed and
+the 'full" image is 1GB download, 2.5GB installed that's the downpart.
 Install docker, make sure the services are started (containerd+docker),
 and run those commands to fetch and start the image:
+(replace "small" with "full" if you want to)
 
-    docker pull esselfe/lunar-codybot
-    docker run -it esselfe/lunar-codybot bash
+    docker pull esselfe/lunar-codybot:small
+    docker run -it esselfe/lunar-codybot:small bash
 
 Once in the container, run:
 
@@ -156,6 +158,8 @@ To make `/home/user/tmp` the only possible location to write, run _inside_ the c
 
     rm -rf /tmp
     ln -sv /home/user/codybot/tmp /tmp
+
+You can also limit the permitted storage size by adding "--tmpfs /home/user/codybot/tmp:rw,size=100M"  
 
 ----
 
